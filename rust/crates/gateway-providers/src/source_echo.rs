@@ -56,7 +56,8 @@ pub(crate) fn item_event(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{ClientSurface, ResponseDecode, ToolMap};
+    use crate::source_tools::ToolMap;
+    use crate::types::{ChatProfile, ClientSurface, ResponseDecode};
     use gateway_core::{js_string::JsString16, provider::UpstreamProvider};
 
     #[test]
@@ -65,7 +66,7 @@ mod tests {
         let plan = DecodePlan {
             provider: UpstreamProvider::Lithos,
             surface: ClientSurface::Responses,
-            decode: ResponseDecode::ChatToResponses(crate::ChatProfile::Lithos),
+            decode: ResponseDecode::ChatToResponses(ChatProfile::Lithos),
             model: "test".into(),
             upstream_model: "test".into(),
             response_id: "resp_test".into(),

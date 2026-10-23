@@ -3,7 +3,10 @@ use gateway_core::model::ModelId;
 use gateway_core::provider::UpstreamProvider;
 use gateway_core::source_json::SourceJson;
 use gateway_providers::{
-    AuthMaterial, ClientSurface, PrepareOptions, ToolMap, anthropic, prepare_source_request, replay,
+    anthropic, replay,
+    source_request::prepare_source_request,
+    source_tools::ToolMap,
+    types::{AuthMaterial, ClientSurface, PrepareOptions},
 };
 use serde_json::{Value, json};
 

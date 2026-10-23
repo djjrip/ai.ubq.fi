@@ -3,7 +3,7 @@ use super::*;
 
 fn golden() -> Value {
     serde_json::from_str(include_str!(
-        "../tests/fixtures/forwarding-unicode-source-v1.json"
+        "../../tests/fixtures/forwarding-unicode-source-v1.json"
     ))
     .unwrap()
 }

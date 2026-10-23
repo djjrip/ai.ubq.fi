@@ -2,6 +2,7 @@
 use crate::{
     request::{bearer_headers, canonical_source_model, codex_user_agent},
     source as s, source_anthropic, source_chat, source_controls as controls,
+    source_tools::ToolMap,
     types::*,
 };
 use gateway_core::{

@@ -1,7 +1,7 @@
 use gateway_core::{
     js_string::JsString16, model::ModelId, source_json::SourceJson, source_serialization as source,
 };
-use gateway_providers::{PrepareOptions, extras};
+use gateway_providers::{extras, types::PrepareOptions};
 fn parse(raw: &str) -> SourceJson {
     SourceJson::parse(raw).unwrap()
 }
@@ -14,7 +14,7 @@ fn image_source_prompt_user_model_default_and_unknown_key_error_remain_original(
         parse(r#"{"prompt":"p\ud800","user":"u\udc00","model":" m\ud801 ","size":"s\udc02"}"#);
     let parsed = extras::parse_source_image(&raw, false).unwrap();
     let default = ModelId::from_source(JsString16::from_units(vec![68, 0xd802]));
-    let plan = extras::prepare_parsed_image(&parsed, &default, "original");
+    let plan = extras::image::prepare_parsed_image(&parsed, &default, "original");
     assert_eq!(
         text(&plan.responses, "model"),
         default.as_js_string().clone()

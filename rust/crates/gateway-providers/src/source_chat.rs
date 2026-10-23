@@ -1,7 +1,8 @@
 //! Provider-owned Responses-to-Chat phases over immutable source fragments.
 use crate::{
     chat::{FORWARD_LIMIT, FORWARD_VERSION, bound_source},
-    source as s, source_tools,
+    source as s,
+    source_tools::{self, ToolMap},
     types::*,
 };
 use gateway_core::{

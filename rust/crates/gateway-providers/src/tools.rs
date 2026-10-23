@@ -1,5 +1,6 @@
 //! Reversible source-unit function/namespace/freeform projection.
-use crate::types::{ToolIdentity, ToolMap};
+use crate::source_tools::ToolMap;
+use crate::types::ToolIdentity;
 use gateway_core::{GatewayError, source_json::SourceJson};
 use serde_json::Value;
 pub fn flatten_tools(

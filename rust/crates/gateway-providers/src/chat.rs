@@ -1,5 +1,6 @@
 //! Responses -> Chat-only request translation, preserving provider-specific boundaries.
-use crate::types::{ChatProfile, Elision, ToolMap, invalid};
+use crate::source_tools::ToolMap;
+use crate::types::{ChatProfile, Elision, invalid};
 use gateway_core::{GatewayError, js_string::JsString16};
 use serde_json::Value;
 pub const FORWARD_LIMIT: usize = 65_536;
@@ -196,5 +197,4 @@ pub fn validate_thinking_choice(body: &Value, field: &str) -> Result<(), Gateway
 }
 
 #[cfg(test)]
-#[path = "chat_unicode_tests.rs"]
 mod unicode_tests;

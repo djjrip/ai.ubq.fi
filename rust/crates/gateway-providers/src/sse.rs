@@ -1,5 +1,5 @@
 //! Bounded incremental SSE parsing. Reader EOF never substitutes for a Responses terminal.
-use crate::{types::*, writer::ResponseWriter};
+use crate::{source_collector::ChatCollector, types::*, writer::ResponseWriter};
 use gateway_core::GatewayError;
 use gateway_core::provider::UpstreamProvider;
 use serde_json::{Value, json};
@@ -577,7 +577,6 @@ fn validate_chat_chunk(value: &Value) -> Result<(), GatewayError> {
     }
     Ok(())
 }
-pub use crate::source_collector::ChatCollector;
 
 impl std::fmt::Debug for StreamDecoder {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

@@ -4,7 +4,7 @@ use super::{
     state::{CyclePermit, record_key},
     target::{catalog_key, json as source_json, runtime_key, set_member},
 };
-use crate::{Authority, TokenSource};
+use crate::store::{Authority, TokenSource};
 use gateway_auth::provider_credentials::codex_source_pool_key;
 use gateway_core::{GatewayError, model::ModelId, source_json::SourceJson, state::AuthorityStore};
 use gateway_schema::{

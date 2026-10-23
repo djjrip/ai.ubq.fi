@@ -1,11 +1,15 @@
 use super::*;
+use crate::native_control::custody::validate_native_control_custody;
+use crate::native_control::managed::NativeManagedPublicationDisposition;
+use crate::native_control::owners::RegisteredRenewalOwners;
 use crate::{
     native_control::{
-        NativeRenewalAuthority, NativeRenewalCancellation, NativeRenewalContext,
-        NativeRenewalControl, NativeRenewalMode, RegisteredRenewalOwner,
+        NativeRenewalCancellation, NativeRenewalContext, NativeRenewalControl, NativeRenewalMode,
+        receiver::NativeRenewalAuthority, receiver::RegisteredRenewalOwner,
     },
     paid_control::{PaidControlConfig, PaidControlOwner, PaidSourceCheck},
-    routing::{LiveRouteSelection, PoolAccount, SubscriptionPool},
+    routing::LiveRouteSelection,
+    routing_types::{PoolAccount, SubscriptionPool},
 };
 use gateway_auth::{
     native::NATIVE_CONTROL_PATH,
@@ -343,8 +347,7 @@ fn one_physical_generation_cannot_refresh_twice_across_live_contexts() {
             .iter()
             .filter(|(key, _)| key.starts_with(&prefix))
         {
-            crate::native_control::validate_native_control_custody(&RecordKey(key.clone()), record)
-                .unwrap();
+            validate_native_control_custody(&RecordKey(key.clone()), record).unwrap();
         }
         let action_key = crate::native_control::rows::key("action", create.action_ref());
         let mut stale = store
@@ -358,7 +361,7 @@ fn one_physical_generation_cannot_refresh_twice_across_live_contexts() {
             .clone();
         stale["fence"]["v"] = json!(1);
         assert!(
-            crate::native_control::validate_native_control_custody(
+            validate_native_control_custody(
                 &action_key,
                 &StoredRecord::json("stale-version", stale, None)
             )
@@ -374,9 +377,7 @@ fn one_physical_generation_cannot_refresh_twice_across_live_contexts() {
             .clone();
         let mut expiring = effect.clone();
         expiring.expires_at_ms = Some(2_000_000);
-        assert!(
-            crate::native_control::validate_native_control_custody(&effect_key, &expiring).is_err()
-        );
+        assert!(validate_native_control_custody(&effect_key, &expiring).is_err());
         let mapped = service
             .prepare_live_mapped_renewal(&actor, "renew-call")
             .await
@@ -556,7 +557,7 @@ fn opaque_old_access_adopts_only_current_usable_publication_without_a_fabricated
             .unwrap();
         assert_eq!(
             published.disposition,
-            crate::native_control::NativeManagedPublicationDisposition::Applied
+            NativeManagedPublicationDisposition::Applied
         );
         let accepted = service
             .verify_action_publication(&action, "opaque-operation", "opaque-publication")
@@ -570,7 +571,7 @@ fn opaque_old_access_adopts_only_current_usable_publication_without_a_fabricated
             .unwrap();
         assert_eq!(
             replay.disposition,
-            crate::native_control::NativeManagedPublicationDisposition::AlreadyCurrent
+            NativeManagedPublicationDisposition::AlreadyCurrent
         );
     });
 }
@@ -642,7 +643,7 @@ fn fixed_registry_selects_the_second_mapped_owner_without_home_or_environment_gu
         )
         .await
         .unwrap();
-        let registry = crate::native_control::RegisteredRenewalOwners::configured(vec![
+        let registry = RegisteredRenewalOwners::configured(vec![
             RegisteredRenewalOwner::configured(
                 "native-one".into(),
                 "/tmp/ai-rust-wasm-20261018/synthetic-home".into(),
@@ -674,7 +675,7 @@ fn fixed_registry_selects_the_second_mapped_owner_without_home_or_environment_gu
                 .native_owner_id(),
             "native-two"
         );
-        let only_first = crate::native_control::RegisteredRenewalOwners::configured(vec![
+        let only_first = RegisteredRenewalOwners::configured(vec![
             RegisteredRenewalOwner::configured(
                 "native-one".into(),
                 "/tmp/ai-rust-wasm-20261018/synthetic-home".into(),
@@ -688,9 +689,9 @@ fn fixed_registry_selects_the_second_mapped_owner_without_home_or_environment_gu
                 .await
                 .is_err()
         );
-        assert!(crate::native_control::RegisteredRenewalOwners::configured(Vec::new()).is_err());
+        assert!(RegisteredRenewalOwners::configured(Vec::new()).is_err());
         assert!(
-            crate::native_control::RegisteredRenewalOwners::configured(vec![
+            RegisteredRenewalOwners::configured(vec![
                 RegisteredRenewalOwner::configured("duplicate".into(), "/tmp/one".into()).unwrap(),
                 RegisteredRenewalOwner::configured("duplicate".into(), "/tmp/two".into()).unwrap()
             ])
@@ -701,7 +702,7 @@ fn fixed_registry_selects_the_second_mapped_owner_without_home_or_environment_gu
 
 #[test]
 fn native_action_source_custody_is_lossless_data_not_an_operation_capability() {
-    use crate::native_control::{facts, rows, validate_native_control_custody};
+    use crate::native_control::{custody::validate_native_control_custody, facts, rows};
     use gateway_core::{
         model::ModelId,
         source_control::{decode_source_control_record, encode_source_control_record},

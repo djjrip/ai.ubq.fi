@@ -1,4 +1,4 @@
-use crate::{PAID_RETENTION_MS, add, nonnegative, paid::PaidAttempt, validate_time};
+use crate::{PAID_RETENTION_MS, add, nonnegative, paid_types::PaidAttempt, validate_time};
 use gateway_core::{GatewayError, identity::MAX_SAFE_INTEGER};
 use serde_json::{Value, json};
 

@@ -1,12 +1,10 @@
 //! Bounded routing and scoped overage probe transitions.
-use crate::routing::{
-    AdmittedAccount, CohortProof, ProbeLease, QuotaBlock, ScopedOverageProbe, class_name,
-    read_view, validate_cohort,
+use crate::routing::{class_name, read_view, validate_cohort};
+use crate::routing_types::{
+    AdmittedAccount, CohortProof, ProbeLease, QuotaBlock, ScopedOverageProbe,
 };
-use crate::{
-    Authority, PROBE_LEASE_MS, TokenSource, add, invalid, keys, next_generation, nonnegative, text,
-    unavailable,
-};
+use crate::store::{Authority, TokenSource};
+use crate::{PROBE_LEASE_MS, add, invalid, keys, next_generation, nonnegative, text, unavailable};
 use gateway_core::GatewayError;
 use gateway_core::identity::RoutingAccountHash;
 use gateway_core::state::AuthorityStore;
@@ -38,7 +36,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
             let Some(raw) = tx.read::<serde_json::Value>(&keys::routing()).await? else {
                 return Ok(false);
             };
-            let mut state = crate::routing::parse_routing_state(&raw)?;
+            let mut state = crate::routing_codec::parse_routing_state(&raw)?;
             let Some(slot) = state.slots.get_mut(usize::from(slot_number - 1)) else {
                 return Ok(false);
             };
@@ -137,7 +135,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
             let lease = ProbeLease {
                 token: self.tokens.next_token()?,
                 generation: slot.generation as i64,
-                circuit: crate::routing::ProbeCircuit::Quota,
+                circuit: crate::routing_types::ProbeCircuit::Quota,
                 quota_class: Some(admission.quota_class),
                 expires_at_ms: add(now, PROBE_LEASE_MS)?,
             };
@@ -273,7 +271,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
             let lease = ProbeLease {
                 token: self.tokens.next_token()?,
                 generation: slot.generation as i64,
-                circuit: crate::routing::ProbeCircuit::Quota,
+                circuit: crate::routing_types::ProbeCircuit::Quota,
                 quota_class: Some(proof.quota_class),
                 expires_at_ms: add(now, PROBE_LEASE_MS)?,
             };

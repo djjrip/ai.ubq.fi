@@ -1,9 +1,10 @@
 use crate::support::*;
 use gateway_authority::{
-    full_pool_reset::*,
+    full_pool_reset::types::*,
     keys,
-    reset::{ResetConfig, ResetMode, reset_invocation, utc_day},
-    routing::RouteSelection,
+    reset::utc_day,
+    reset_types::{ResetConfig, ResetMode, reset_invocation},
+    routing_types::RouteSelection,
 };
 use gateway_core::{
     GatewayError,
@@ -51,14 +52,14 @@ fn setup(
 ) -> (
     MemoryStore,
     TestAuthority,
-    gateway_authority::routing::CohortProof,
+    gateway_authority::routing_types::CohortProof,
 ) {
     setup_with_config(Some(mode))
 }
 fn setup_without_reset_config() -> (
     MemoryStore,
     TestAuthority,
-    gateway_authority::routing::CohortProof,
+    gateway_authority::routing_types::CohortProof,
 ) {
     setup_with_config(None)
 }
@@ -67,7 +68,7 @@ fn setup_with_config(
 ) -> (
     MemoryStore,
     TestAuthority,
-    gateway_authority::routing::CohortProof,
+    gateway_authority::routing_types::CohortProof,
 ) {
     let store = MemoryStore::default();
     seed_pool(&store, &pool());
@@ -107,7 +108,7 @@ fn assert_history_unchanged(store: &MemoryStore, key: &RecordKey, saved: &Stored
 }
 fn plan(
     authority: &TestAuthority,
-    proof: &gateway_authority::routing::CohortProof,
+    proof: &gateway_authority::routing_types::CohortProof,
 ) -> FullPoolResetPlan {
     let FullPoolPreparation::Observe(plan) =
         run(authority.prepare_full_pool_reset(proof, &original())).unwrap()

@@ -1,5 +1,6 @@
 //! Original-request identity, rechecked from fixed source rows. Never a native operation grant.
-use crate::{Authority, TokenSource, keys, store::Transaction};
+use crate::keys;
+use crate::store::{Authority, TokenSource, Transaction};
 use gateway_auth::{
     AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthService, api_keys,
     crypto::{decode_base64url, sha256_hex},
@@ -417,7 +418,7 @@ pub(in crate::native_control) async fn read_current_after_import_publication<
     tx: &mut Transaction<'_, S, I>,
     stored: &StoredNativeActor,
     config: &AuthConfig,
-    verified: &super::import::VerifiedImportActorRevisions,
+    verified: &super::import::publication_current::VerifiedImportActorRevisions,
 ) -> Result<CurrentNativeActor, GatewayError> {
     if stored != verified.original_actor() {
         return Err(fail());

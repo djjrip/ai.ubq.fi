@@ -1,13 +1,14 @@
 use super::{
     NativeRenewalFence,
-    rows::{Actor, fail, session_key},
+    actor::StoredNativeActor as Actor,
+    rows::{fail, session_key},
 };
+use crate::store::{TokenSource, Transaction};
 use crate::{
-    TokenSource, keys,
+    keys,
     paid_control::{PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner},
     quota::{ApiKeyPolicy, ApiReservation, ApiUsageRequest, ApiUsageState},
-    routing::{AdmittedAccount, SubscriptionPool},
-    store::Transaction,
+    routing_types::{AdmittedAccount, SubscriptionPool},
 };
 use gateway_auth::{
     crypto::sha256_hex,
@@ -245,7 +246,7 @@ pub(super) async fn read<S: AuthorityStore, I: TokenSource>(
     expected_attempt: Option<&str>,
     identity: &gateway_auth::native_auth::NativeTransportIdentity,
     current_config: &gateway_auth::AuthConfig,
-    registered: &super::RegisteredRenewalOwner,
+    registered: &super::receiver::RegisteredRenewalOwner,
 ) -> Result<Facts, GatewayError> {
     let control = read_control(
         tx,

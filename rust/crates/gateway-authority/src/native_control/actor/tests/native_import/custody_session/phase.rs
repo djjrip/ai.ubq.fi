@@ -1,11 +1,11 @@
 //! Real same-store finite phase handler; no private proof is decoded from DATA.
 use super::*;
-use crate::native_control::import::NativeImportPublicationDisposition;
 use gateway_auth::native_import::authority::{
     ImportAuthorityClaimMode, ImportAuthorityCommand as Command, ImportAuthorityReplyData as Reply,
     ImportAuthorityRequestData as Request, ImportAuthorityResult as ResultData,
     ImportAuthorityStateData as State,
 };
+use gateway_auth::native_import::publication::NativeImportPublicationDisposition;
 
 impl Fixture {
     async fn phase_preparation(&self) -> NativeImportMetadata {

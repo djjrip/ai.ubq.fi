@@ -53,7 +53,7 @@ pub(super) fn conflict() -> GatewayError {
     )
 }
 
-pub(super) use super::actor::StoredNativeActor as Actor;
+use super::actor::StoredNativeActor as Actor;
 
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]

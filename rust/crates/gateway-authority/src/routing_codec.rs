@@ -1,5 +1,5 @@
 //! Source v2 row normalization; absent legacy fields follow native-codex-contracts.ts.
-use crate::routing::{
+use crate::routing_types::{
     ProbeCircuit, ProbeLease, QuotaBlock, QuotaBlockSource, RoutingSlot, RoutingState,
     SubscriptionPool,
 };

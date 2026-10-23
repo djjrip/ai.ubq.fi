@@ -6,9 +6,9 @@ use gateway_providers::ClientSurface;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::paid::{PaidRequest, PaidRoutingPolicy};
-use crate::store::Transaction;
-use crate::{Authority, TokenSource, keys, positive, text, unavailable};
+use crate::paid_types::{PaidRequest, PaidRoutingPolicy};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{keys, positive, text, unavailable};
 use gateway_core::{
     GatewayError,
     state::{AuthorityStore, RecordKey},
@@ -157,7 +157,7 @@ pub struct PaidRoutingReceipt {
     pub(crate) context: PaidRequestContext,
     pub(crate) checks: Vec<RevisionCheck>,
     pub(crate) original_request: Option<gateway_core::identity::RequestContext>,
-    pub(crate) existing_paid: Option<crate::paid::PaidReservation>,
+    pub(crate) existing_paid: Option<crate::paid_types::PaidReservation>,
     owner_id: String,
     owner_epoch: String,
     configuration_generation: String,

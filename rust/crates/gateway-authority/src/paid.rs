@@ -8,17 +8,15 @@ use gateway_core::state::AuthorityStore;
 use crate::paid_control::PaidRoutingReceipt;
 use crate::quota::ApiKeyPolicy;
 use crate::routing::validate_cohort;
-use crate::store::Transaction;
+use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
-    Authority, DAY_MS, PAID_RETENTION_MS, TokenSource, add, invalid, keys, nonnegative, positive,
-    quota_error, retention, text, unavailable,
+    DAY_MS, PAID_RETENTION_MS, add, invalid, keys, nonnegative, positive, quota_error, retention,
+    text, unavailable,
 };
 
-pub use crate::paid_types::*;
-mod source_usage;
-pub use source_usage::surplus_usage_from_source;
-mod source_records;
-pub use source_records::{decode_paid_attempt_record, decode_paid_rollup_record};
+use crate::paid_types::*;
+pub mod source_records;
+pub mod source_usage;
 
 fn pending_id(key: &ApiKeyId, attempt: &PaidAttemptId) -> String {
     serde_json::json!([key.0, attempt.0]).to_string()

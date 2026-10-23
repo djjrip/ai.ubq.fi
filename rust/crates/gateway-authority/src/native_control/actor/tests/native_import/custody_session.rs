@@ -1,7 +1,10 @@
 //! Actual original admin/admission/start + genuine MAC peer; verifier itself is readonly.
 use super::*;
+use crate::native_control::custody::validate_native_control_custody;
 use crate::native_control::import::{
-    AuthenticatedNativeImport, ImportCustodyStartedRequest, NativeImportClaim, NativeImportMode,
+    AuthenticatedNativeImport,
+    custody_session::ImportCustodyStartedRequest,
+    effects::{NativeImportClaim, NativeImportMode},
 };
 use gateway_auth::{
     native::{NATIVE_CONTROL_PATH, NATIVE_RENEWAL_AUTHORITY_PATH},
@@ -543,7 +546,7 @@ fn normal_v3_required_null_action_and_actual_started_request_preserve_original_l
         assert!(row.value.as_object().unwrap().contains_key("publication"));
         assert!(row.value["publication"].is_null());
         assert_eq!(data.deadline_ms, proof.deadline_ms());
-        crate::native_control::validate_native_control_custody(&key, &row).unwrap();
+        validate_native_control_custody(&key, &row).unwrap();
         let peer = f.peer(&data, 70).await;
         let snapshot = f.snapshot();
         let observation = f
@@ -574,7 +577,7 @@ fn normal_v3_required_null_action_and_actual_started_request_preserve_original_l
                 }
             }
             assert!(
-                crate::native_control::validate_native_control_custody(&key, &wrong).is_err(),
+                validate_native_control_custody(&key, &wrong).is_err(),
                 "{mutation}"
             );
         }
@@ -591,8 +594,8 @@ fn historical_v2_preparation_remains_lossless_without_publication_permission() {
         assert!(!row.value.as_object().unwrap().contains_key("publication"));
         let mut wrong = row.clone();
         wrong.value["publication"] = json!(null);
-        assert!(crate::native_control::validate_native_control_custody(&key, &wrong).is_err());
-        crate::native_control::validate_native_control_custody(&key, &row).unwrap();
+        assert!(validate_native_control_custody(&key, &wrong).is_err());
+        validate_native_control_custody(&key, &row).unwrap();
     });
 }
 

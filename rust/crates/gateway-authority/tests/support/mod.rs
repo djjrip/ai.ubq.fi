@@ -6,10 +6,10 @@ use std::sync::{Arc, Mutex};
 use std::task::{Context, Poll, Waker};
 
 use gateway_authority::quota::ApiKeyPolicy;
-use gateway_authority::routing::{
+use gateway_authority::routing_types::{
     AdmittedAccount, PoolAccount, QuotaBlock, QuotaBlockSource, RouteSelection, SubscriptionPool,
 };
-use gateway_authority::{Authority, AuthorityClock, TokenSource};
+use gateway_authority::store::{Authority, AuthorityClock, TokenSource};
 use gateway_core::GatewayError;
 use gateway_core::identity::{
     ApiKeyId, PoolVersionstamp, RoutingAccountHash, SubscriptionSelectionHash,

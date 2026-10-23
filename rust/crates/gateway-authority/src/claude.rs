@@ -9,8 +9,8 @@ use gateway_core::{
 };
 use sha2::{Digest, Sha256};
 
-use crate::store::Transaction;
-use crate::{Authority, TokenSource, invalid, keys, positive, unavailable};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{invalid, keys, positive, unavailable};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 struct Binding {

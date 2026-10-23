@@ -1,10 +1,10 @@
 //! One finite same-original local-success intent. Data plans never mint I/O rights.
-use crate::kernel::{kernel_identity, stage_kernel_terminal_intent};
-use crate::quota::{
-    ApiReservation, ApiUsageRequest, ApiUsageState, KernelReservation, KernelTerminal,
+use crate::kernel::{
+    KernelReservation, KernelTerminal, kernel_identity, stage_kernel_terminal_intent,
 };
-use crate::store::Transaction;
-use crate::{Authority, TokenSource, invalid, keys};
+use crate::quota::{ApiReservation, ApiUsageRequest, ApiUsageState};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{invalid, keys};
 use gateway_core::source_json::SourceJson;
 use gateway_core::source_serialization as source;
 use gateway_core::state::AuthorityStore;

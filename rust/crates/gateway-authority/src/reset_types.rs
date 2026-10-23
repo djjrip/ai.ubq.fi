@@ -1,6 +1,6 @@
 //! Reset records, immutable identities and pure credit selection.
 use crate::reset::hash;
-use crate::routing::{AdmittedAccount, CohortProof};
+use crate::routing_types::{AdmittedAccount, CohortProof};
 use crate::{nonnegative, text, unavailable};
 use gateway_core::GatewayError;
 use gateway_core::identity::AccountBinding;

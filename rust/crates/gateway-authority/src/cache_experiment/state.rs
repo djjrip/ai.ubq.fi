@@ -3,7 +3,7 @@ use super::{
     model::*,
     target::{key, resolve},
 };
-use crate::{Authority, TokenSource, store::Transaction};
+use crate::store::{Authority, TokenSource, Transaction};
 use gateway_core::{
     GatewayError,
     state::{AuthorityStore, RecordKey},

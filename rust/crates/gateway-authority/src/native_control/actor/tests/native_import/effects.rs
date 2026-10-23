@@ -1,6 +1,7 @@
 //! Actual admin/CAS effect tests. No native filesystem/provider callback is used.
 use super::*;
-use crate::native_control::import::{AuthenticatedNativeImport, NativeImportMode};
+use crate::native_control::custody::validate_native_control_custody;
+use crate::native_control::import::{AuthenticatedNativeImport, effects::NativeImportMode};
 use std::sync::atomic::AtomicBool;
 #[derive(Default)]
 struct EffectTokens(AtomicUsize);
@@ -154,7 +155,7 @@ fn original_import_v2_single_start_replay_unknown_and_no_forged_terminal() {
                 ),
                 (generation_key, generation),
             ] {
-                crate::native_control::validate_native_control_custody(&key, record).unwrap();
+                validate_native_control_custody(&key, record).unwrap();
                 assert!(
                     !serde_json::to_string(&record.value)
                         .unwrap()
@@ -164,7 +165,7 @@ fn original_import_v2_single_start_replay_unknown_and_no_forged_terminal() {
             let mut forged = operation.clone();
             forged.value["phase"] = json!("published");
             assert!(
-                crate::native_control::validate_native_control_custody(
+                validate_native_control_custody(
                     &crate::native_control::rows::key("operation", &proof.metadata().operation_id),
                     &forged
                 )
@@ -288,7 +289,7 @@ fn legacy_import_v1_custody_is_lossless_but_cannot_acquire_effects() {
             ] {
                 facts.remove(field);
             }
-            crate::native_control::validate_native_control_custody(&key, action).unwrap();
+            validate_native_control_custody(&key, action).unwrap();
         }
         assert!(control.claim_import(&proof).await.is_err());
         let admission = header(&id, proof.metadata(), b"SYNTHETIC_BODY", 23).await;

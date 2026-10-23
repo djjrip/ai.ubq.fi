@@ -1,8 +1,9 @@
 //! Same-authority live custody. No admission, quota proof, refresh or paid authorization.
+use crate::keys;
 use crate::native_control::actor::{self, NativeActorScope, NativeRenewalActor, StoredNativeActor};
 use crate::paid_control::PaidControlOwner;
-use crate::routing::SubscriptionPool;
-use crate::{Authority, TokenSource, keys, store::Transaction};
+use crate::routing_types::SubscriptionPool;
+use crate::store::{Authority, TokenSource, Transaction};
 use gateway_auth::{
     AuthConfig,
     native_auth::NativeTransportIdentity,
@@ -19,7 +20,7 @@ use gateway_core::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 pub mod wire;
-pub use wire::*;
+use wire::*;
 
 /// Nonexpiring secretless control custody, NOT a second routing/accounting ledger.
 pub fn custody_key(kind: &str, reference: &str) -> RecordKey {

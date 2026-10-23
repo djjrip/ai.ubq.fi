@@ -1,6 +1,9 @@
 mod live_selection;
 use super::support::*;
-use gateway_authority::routing::*;
+use gateway_authority::capacity_rules::*;
+use gateway_authority::routing_codec::*;
+use gateway_authority::routing_rules::*;
+use gateway_authority::routing_types::*;
 use gateway_core::identity::{
     CredentialVersion, PoolVersionstamp, RoutingAccountHash, SubscriptionSelectionHash,
 };
@@ -71,7 +74,7 @@ fn source_pool_reorder_refresh_timeout_retirement_and_legacy_reset_fences_match(
             pool_versionstamp: PoolVersionstamp("source-pool".into()),
             accounts,
         };
-        let actual = normalize_routing_state(
+        let actual = normalize(
             &pool,
             Some(parse_routing_state(&case["raw"]).unwrap()),
             case["now"].as_i64().unwrap(),

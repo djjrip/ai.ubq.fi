@@ -2,7 +2,7 @@
 use crate::routing_codec::{safe_integer, safe_ms};
 use crate::{
     invalid,
-    routing::{
+    routing_types::{
         CapacityAdditionalRateLimit, CapacityObservation, CapacityState, CapacityStore,
         CapacityWindow, CapacityWindows,
     },

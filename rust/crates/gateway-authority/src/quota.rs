@@ -8,9 +8,10 @@ use gateway_core::provider::UpstreamProvider;
 use gateway_core::state::AuthorityStore;
 use serde::{Deserialize, Serialize};
 
+use crate::store::{Authority, TokenSource};
 use crate::{
-    Authority, QUOTA_RETENTION_MS, REQUEST_LEASE_MS, TokenSource, add, invalid, keys, nonnegative,
-    positive, quota_error, retention, text, unavailable,
+    QUOTA_RETENTION_MS, REQUEST_LEASE_MS, add, invalid, keys, nonnegative, positive, quota_error,
+    retention, text, unavailable,
 };
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -640,10 +641,6 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
         ))
     }
 }
-
-pub use crate::kernel::{
-    KernelDefaults, KernelPolicy, KernelReservation, KernelTerminal, KernelWindow,
-};
 
 fn classify_release_read(
     error: crate::store::ApiReleaseReadError,

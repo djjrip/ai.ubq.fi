@@ -1,5 +1,5 @@
+use gateway_authority::kernel::{KernelPolicy, KernelWindow};
 use gateway_authority::keys;
-use gateway_authority::quota::{KernelPolicy, KernelWindow};
 use gateway_core::{
     js_string::JsString16,
     source_control::{decode_source_control_record, encode_source_control_record},

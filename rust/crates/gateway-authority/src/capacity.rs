@@ -1,13 +1,14 @@
 //! Fixed trusted sampler capability. Data-plane requests cannot construct its source fence.
-use crate::capacity_rules::merge_capacity;
+use crate::capacity_rules::{merge_capacity, parse_capacity_observation, parse_capacity_store};
 use crate::paid_control::PaidControlOwner;
-use crate::routing::{
+use crate::routing_codec::parse_routing_state;
+use crate::routing_rules::apply_capacity_observation;
+use crate::routing_types::{
     CapacityAdditionalRateLimit, CapacityObservation, CapacityState, CapacityWindows,
-    SubscriptionPool, apply_capacity_observation, parse_capacity_observation, parse_capacity_store,
-    parse_routing_state,
+    SubscriptionPool,
 };
-use crate::store::Transaction;
-use crate::{Authority, TokenSource, invalid, keys, text, unavailable};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{invalid, keys, text, unavailable};
 use gateway_auth::provider_credentials::{
     CodexNativeOwner, codex_source_pool_key, read_codex_source_pool,
 };

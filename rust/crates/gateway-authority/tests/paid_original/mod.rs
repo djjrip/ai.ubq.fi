@@ -2,8 +2,8 @@
 use super::{MemoryStore, TestAuthority};
 use gateway_authority::{
     REQUEST_LEASE_MS,
-    paid::PaidRequest,
     paid_control::{PaidRequestContext, PaidRoutingReceipt},
+    paid_types::PaidRequest,
 };
 use gateway_core::{
     GatewayError,

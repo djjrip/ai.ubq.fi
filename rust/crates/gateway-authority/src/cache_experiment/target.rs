@@ -1,6 +1,6 @@
 //! Full source roster and exact capability/ordered-pool fingerprints, without discovery I/O.
 use super::{PreparedTarget, model::*};
-use crate::{Authority, TokenSource, store::Transaction};
+use crate::store::{Authority, TokenSource, Transaction};
 use gateway_auth::{
     crypto::sha256_hex,
     provider_credentials::{codex_source_pool_key, parse_codex_source_pool},

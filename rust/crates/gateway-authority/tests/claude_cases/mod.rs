@@ -670,7 +670,7 @@ fn claude_model_scope_clock_and_current_paid_policy_remain_required() {
         .is_err()
     );
     assert!(store.row(&keys::paid_gate()).is_none());
-    let no_clock = gateway_authority::Authority::new(store.clone(), Tokens::default());
+    let no_clock = gateway_authority::store::Authority::new(store.clone(), Tokens::default());
     assert_eq!(
         run(no_clock.prove_claude_unavailable(&"paid-model".into(), NOW))
             .unwrap_err()

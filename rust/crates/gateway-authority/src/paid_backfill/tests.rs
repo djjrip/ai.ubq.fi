@@ -1,4 +1,9 @@
 use super::*;
+use crate::paid::source_usage::surplus_usage_from_source;
+use crate::paid_types::PaidCorrelation;
+use crate::paid_types::PaidRollup;
+use crate::paid_types::PaidUsage;
+use crate::paid_types::PaidWindow;
 use gateway_core::{
     provider::PaidProvider,
     state::{AtomicTransition, AuthorityStore, CommitOutcome, RecordMutation, StoredRecord},
@@ -508,7 +513,7 @@ fn generated_backfill_rollup_roundtrips_the_existing_live_settlement_dto() {
     store.put(key("a"), request("a", true));
     assert_eq!(backfill(&store, 10).requests.rollups_written, 1);
     let raw = store.value(&rollup_key("a"));
-    let typed: crate::paid::PaidRollup = decode_json(raw.clone()).unwrap();
+    let typed: PaidRollup = decode_json(raw.clone()).unwrap();
     assert_eq!(typed.provider_quota, 1.5);
     assert_eq!(typed.spend_microcredits, 5.0);
     let restored = serde_json::to_value(typed).unwrap();
@@ -552,13 +557,13 @@ fn pending_for_live_settlement(store: &Store, model: &str) -> PaidAttempt {
     store.put(keys::paid_window("key", NOW), active);
     row
 }
-fn live_usage() -> crate::paid::PaidUsage {
-    crate::paid::PaidUsage {
+fn live_usage() -> PaidUsage {
+    PaidUsage {
         provider_quota: 5.0,
         input_tokens: 10,
         cached_input_tokens: Some(2),
         output_tokens: 3,
-        correlation: crate::paid::PaidCorrelation::ProviderRequestId("a".into()),
+        correlation: PaidCorrelation::ProviderRequestId("a".into()),
     }
 }
 #[test]
@@ -668,7 +673,7 @@ fn shared_surplus_usage_adapter_matches_all_actual_source_pricing_cases() {
             .map(gateway_core::source_json::SourceJson::from_serializable)
             .transpose()
             .unwrap();
-        let actual = crate::paid::surplus_usage_from_source(&row, usage.as_ref(), pricing.as_ref());
+        let actual = surplus_usage_from_source(&row, usage.as_ref(), pricing.as_ref());
         let expected = &case["expected"];
         if expected.is_null() {
             assert!(actual.is_none(), "{name}: unexpected billing input");
@@ -695,7 +700,7 @@ fn shared_surplus_usage_adapter_matches_all_actual_source_pricing_cases() {
             expected["output_tokens"],
             "{name}"
         );
-        let crate::paid::PaidCorrelation::SurplusReservation {
+        let PaidCorrelation::SurplusReservation {
             attempt_id,
             buyer_cost_micro,
         } = actual.correlation
@@ -725,22 +730,19 @@ fn fractional_aggregate_spend_does_not_widen_counters_request_or_window_billing(
     ] {
         let mut invalid = raw.clone();
         invalid[field] = json!(0.25);
-        assert!(
-            decode_json::<crate::paid::PaidRollup>(invalid).is_err(),
-            "{field}"
-        );
+        assert!(decode_json::<PaidRollup>(invalid).is_err(), "{field}");
     }
     for value in [json!(-0.25), json!("0.25"), Value::Null] {
         let mut invalid = raw.clone();
         invalid["spend_microcredits"] = value;
-        assert!(decode_json::<crate::paid::PaidRollup>(invalid).is_err());
+        assert!(decode_json::<PaidRollup>(invalid).is_err());
     }
     let mut invalid_request = request("a", true);
     invalid_request["spend_microcredits"] = json!(0.25);
     assert!(decode_json::<PaidAttempt>(invalid_request).is_err());
     let mut invalid_window = window(NOW);
     invalid_window["settled_microcredits"] = json!(0.25);
-    assert!(decode_json::<crate::paid::PaidWindow>(invalid_window).is_err());
+    assert!(decode_json::<PaidWindow>(invalid_window).is_err());
 }
 
 mod source_control;

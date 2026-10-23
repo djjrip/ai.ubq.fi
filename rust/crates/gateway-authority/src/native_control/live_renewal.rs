@@ -1,16 +1,18 @@
 //! Explicit non-inference native renewal facts. No manufactured session, attempt or admission.
 use super::{
-    NATIVE_RENEWAL_FENCE_VERSION, NativeRenewalAction, NativeRenewalAuthority,
-    NativeRenewalCancellation, NativeRenewalContext, NativeRenewalFence, OWNER_RENEWAL_MAX_MS,
+    NATIVE_RENEWAL_FENCE_VERSION, NativeRenewalAction, NativeRenewalCancellation,
+    NativeRenewalContext, NativeRenewalFence, OWNER_RENEWAL_MAX_MS,
     actor::{self, NativeActorScope, NativeRenewalActor, StoredNativeActor},
     facts,
+    receiver::NativeRenewalAuthority,
     rows::{self, ActionRow, conflict, fail},
 };
+use crate::store::{TokenSource, Transaction};
 use crate::{
-    TokenSource, keys,
+    keys,
     paid_control::{PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner},
-    routing::{LiveAccountSelection, SubscriptionPool},
-    store::Transaction,
+    routing::LiveAccountSelection,
+    routing_types::SubscriptionPool,
 };
 use gateway_auth::{
     crypto::sha256_hex,
@@ -237,7 +239,7 @@ impl<S: AuthorityStore, I: TokenSource, C: NativeRenewalCancellation>
                 }
                 let routing: Option<Value> = tx.read(&keys::routing()).await?;
                 if let Some(raw) = routing {
-                    let state = crate::routing::parse_routing_state(&raw)?;
+                    let state = crate::routing_codec::parse_routing_state(&raw)?;
                     let slot = state
                         .slots
                         .get(usize::try_from(binding.slot).map_err(|_| fail())?)

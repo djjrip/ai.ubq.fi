@@ -1,5 +1,5 @@
 use super::*;
-use gateway_authority::paid::{PaidAttempt, PaidReservation};
+use gateway_authority::paid_types::{PaidAttempt, PaidReservation};
 use gateway_core::{
     js_string::JsString16, model::ModelId, source_control::decode_source_control_record,
     source_json::SourceJson, source_serialization as source, value::ValueEncoding,
@@ -316,8 +316,11 @@ fn paid_alias_tie_uses_one_constructor_collator_and_missing_or_unknown_pairs_fai
     )])
     .unwrap();
     context.synthetic_hop = Some(PaidSyntheticHop::Openlux);
-    let missing_collator =
-        gateway_authority::Authority::with_clock(store.clone(), Tokens::default(), store.clone());
+    let missing_collator = gateway_authority::store::Authority::with_clock(
+        store.clone(),
+        Tokens::default(),
+        store.clone(),
+    );
     let absent = match run(missing_collator.authorize_paid_route(&input, &context, NOW)) {
         Err(error) => error,
         Ok(_) => panic!("missing demanded collator"),

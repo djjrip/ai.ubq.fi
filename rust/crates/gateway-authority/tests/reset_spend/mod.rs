@@ -1,12 +1,11 @@
 //! Source banked-reset claim/submission and native-codex-mutations probe boundaries.
 use crate::support::*;
 use gateway_authority::{
-    full_pool_reset::*,
+    full_pool_reset::types::*,
     keys,
-    reset::{
-        AccountDayBudget, ResetClaim, ResetConfig, ResetMode, ResetRecord, ResetState, utc_day,
-    },
-    routing::{CohortProof, RouteSelection},
+    reset::utc_day,
+    reset_types::{AccountDayBudget, ResetClaim, ResetConfig, ResetMode, ResetRecord, ResetState},
+    routing_types::{CohortProof, RouteSelection},
 };
 use gateway_core::{
     GatewayError,
@@ -130,10 +129,10 @@ fn preexisting_reset_scan_never_claims_an_absent_ledger_or_budget() {
     let cohort = proof(&authority, NOW);
     assert!(matches!(
         run(authority.reconcile_full_pool_reset(&cohort, &original())).unwrap(),
-        gateway_authority::reset::FullPoolResetReconciliation::NoExisting
+        gateway_authority::reset_types::FullPoolResetReconciliation::NoExisting
     ));
     for account in pool().accounts {
-        let invocation = gateway_authority::reset::reset_invocation(
+        let invocation = gateway_authority::reset_types::reset_invocation(
             &account.admin_account_hash.0,
             &account.credential_version.0,
             NOW + 60_000,
@@ -205,7 +204,7 @@ fn preexisting_verified_reset_needs_no_new_credit_inventory() {
         }
         // Deliberately no prepare/finish/inventory call after the physical outcome.
         let cohort = proof(&authority, NOW);
-        let gateway_authority::reset::FullPoolResetReconciliation::Recovered(account) =
+        let gateway_authority::reset_types::FullPoolResetReconciliation::Recovered(account) =
             run(authority.reconcile_full_pool_reset(&cohort, &original())).unwrap()
         else {
             panic!("known verified ledger must grant only a recovery probe")
@@ -233,7 +232,7 @@ fn full_pool_spend_uses_one_existing_budget_and_unknown_never_resubmits() {
     .unwrap();
     assert!(matches!(
         run(authority.reconcile_full_pool_reset(&proof(&authority, NOW), &original())).unwrap(),
-        gateway_authority::reset::FullPoolResetReconciliation::Blocked { .. }
+        gateway_authority::reset_types::FullPoolResetReconciliation::Blocked { .. }
     ));
     assert!(run(authority.prepare_full_pool_reset_submission(&permit, &unknown)).is_err());
     assert!(run(authority.renew_full_pool_reset_before_redeem(&permit, &unknown)).is_err());

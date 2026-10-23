@@ -1,6 +1,6 @@
 //! Synthetic-only private receipt issuer. It does not establish real native writer exclusion.
 use super::*;
-use crate::existing_account_import::{DurableNativeImport, ExistingAccountImportStore};
+use crate::existing_account_import::{ExistingAccountImportStore, durability::DurableNativeImport};
 use gateway_authority::native_control::import::{NativeImportClaim, NativeImportMode};
 use std::{
     fs,

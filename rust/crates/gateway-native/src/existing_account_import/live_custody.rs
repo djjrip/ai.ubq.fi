@@ -16,7 +16,7 @@ use std::{
 
 /// Only the fixed actor's genuine original Start plus its inherited live peer can issue this.
 /// ```compile_fail
-/// use gateway_native::existing_account_import::LiveImportCustody;
+/// use gateway_native::existing_account_import::live_custody::LiveImportCustody;
 /// let forged: LiveImportCustody<'_> = serde_json::from_str("{}").unwrap();
 /// ```
 pub struct LiveImportCustody<'a> {

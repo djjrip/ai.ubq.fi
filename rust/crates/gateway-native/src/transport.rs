@@ -3,7 +3,7 @@ use std::future::Future;
 use gateway_core::GatewayError;
 use serde_json::{Value, json};
 
-use crate::credentials::{
+use gateway_auth::native_credentials::{
     NativeCredentials, NativeGeneration, NativeOwnerId, OwnerFence, generation_failed,
     owner_unavailable, verify_daemon_account, verify_generation,
 };
@@ -102,11 +102,11 @@ pub async fn renew_owned<T: NativeOwnerTransport>(
 ) -> Result<NativeGeneration, GatewayError> {
     if current.generation_hash() != fence.generation_hash || current.account_id != fence.account_id
     {
-        return Err(crate::credentials::owner_conflict());
+        return Err(gateway_auth::native_credentials::owner_conflict());
     }
     let mut observed = transport.read_credentials(&fence.owner).await?;
     if current.account_id != observed.account_id {
-        return Err(crate::credentials::owner_conflict());
+        return Err(gateway_auth::native_credentials::owner_conflict());
     }
     if !current.same_credentials(&observed) {
         verify_generation(current, &observed, now_ms, false)?;
@@ -240,7 +240,7 @@ impl<T: NativeOwnerTransport, G: crate::owner_control::NativeRenewalGuard> Nativ
             if !self.current.same_credentials(&observed) {
                 verify_generation(self.current, &observed, self.guard.now_ms()?, true)?;
                 self.advanced.set(true);
-                return Err(crate::credentials::owner_conflict());
+                return Err(gateway_auth::native_credentials::owner_conflict());
             }
             self.guard.start_refresh().await?;
             self.guard.ensure_current().await?;

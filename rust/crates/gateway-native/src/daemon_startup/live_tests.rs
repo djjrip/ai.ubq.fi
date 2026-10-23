@@ -1,5 +1,5 @@
 use super::*;
-use crate::live_bridge::{LiveDialContext, NativeLiveConnector};
+use crate::live_bridge::socket::{LiveDialContext, NativeLiveConnector};
 use gateway_auth::{
     crypto::base64url,
     native::*,

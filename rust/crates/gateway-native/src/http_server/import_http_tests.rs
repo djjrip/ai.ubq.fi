@@ -1,9 +1,6 @@
 //! Real loopback bytes and real AuthService/M22 proofs. Recording only; no credential effects.
 use super::*;
-use crate::native_import::{
-    AuthenticatedNativeImport, NativeImportContext, NativeImportHandler, NativeImportMetadata,
-    NativeImportResult,
-};
+use crate::native_import::{NativeImportContext, NativeImportHandler, NativeImportResult};
 use gateway_auth::{
     AuthConfig, AuthHost, AuthRequest,
     crypto::{Secret, base64url, sha256_hex},
@@ -17,6 +14,7 @@ use gateway_auth::{
     upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
     webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
 };
+use gateway_authority::native_control::import::AuthenticatedNativeImport;
 use gateway_authority::{
     Authority, AuthorityClock, TokenSource, keys,
     native_control::{

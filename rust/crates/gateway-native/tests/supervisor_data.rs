@@ -1,5 +1,5 @@
+use gateway_core::redaction;
 use gateway_native::{
-    redaction,
     supervisor::SourceId,
     supervisor_data::{SupervisorData, SupervisorSourceConfig},
     supervisor_metadata, supervisor_rollout,
@@ -255,7 +255,7 @@ fn actual_uds_inventory_selection_cache_brief_and_rollout_are_read_only() {
     assert!(wire.contains("Fresh visible rollout result"));
     assert_eq!(before, fs::read(&db).unwrap());
     assert_eq!(
-        gateway_native::SupervisorMethod::parse("turn/start")
+        gateway_native::transport::SupervisorMethod::parse("turn/start")
             .unwrap_err()
             .status,
         403

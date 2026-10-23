@@ -1,7 +1,17 @@
 use std::collections::BTreeSet;
 
 use gateway_auth::crypto::{Secret, base64url};
-use gateway_native::*;
+use gateway_auth::native_credentials::{
+    NativeCredentials, native_refresh_time_ns, parse_native_document, verify_bootstrap,
+    verify_daemon_account, verify_generation,
+};
+use gateway_native::{
+    supervisor::{
+        InventoryScope, KnownThread, SourceId, SupervisorState, classify_state, extract_follow,
+        follow_update, resolve_rollout_path, select_follow_updates,
+    },
+    transport::{RenewalStep, SupervisorMethod, SupervisorTransport},
+};
 use serde_json::json;
 
 fn token(expiry: i64, user: &str, account: &str) -> String {
@@ -218,11 +228,11 @@ fn closed_secrets_cross_records_but_unclosed_values_do_not() {
         "password: \"first-secret".into(),
         "second-secret\" done".into(),
     ];
-    let masked = gateway_native::redaction::redact_parts(&parts);
+    let masked = gateway_core::redaction::redact_parts(&parts);
     assert!(masked.iter().all(|part| !part.text.contains("secret")));
     assert!(masked[1].text.ends_with(" done"));
     let parts = vec!["password: \"private".into(), "Working on refresh".into()];
-    let masked = gateway_native::redaction::redact_parts(&parts);
+    let masked = gateway_core::redaction::redact_parts(&parts);
     assert_eq!(masked[1].text, "Working on refresh");
 }
 

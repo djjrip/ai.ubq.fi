@@ -111,7 +111,7 @@ pub(crate) fn source_policy(
 }
 pub(crate) fn request_service(
     config: PreparedNativeDaemonConfig,
-    connector: std::sync::Arc<dyn crate::live_bridge::NativeLiveConnector>,
+    connector: std::sync::Arc<dyn crate::live_bridge::socket::NativeLiveConnector>,
     reverse: Option<std::net::TcpStream>,
 ) -> Result<NativeHttpService, GatewayError> {
     request_service_with(
@@ -120,16 +120,17 @@ pub(crate) fn request_service(
         reverse,
         |target, socket, identity, connector| {
             #[cfg(not(test))]
-            let authority = crate::live_bridge::NativeLiveAuthorityHttp::from_connected(
+            let authority = crate::live_bridge::authority::NativeLiveAuthorityHttp::from_connected(
                 target, socket, identity,
             )?;
             #[cfg(test)]
-            let authority = crate::live_bridge::NativeLiveAuthorityHttp::with_test_roots(
-                target,
-                socket,
-                identity,
-                live_tests::authority_roots(),
-            )?;
+            let authority =
+                crate::live_bridge::authority::NativeLiveAuthorityHttp::with_test_roots(
+                    target,
+                    socket,
+                    identity,
+                    live_tests::authority_roots(),
+                )?;
             let service = crate::live_bridge::NativeLiveService::configured(
                 std::sync::Arc::new(authority),
                 connector,
@@ -142,13 +143,13 @@ pub(crate) fn request_service(
 }
 fn request_service_with(
     config: PreparedNativeDaemonConfig,
-    connector: std::sync::Arc<dyn crate::live_bridge::NativeLiveConnector>,
+    connector: std::sync::Arc<dyn crate::live_bridge::socket::NativeLiveConnector>,
     reverse: Option<std::net::TcpStream>,
     build_live: impl FnOnce(
         &str,
         std::net::TcpStream,
         gateway_auth::native_auth::NativeTransportIdentity,
-        std::sync::Arc<dyn crate::live_bridge::NativeLiveConnector>,
+        std::sync::Arc<dyn crate::live_bridge::socket::NativeLiveConnector>,
     ) -> Result<crate::live_bridge::NativeLiveService, GatewayError>,
 ) -> Result<NativeHttpService, GatewayError> {
     if config.owner_renewal.is_some() {

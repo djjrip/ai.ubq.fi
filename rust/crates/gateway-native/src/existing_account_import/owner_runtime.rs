@@ -1,8 +1,5 @@
 //! Owned-process custody only. Dirty state never becomes another import start permit.
-use super::{
-    ExclusiveManagedOwner,
-    exclusive_owner::{Facts, PinnedExecutable, fail},
-};
+use super::exclusive_owner::{ExclusiveManagedOwner, Facts, PinnedExecutable, fail};
 use crate::native_import::NativeImportContext;
 use gateway_authority::native_control::import::{
     AuthenticatedNativeImport, NativeImportBinding, NativeImportStart,
@@ -72,7 +69,7 @@ pub struct OwnedRuntime {
 /// An original-start-bound settled OWNED writer. No mutation API is exposed by this foundation.
 /// Bootstrap exclusivity/full credential importer/publication remain separate acceptance.
 /// ```compile_fail
-/// use gateway_native::existing_account_import::ExclusiveOwnerLease;
+/// use gateway_native::existing_account_import::owner_runtime::ExclusiveOwnerLease;
 /// let forged: ExclusiveOwnerLease<'_> = serde_json::from_str("{}").unwrap();
 /// ```
 pub struct ExclusiveOwnerLease<'a> {

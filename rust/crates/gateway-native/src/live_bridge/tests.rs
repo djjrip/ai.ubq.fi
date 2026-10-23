@@ -1,3 +1,4 @@
+use super::authority::LiveAuthorization;
 use super::*;
 use gateway_auth::{
     native::*,

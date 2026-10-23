@@ -23,7 +23,9 @@ pub(super) struct ValidatedNativeImport<'a> {
     pub(super) etag: Option<String>,
 }
 
-use super::{ExistingAccountImportStore, LiveImportCustody, import_documents as document};
+use super::{
+    ExistingAccountImportStore, import_documents as document, live_custody::LiveImportCustody,
+};
 use crate::import_custody_protocol::unavailable;
 use crate::{
     native_import::NativeImportContext,

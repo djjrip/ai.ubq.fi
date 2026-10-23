@@ -4,9 +4,15 @@ mod fixture;
 #[cfg(not(target_arch = "wasm32"))]
 mod worker_custody_fixture;
 #[cfg(not(target_arch = "wasm32"))]
-fn main() -> Result<(), gateway_migration::MigrationError> {
+fn main() -> Result<(), gateway_migration::error::MigrationError> {
     use gateway_core::state::AuthorityStore;
-    use gateway_migration::{operational::ArtifactInput, *};
+    use gateway_migration::{
+        engine::{AdoptionReceipt, adopt_empty},
+        inverse::{ArtifactContext, CustodyRecord},
+        native_capture::{NativeCapture, prepare_native},
+        native_custody::{export_native_rollback_with_custody, sanitize_native_capture},
+        operational::ArtifactInput,
+    };
     use serde::{Deserialize, Serialize};
     use worker_custody_fixture::{host, inputs, port, producers, staged, support_run};
     #[derive(Deserialize)]

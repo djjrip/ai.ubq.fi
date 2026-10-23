@@ -67,10 +67,10 @@ struct Receipt {
     target_touched: bool,
     summary: gateway_migration::staged::StagePlanSummary,
 }
-fn failure(message: &str) -> gateway_migration::MigrationError {
+fn failure(message: &str) -> gateway_migration::error::MigrationError {
     gateway_core::GatewayError::unavailable(message, "m20_stage_frames_invalid").into()
 }
-fn sha256_file(path: &Path) -> Result<String, gateway_migration::MigrationError> {
+fn sha256_file(path: &Path) -> Result<String, gateway_migration::error::MigrationError> {
     let mut file = File::open(path).map_err(|_| failure("Private capture cannot be hashed"))?;
     let mut hash = Sha256::new();
     let mut bytes = vec![0; 1024 * 1024];
@@ -89,7 +89,7 @@ fn sha256_file(path: &Path) -> Result<String, gateway_migration::MigrationError>
         .map(|byte| format!("{byte:02x}"))
         .collect())
 }
-fn private_output(path: &Path) -> Result<File, gateway_migration::MigrationError> {
+fn private_output(path: &Path) -> Result<File, gateway_migration::error::MigrationError> {
     OpenOptions::new()
         .write(true)
         .create_new(true)
@@ -102,7 +102,7 @@ fn write_frame(
     frame: &[u8],
     total: &mut u64,
     maximum: &mut usize,
-) -> Result<(), gateway_migration::MigrationError> {
+) -> Result<(), gateway_migration::error::MigrationError> {
     if frame.len() > gateway_migration::staged::STAGED_BATCH_MAX_BYTES {
         return Err(failure("Private stage frame exceeds its bound"));
     }
@@ -115,7 +115,7 @@ fn write_frame(
         .ok_or_else(|| failure("Private stage frame byte count overflows"))?;
     Ok(())
 }
-fn main() -> Result<(), gateway_migration::MigrationError> {
+fn main() -> Result<(), gateway_migration::error::MigrationError> {
     assert_eq!(std::env::args_os().len(), 1, "Private input is stdin only");
     let mut raw = Vec::new();
     std::io::stdin()

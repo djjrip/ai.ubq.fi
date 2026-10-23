@@ -13,7 +13,16 @@ use gateway_core::{
     state::*,
     tuple_key::TupleKey,
 };
-use gateway_migration::*;
+use gateway_migration::{
+    engine::adopt_empty,
+    graph_transport,
+    inverse::ArtifactContext,
+    native_capture::{NativeCapture, NativeEntry, NativeRevision, NativeValue, prepare_native},
+    native_custody::{
+        NativeCustody, OwnedNativeSnapshot, export_native_rollback_with_custody,
+        export_native_with_custody, sanitize_native_capture,
+    },
+};
 use gateway_native::{
     NativeOwnerTransport,
     unix::{NativeOwnerLocation, UnixOwnerTransport},

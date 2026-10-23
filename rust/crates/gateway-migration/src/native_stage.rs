@@ -1,5 +1,9 @@
 //! Private stopped-file preparation. No full-capture payload collection, VM,
 //! database, public import route, or capability is created by these spool files.
+use crate::core_state::{CoreStateCapture, CoreStateManifest};
+use crate::error::MigrationError;
+use crate::native_capture::{NativeCapture, NativeEntry};
+use crate::native_custody::NativeCustody;
 use crate::native_spool::{RowInventory, Spool, Writer};
 use crate::*;
 use serde::de::{DeserializeSeed, Error, MapAccess, SeqAccess, Visitor};
@@ -83,16 +87,16 @@ impl Captured {
     /// Select the bounded operational core without touching a target or opening
     /// a credential. The returned capture still needs the existing preparation
     /// and custody gates before any adoption.
-    pub fn core_capture(&self) -> Result<crate::CoreStateCapture, MigrationError> {
+    pub fn core_capture(&self) -> Result<CoreStateCapture, MigrationError> {
         crate::core_state::select_spool(&self.header, &self.entries)
     }
     /// Select and prepare the bounded core in one private offline operation.
     /// The returned plan still needs the existing staged adoption and activation gates.
-    pub async fn prepare_core<H: crate::NativeCustody>(
+    pub async fn prepare_core<H: NativeCustody>(
         self,
         host: &H,
-    ) -> Result<(crate::CoreStateManifest, crate::staged::StagePlan), MigrationError> {
-        let crate::CoreStateCapture { capture, manifest } = self.core_capture()?;
+    ) -> Result<(CoreStateManifest, crate::staged::StagePlan), MigrationError> {
+        let CoreStateCapture { capture, manifest } = self.core_capture()?;
         let directory = crate::native_stage::directory(&self.directory)?;
         let plan = Captured::owned(capture, &directory)?.prepare(host).await?;
         Ok((manifest, plan))
@@ -177,7 +181,7 @@ impl Captured {
         }
         reader.verify_end()?;
         let projected = projected.seal()?;
-        let (bound, derived) = crate::indexes::bind_spooled(
+        let (bound, derived) = crate::indexes::disk::bind_spooled(
             &projected,
             self.header.captured_at_ms,
             &revision,

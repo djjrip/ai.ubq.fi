@@ -1,4 +1,7 @@
-use gateway_admin::{AdminHost, AdminInput, AdminOperation};
+use gateway_admin::{
+    operations::{AdminHost, AdminInput},
+    routes::AdminOperation,
+};
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::*};
 use gateway_auth::{native::NativeReadRequest, upstream::*, webauthn::*, *};
 use gateway_core::{
@@ -1128,7 +1131,7 @@ fn authenticated_admin_service_uses_runtime_deletion_completion_hooks() {
         admin_tokens: vec![gateway_auth::crypto::Secret::new("fixture-admin".into())],
         ..AuthConfig::default()
     };
-    let admin = gateway_admin::AdminService {
+    let admin = gateway_admin::service::AdminService {
         store: &store,
         host: &host,
         capabilities: &runtime,

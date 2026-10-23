@@ -11,7 +11,10 @@ use gateway_core::{
     source_graph::{GraphAtom, GraphNode, SourceGraph},
     tuple_key::TupleKey,
 };
-use gateway_migration::{NativeCapture, NativeEntry, NativeRevision, NativeValue, graph_transport};
+use gateway_migration::{
+    graph_transport,
+    native_capture::{NativeCapture, NativeEntry, NativeRevision, NativeValue},
+};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::path::Path;

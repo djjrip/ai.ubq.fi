@@ -1,8 +1,11 @@
 //! Native-private latest state, one genuine row at a time; no store mirror.
 use crate::engine::{Manifest, manifest_key, mapping_key};
+use crate::inverse::{ArtifactContext, CustodyRecord};
+use crate::native_capture::{NativeCapture, NativeEntry, NativeRevision};
+use crate::native_custody::NativeCustody;
 use crate::native_spool::Writer;
 use crate::staged::CanonicalRecord;
-use crate::*;
+use crate::{error::MigrationError, *};
 use gateway_core::query::{QueryRequest, QuerySelector, QueryStore};
 use serde_json::json;
 use std::{

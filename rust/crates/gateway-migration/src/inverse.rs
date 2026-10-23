@@ -1,5 +1,6 @@
+use crate::capture::{PrivateCapture, SourceEntry};
 use crate::engine::{Manifest, manifest_key, mapping_key};
-use crate::*;
+use crate::{error::MigrationError, *};
 use gateway_admin_data::profile::{encode_base64, to_source_profile as to_profile};
 use gateway_core::{
     query::{QueryRequest, QuerySelector, QueryStore},
@@ -545,7 +546,7 @@ async fn export_internal<S: QueryStore>(
     };
     // A private export is not a successful rollback until every latest source/index
     // invariant can be re-adopted. This reads no old database or backup.
-    crate::prepare(&result, &CanonicalDates)?;
+    crate::engine::prepare(&result, &gateway_admin_data::profile::CanonicalDates)?;
     Ok((result, controls))
 }
 

@@ -2,7 +2,13 @@
 mod support;
 use gateway_auth::store::key;
 use gateway_core::{query::*, source_graph::GraphNode, state::*, tuple_key::TupleKey};
-use gateway_migration::*;
+use gateway_migration::{
+    engine::adopt_empty,
+    graph_transport,
+    inverse::{ArtifactContext, export_latest},
+    native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native},
+    native_inverse::{export_native_latest, export_native_rollback_bundle},
+};
 use serde_json::json;
 use support::{fixture::*, sqlite_store::*};
 

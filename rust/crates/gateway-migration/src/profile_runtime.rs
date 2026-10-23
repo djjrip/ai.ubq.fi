@@ -1,5 +1,5 @@
 //! Existing public profile import, distinct from stopped complete-state adoption.
-use crate::*;
+use crate::{capture::SourceEntry, *};
 use gateway_admin_data::{
     migration::{self, ImportOptions, NormalizedEntry, Profile},
     profile::{SourceDateHost, normalize_source_import_line_with_host},

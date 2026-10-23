@@ -1,4 +1,4 @@
-use crate::{ClaudePoolSession, host::*, persistence};
+use crate::{host::*, persistence, pool::ClaudePoolSession};
 use gateway_admin_runtime::claude::{self, AccountUpdate, Workspace};
 use gateway_core::{
     GatewayError, js_string::JsString16, js_string_case::lowercase_source, source_json::SourceJson,

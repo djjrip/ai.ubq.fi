@@ -1,6 +1,6 @@
 //! Private offline operator data, never an HTTP/admin capability. The host must
 //! hold a NEW empty target unpublished and quiescent until seal and reconciliation.
-use crate::*;
+use crate::{engine::PreparedAdoption, *};
 use gateway_authority::initial_control_owner::{InitialAdoptionAccountFacts, InitialAdoptionFacts};
 use gateway_authority::paid_control::PaidControlOwner;
 use gateway_core::{

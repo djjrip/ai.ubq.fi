@@ -1,6 +1,6 @@
 //! Only the actual paid source/runtime families opt into this finite codec.
 //! Complete runtime DTO/key validation remains owned by gateway-authority.
-use crate::*;
+use crate::{capture::SourceEntry, *};
 use gateway_core::{
     js_string::JsString16,
     source_control::{

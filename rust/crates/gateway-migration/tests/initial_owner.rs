@@ -8,7 +8,12 @@ use gateway_authority::initial_control_owner::*;
 use gateway_core::{
     GatewayError, js_string::JsString16, query::*, source_graph::*, state::*, tuple_key::TupleKey,
 };
-use gateway_migration::*;
+use gateway_migration::{
+    engine::{PreparedAdoption, adopt_empty, adopt_empty_with_initial_control_owner},
+    graph_transport,
+    initial_owner::InitialControlOwnerAdoptionReceipt,
+    native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native},
+};
 use serde_json::{Value, json};
 use std::{cell::Cell, collections::BTreeSet};
 use support::{fixture::*, sqlite_store::*};

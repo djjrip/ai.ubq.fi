@@ -5,8 +5,13 @@ mod sqlite_store;
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     use fixture::{Directory, run};
+    use gateway_admin_data::profile::CanonicalDates;
     use gateway_core::identity::{ApiKeyId, RequestId};
-    use gateway_migration::*;
+    use gateway_migration::{
+        capture::PrivateCapture,
+        engine::{adopt_empty, prepare},
+        inverse::export_latest,
+    };
     use serde_json::json;
     use sqlite_store::SqliteStore;
     use std::sync::atomic::{AtomicU64, Ordering};

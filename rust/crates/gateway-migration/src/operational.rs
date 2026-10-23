@@ -1,8 +1,11 @@
 //! Finite private host operations. The host owns stopped-source and target isolation.
 //! A decoded request is data, never an ownership, publication or replay capability.
 use crate::{
-    AdoptionReceipt, ArtifactContext, MigrationError, NativeCapture, NativeRollbackBundle,
-    adopt_empty, export_native_rollback_bundle, prepare_native,
+    engine::{AdoptionReceipt, adopt_empty},
+    error::MigrationError,
+    inverse::ArtifactContext,
+    native_capture::{NativeCapture, prepare_native},
+    native_inverse::{NativeRollbackBundle, export_native_rollback_bundle},
 };
 use gateway_core::{GatewayError, identity::MAX_SAFE_INTEGER, query::QueryStore};
 use serde::{Deserialize, Serialize};

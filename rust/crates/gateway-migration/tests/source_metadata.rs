@@ -5,7 +5,12 @@ use gateway_admin_data::profile::{CanonicalDates, from_source_profile, to_source
 use gateway_core::{
     source_control::source_json_tree, source_json::SourceJson, value::PortableValue,
 };
-use gateway_migration::*;
+use gateway_migration::{
+    capture::{PrivateCapture, SourceEntry},
+    engine::{adopt_empty, prepare},
+    error::MigrationError,
+    inverse::export_latest,
+};
 use serde_json::{Value, json};
 use support::{fixture::*, sqlite_store::*};
 

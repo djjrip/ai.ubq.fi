@@ -10,7 +10,14 @@ use gateway_core::{
     },
     tuple_key::TupleKey,
 };
-use gateway_extras_runtime::*;
+use gateway_extras_runtime::{
+    ExtrasRuntime,
+    types::{
+        DispatchFailure, DispatchFailureOrigin, ExtrasDispatch, ExtrasHost, ExtrasProvider,
+        ExtrasRequest, ExtrasRoute, Headers, HealthKind, ImageKind, KernelDisposition,
+        UpstreamResponse,
+    },
+};
 use gateway_providers::types::PrepareOptions;
 use serde_json::{Value, json};
 use std::{

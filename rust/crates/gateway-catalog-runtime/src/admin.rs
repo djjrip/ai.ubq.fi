@@ -1,5 +1,5 @@
 //! Finite, already-authorized administrator catalog operations; no HTTP or credential ownership.
-use crate::{CatalogRuntime, CatalogState, host::*, state};
+use crate::{CatalogRuntime, host::*, state};
 use gateway_core::{
     GatewayError,
     query::QueryStore,
@@ -151,7 +151,7 @@ impl CatalogRuntime {
         &self,
         store: &S,
         host: &H,
-    ) -> Result<CatalogState, GatewayError> {
+    ) -> Result<state::CatalogState, GatewayError> {
         host.warm_openrouter();
         self.admin_discover(
             store,

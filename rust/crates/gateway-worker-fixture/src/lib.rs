@@ -9,7 +9,6 @@ use gateway_auth::{
 use gateway_publication::{
     control_publication::ConfiguredPaidInputs, transport::PublicationReceiver,
 };
-pub use gateway_worker::GatewayAuthority;
 use gateway_worker_fixture_setup::{initialize, invalid};
 use std::collections::BTreeSet;
 use worker::{Context, Env, Request};

@@ -2,7 +2,12 @@
 mod oracle;
 mod support;
 use gateway_admin_runtime::claude::{self, AccountUpdate};
-use gateway_claude_runtime::*;
+use gateway_claude_runtime::{
+    host::{self, OutcomeDecision, PoolSelection, SelectionInput},
+    persistence::{clear_guards, quota_key},
+    pool::ClaudePoolSession,
+    quota,
+};
 use gateway_providers::Headers;
 use serde_json::{Value, json};
 use support::*;
@@ -249,9 +254,9 @@ fn credential_replacement_rejects_old_quota_and_health_without_touching_other_ac
     let raw = raw();
     let first = selected(&session, &store, &host, &raw);
     let mut credential = a.credential.clone();
-    credential.secret = std::sync::Arc::new(claude::ClaudeSourceSecret::from_source(
-        "fixture-new-secret".into(),
-    ));
+    credential.secret = std::sync::Arc::new(
+        claude::source_secret::ClaudeSourceSecret::from_source("fixture-new-secret".into()),
+    );
     run(claude::update_account(
         &store,
         &host,
@@ -711,7 +716,7 @@ fn source_binding_snapshot_named_rotation_and_clear_preserve_units_without_scala
     use std::sync::Arc;
     let store = Store::new();
     let mut a = account(1);
-    a.credential.secret = Arc::new(claude::ClaudeSourceSecret::from_source(
+    a.credential.secret = Arc::new(claude::source_secret::ClaudeSourceSecret::from_source(
         JsString16::from_units(vec![115, 0xd800, 107]),
     ));
     a.credential.hint = JsString16::from_units(vec![104, 0xdc00]);

@@ -11,8 +11,9 @@ use gateway_core::{
     value::{PortableValue, ValueEncoding},
 };
 use gateway_migration::{
+    capture::PrivateCapture,
+    engine::{adopt_empty, prepare},
     profile_runtime::{ProfileHost, execute_profile},
-    *,
 };
 use serde_json::{Value, json};
 use std::cell::Cell;

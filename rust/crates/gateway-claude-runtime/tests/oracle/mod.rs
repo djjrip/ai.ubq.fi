@@ -1,6 +1,9 @@
 #![cfg(not(target_arch = "wasm32"))]
 use crate::support::*;
-use gateway_claude_runtime::{quota, response, *};
+use gateway_claude_runtime::{
+    host, persistence::quota_key, pool::ClaudePoolSession, quota, response,
+};
+use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
 use gateway_providers::Headers;
 use serde_json::Value;
 
@@ -22,8 +25,8 @@ fn headers(value: &Value) -> Headers {
         .map(|(key, value)| (key, value.trim_matches([' ', '\t']).into()))
         .collect()
 }
-fn evidence(case: &Value) -> response::ErrorEvidence {
-    response::ErrorEvidence::from_prefix(
+fn evidence(case: &Value) -> ErrorEvidence {
+    ErrorEvidence::from_prefix(
         serde_json::from_value(case["body_units"].clone()).unwrap(),
         case["complete"].as_bool().unwrap_or(true),
     )

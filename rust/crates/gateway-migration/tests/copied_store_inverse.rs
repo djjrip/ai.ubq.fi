@@ -21,9 +21,10 @@ use gateway_core::{
     tuple_key::{KeyPart, TupleKey},
 };
 use gateway_migration::{
-    NativeCapture, NativeEntry, NativeRevision, NativeValue, adopt_empty, graph_transport,
+    engine::adopt_empty,
+    graph_transport,
+    native_capture::{NativeCapture, NativeEntry, NativeRevision, NativeValue, prepare_native},
     native_operator::{NativeCustodyRegistration, prepare_local_bootstrap},
-    prepare_native,
 };
 use rusqlite::{Connection, params};
 use serde_json::{Value, json};

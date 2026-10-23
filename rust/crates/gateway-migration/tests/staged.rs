@@ -1,7 +1,16 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
 use gateway_core::state::AuthorityStore;
-use gateway_migration::{staged::*, *};
+use gateway_migration::{
+    engine::adopt_empty,
+    graph_transport,
+    inverse::ArtifactContext,
+    native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native},
+    native_custody::{NativeCustody, OwnedNativeSnapshot},
+    native_inverse::{export_native_latest, export_native_rollback_bundle},
+    native_operator, native_stage,
+    staged::{self, *},
+};
 use support::{fixture::*, sqlite_store::*};
 fn fixture() -> NativeCapture {
     serde_json::from_str(include_str!("fixtures/native-source.json")).unwrap()

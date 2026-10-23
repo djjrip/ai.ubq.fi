@@ -1,5 +1,6 @@
 //! Finite private initial-owner consumer. Physical custody is a local attestation,
 //! never reconstructed from captured records or reread by this portable module.
+use crate::engine::{AdoptionReceipt, PreparedAdoption};
 use crate::*;
 use gateway_authority::initial_control_owner::{
     InitialAdoptionAccountFacts, InitialAdoptionFacts, InitialControlOwnerReceipt,
@@ -196,7 +197,7 @@ pub(crate) async fn adopt<S: QueryStore>(
         now_ms,
         committed: Cell::new(false),
     };
-    let adoption = crate::adopt_empty(&fenced, prepared).await?;
+    let adoption = crate::engine::adopt_empty(&fenced, prepared).await?;
     matching_fences(store, prepared, owner, &facts, now_ms).await?;
     Ok(InitialControlOwnerAdoptionReceipt::Installed {
         adoption,

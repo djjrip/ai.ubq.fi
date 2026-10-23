@@ -1,5 +1,5 @@
 use crate::{AdminRuntime, capabilities::RuntimeCapabilities, store};
-use gateway_admin::{PaidKeyFields, source_input as input};
+use gateway_admin::{operations::PaidKeyFields, source_input as input};
 use gateway_auth::{
     AuthHost, conflict, invalid,
     store::{check, commit, put},

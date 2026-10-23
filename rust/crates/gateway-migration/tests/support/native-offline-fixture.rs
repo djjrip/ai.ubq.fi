@@ -13,7 +13,11 @@ fn main() {
     use fixture::{Directory, run};
     use gateway_auth::store::key;
     use gateway_core::{source_graph::GraphNode, state::*};
-    use gateway_migration::*;
+    use gateway_migration::{
+        engine::adopt_empty,
+        native_capture::{NativeCapture, prepare_native},
+        native_inverse::export_native_latest,
+    };
     use sqlite_store::SqliteStore;
     struct Tokens(std::sync::atomic::AtomicU64);
     impl gateway_authority::TokenSource for Tokens {

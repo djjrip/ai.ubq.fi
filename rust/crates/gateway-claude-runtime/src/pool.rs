@@ -1,16 +1,17 @@
 use crate::{
     host::*,
     persistence, quota,
-    response::{self, ErrorEvidence, ResponseKind},
+    response::{self, ResponseKind},
 };
 use gateway_admin_runtime::{
     claude::{self, AccountBinding, CredentialKind},
     claude_access,
     claude_generation::StateSnapshot,
 };
-use gateway_catalog_runtime::{ProviderBinding, state::checks_current};
+use gateway_catalog_runtime::{host::ProviderBinding, state::checks_current};
 use gateway_core::{
     GatewayError,
+    claude::ClaudeErrorEvidence as ErrorEvidence,
     js_string::JsString16,
     model::ModelId,
     source_json::SourceJson,

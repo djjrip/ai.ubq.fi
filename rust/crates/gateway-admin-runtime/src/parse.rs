@@ -1,5 +1,5 @@
 use crate::capabilities::*;
-use gateway_admin::{AdminInput, source_input as source_body};
+use gateway_admin::{operations::AdminInput, source_input as source_body};
 use gateway_auth::invalid;
 use gateway_core::{
     GatewayError, identity::MAX_SAFE_INTEGER, js_string::JsString16, source_json::SourceJson,

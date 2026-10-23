@@ -335,7 +335,7 @@ mod frame_tests {
             #[derive(Deserialize)]
             struct Envelope {
                 operation: String,
-                capture: gateway_migration::NativeCapture,
+                capture: gateway_migration::native_capture::NativeCapture,
             }
             let parsed: Envelope = value.deserialize().unwrap();
             assert_eq!(parsed.operation, "candidate");

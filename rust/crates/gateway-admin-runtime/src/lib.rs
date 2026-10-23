@@ -14,9 +14,8 @@ mod state;
 mod store;
 
 use capabilities::*;
-use gateway_admin::{
-    AdminHost, AdminInput, AdminOperation, PaidKeyFields, source_input as source_body,
-};
+use gateway_admin::operations::{AdminHost, AdminInput, PaidKeyFields};
+use gateway_admin::{routes::AdminOperation, source_input as source_body};
 use gateway_auth::{AuthHost, AuthResponse, invalid, native::NativeReadRequest};
 use gateway_core::{GatewayError, query::QueryStore, state::RevisionCheck};
 use serde_json::{Value, json};
@@ -474,7 +473,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminHost for AdminRunt
                 self.native_response(request, context).await
             }
             // AdminService owns these operations; never duplicate key/passkey/public-key writers.
-            _ => Err(gateway_admin::missing_capability(operation)),
+            _ => Err(gateway_admin::operations::missing_capability(operation)),
         }
     }
     async fn prepare_key_deletion(&self, key_id: &str) -> Result<Vec<RevisionCheck>, GatewayError> {

@@ -1,5 +1,5 @@
 //! Process/isolate-local authenticated native replay receipts. No signatures enter public wire/disk.
-use crate::{source as s, types::PrepareOptions};
+use crate::{source as s, source_tools::ToolMap, types::PrepareOptions};
 use gateway_core::{
     js_string::JsString16, source_json::SourceJson, source_serialization as source,
 };
@@ -250,7 +250,7 @@ fn native_matches(
     native: &SourceJson,
     output: &[SourceJson],
     transport: ReplayTransport,
-    names: &crate::types::ToolMap,
+    names: &ToolMap,
 ) -> bool {
     if transport == ReplayTransport::Messages {
         let Some(blocks) = source::array(native) else {
@@ -424,14 +424,7 @@ impl ReplayStore {
         transport: ReplayTransport,
         now_ms: i64,
     ) -> bool {
-        self.remember_with_tools(
-            context,
-            output,
-            native,
-            transport,
-            &crate::types::ToolMap::new(),
-            now_ms,
-        )
+        self.remember_with_tools(context, output, native, transport, &ToolMap::new(), now_ms)
     }
     pub fn remember_with_tools(
         &mut self,
@@ -439,7 +432,7 @@ impl ReplayStore {
         output: &[SourceJson],
         native: SourceJson,
         transport: ReplayTransport,
-        names: &crate::types::ToolMap,
+        names: &ToolMap,
         now_ms: i64,
     ) -> bool {
         if !context_valid(&context)
@@ -569,7 +562,7 @@ impl ReplayStore {
         output: &[SourceJson],
         native: SourceJson,
         transport: ReplayTransport,
-        names: &crate::types::ToolMap,
+        names: &ToolMap,
         now_ms: i64,
     ) -> bool {
         let payload = match transport {

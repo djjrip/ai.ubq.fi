@@ -576,7 +576,7 @@ pub fn decode_response(
                 s::generated(&value)
             }
         }
-        ResponseDecode::Voyage => crate::extras::decode_embeddings(&value, plan)?,
+        ResponseDecode::Voyage => crate::source_embeddings::decode_embeddings(&value, plan)?,
         ResponseDecode::SystemOne => s::generated(&crate::extras::decode_systemone(&value)?),
     };
     if plan.stream && !events.is_empty() {

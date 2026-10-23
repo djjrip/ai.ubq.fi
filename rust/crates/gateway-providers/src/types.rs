@@ -1,3 +1,4 @@
+use crate::source_tools::ToolMap;
 use gateway_core::{
     js_string::JsString16, model::ModelId, provider::UpstreamProvider, source_json::SourceJson,
     source_serialization,
@@ -38,7 +39,6 @@ pub struct ToolIdentity {
     pub namespace: Option<JsString16>,
     pub custom: bool,
 }
-pub use crate::source_tools::ToolMap;
 
 /// Secrets are supplied by the host-owned credential capability; never discovered here.
 #[derive(Clone, Default)]

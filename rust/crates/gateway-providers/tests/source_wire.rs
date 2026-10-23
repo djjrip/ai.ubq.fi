@@ -4,8 +4,10 @@ use gateway_core::{
     source_serialization as json,
 };
 use gateway_providers::{
-    AuthMaterial, ClientSurface, PrepareOptions, ProviderEvent, ToolMap, decode_response,
-    prepare_source_request,
+    response::decode_response,
+    source_request::prepare_source_request,
+    source_tools::ToolMap,
+    types::{AuthMaterial, ClientSurface, PrepareOptions, ProviderEvent},
 };
 fn parse(raw: &str) -> SourceJson {
     SourceJson::parse(raw).unwrap()
@@ -144,7 +146,7 @@ fn buffered_and_actual_sse_writer_created_progress_terminal_echo_the_same_source
     assert_echo(&decoded.body, &raw);
     let mut plan = prepared.decode.clone();
     plan.stream = true;
-    let mut decoder = gateway_providers::StreamDecoder::new(plan);
+    let mut decoder = gateway_providers::sse::StreamDecoder::new(plan);
     let mut events=decoder.push(b"data: {\"id\":\"chat_fixture\",\"object\":\"chat.completion.chunk\",\"created\":2,\"choices\":[{\"index\":0,\"delta\":{\"content\":\"answer\"},\"finish_reason\":\"stop\"}]}\n\ndata: [DONE]\n\n").unwrap();
     events.extend(decoder.finish().unwrap());
     for kind in [
@@ -409,7 +411,7 @@ fn source_original_tool_identity_survives_buffered_and_streamed_generated_items(
     )
     .unwrap()
     .decode;
-    let identity = gateway_providers::ToolIdentity {
+    let identity = gateway_providers::types::ToolIdentity {
         name: JsString16::from_units(vec![102, 0xd800]),
         namespace: Some(JsString16::from_units(vec![110, 0xdc00])),
         custom: false,
@@ -595,7 +597,7 @@ fn custom_argument_json_parse_extracts_source_units_without_a_scalar_response_mi
     let mut names = ToolMap::new();
     names.insert(
         "custom".into(),
-        gateway_providers::ToolIdentity {
+        gateway_providers::types::ToolIdentity {
             name: JsString16::from_units(vec![99, 0xd800]),
             namespace: None,
             custom: true,
@@ -660,8 +662,8 @@ fn source_model_echoes_in_buffered_and_sse_composition_are_ordinary_json_strings
         // Select the existing scalar Chat upstream codec to exercise its synthesized
         // request-derived envelope; this is not a new router/provider selection.
         let mut plan = prepared.decode.clone();
-        plan.decode = gateway_providers::ResponseDecode::ChatToResponses(
-            gateway_providers::ChatProfile::Deepseek,
+        plan.decode = gateway_providers::types::ResponseDecode::ChatToResponses(
+            gateway_providers::types::ChatProfile::Deepseek,
         );
         let buffered = decode_response(&plan, 200, &Default::default(), reply()).unwrap();
         assert_eq!(text(&get(&buffered.body, "model")), model);

@@ -410,7 +410,7 @@ fn systemone_default_and_exact_error_envelopes_follow_source() {
 fn opaque_image_parse_precedes_host_model_resolution_and_keeps_operation_kind() {
     let parsed = extras::parse_image(&json!({"prompt":"image","n":2}), false).unwrap();
     assert_eq!(parsed.count(), 2);
-    let plan = extras::prepare_parsed_image(&parsed, &"host".into(), "original");
+    let plan = extras::image::prepare_parsed_image(&parsed, &"host".into(), "original");
     assert_eq!(
         scalar_source(&plan.responses)["tools"][0]["action"],
         "generate"
@@ -427,7 +427,7 @@ fn multipart_scalar_strings_follow_source_grammar_and_fail_before_file_validatio
         bytes: vec![1],
     };
     let parsed = extras::parse_multipart_image(&json!({"prompt":"image","n":" 2 ","stream":"false","output_compression":"1e2","response_format":"b64_json"}), std::slice::from_ref(&file)).unwrap();
-    let plan = extras::prepare_parsed_image(&parsed, &"host".into(), "original");
+    let plan = extras::image::prepare_parsed_image(&parsed, &"host".into(), "original");
     assert_eq!(plan.count, 2);
     assert_eq!(scalar_source(&plan.responses)["tools"][0]["action"], "edit");
     assert_eq!(

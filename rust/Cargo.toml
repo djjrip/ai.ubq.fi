@@ -1,5 +1,7 @@
 [workspace]
 members = [
+  "crates/gateway-quality",
+  "crates/gateway-quality-syntax",
   "crates/gateway-core",
   "crates/gateway-compaction",
   "crates/gateway-schema",
@@ -97,10 +99,11 @@ private_intra_doc_links = "warn"
 all = { level = "warn", priority = -2 }
 correctness = { level = "deny", priority = -1 }
 
-# Threshold 5 is configured in clippy.toml; existing nesting debt keeps the
-# group member deferred until the source cleanup.
-excessive_nesting = "allow"
+# Threshold 5 is configured in clippy.toml. Rust gates stage existing debt
+# with --force-warn and the diagnostic baseline while preserving -D warnings.
+excessive_nesting = "warn"
 
+allow_attributes = "deny"
 dbg_macro = "deny"
 todo = "deny"
 unimplemented = "deny"

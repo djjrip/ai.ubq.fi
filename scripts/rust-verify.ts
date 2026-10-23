@@ -4,6 +4,7 @@ import { basename, delimiter, dirname, isAbsolute, join, relative, resolve } fro
 import { fileURLToPath } from "node:url";
 import { detectCiScope, isDocumentationPath, isRustGatePath, RUST_NATIVE_ONLY_PACKAGES } from "./test-scope.ts";
 import { testNetworkArgv } from "./test-network.ts";
+import { observeRustCommandResult as observeCommandResult, rustClippyCommand, rustQualityCommands } from "./rust-verify-quality.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const NATIVE_TARGET = "aarch64-unknown-linux-gnu";
@@ -41,6 +42,8 @@ export type RustCommand = Readonly<{
   darwinNativeTests?: boolean;
   nativeImportFixture?: boolean;
   ownedImportDriver?: boolean;
+  clippyStage?: RustStage;
+  clippyPackages?: readonly string[];
 }>;
 export type CommandResult = Readonly<{ code: number; stdout: string; stderr: string }>;
 export type CommandRunner = (command: RustCommand, environment: Record<string, string>) => Promise<CommandResult>;
@@ -167,8 +170,9 @@ export const planRustVerification = (root: string, paths: readonly string[], sta
   const target = stage === "native" ? rustNativeTarget(host) : WASM_TARGET;
   const cargo = ["--locked", "--offline", "--target", target, ...flags];
   const commands: RustCommand[] = [
+    ...rustQualityCommands(root, cwd),
     { argv: ["cargo", "fmt", "--all", "--", "--check"], cwd, isolated: true },
-    { argv: ["cargo", "clippy", ...cargo, ...(stage === "native" ? ["--all-targets"] : ["--lib"]), "--", "-D", "warnings"], cwd, isolated: true },
+    rustClippyCommand(stage, cwd, cargo, names),
   ];
   // A complete CI job still retains documentation-only zero-test selection.
   const testAffected = affectedPackages(root, packages, changed, false);
@@ -274,16 +278,7 @@ export const runCommand: CommandRunner = async (command, environment) => {
     stop();
   }
 };
-const observeCommandResult = (command: RustCommand, result: CommandResult): number => {
-  if (result.stdout) process.stdout.write(result.stdout);
-  if (result.stderr) process.stderr.write(result.stderr);
-  if (result.code !== 0) throw new Error(`Rust command failed (${result.code}): ${command.argv.join(" ")}`);
-  const tests = command.testListing ? result.stdout.split("\n").filter((line) => /: test\s*$/.test(line)).length : 0;
-  if (command.testListing && tests === 0) throw new Error("Selected Rust test package listed zero tests");
-  if (command.testRun && !/^test result: ok\..* [1-9]\d* passed;/m.test(result.stdout))
-    throw new Error("Selected Rust test package executed zero passing tests");
-  return tests;
-};
+
 const PRELAUNCH_TARGET = "connector_confinement";
 // Prelaunch fixtures apply their own Seatbelt profile. macOS refuses a second
 // sandbox_apply from inside the outer test-network profile, so these cases run
@@ -774,7 +769,7 @@ export const executeRustPlan = async (plan: RustPlan, environment: Record<string
     else
       listedTests += command.darwinNativeTests
         ? await executeDarwinNativeTests(command.cwd, environment, "package", run)
-        : observeCommandResult(command, await run(command, environment));
+        : observeCommandResult(command, await run(command, environment), environment);
   }
   return listedTests;
 };

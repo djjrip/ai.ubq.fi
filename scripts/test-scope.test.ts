@@ -706,14 +706,26 @@ describe("Rust changed-path CI selection", () => {
   });
 });
 
-test("native-only companion source does not schedule a WASM compilation on ordinary PRs", () => {
-  const ci = scopeCommand(["scripts/test-scope.ts", "--ci-json"], {}, "rust/crates/gateway-native/src/lib.rs");
-  expect(ci.status).toBe(0);
-  expect(JSON.parse(ci.stdout)).toMatchObject({
-    affectedTests: [],
-    needsRustNative: true,
-    needsRustWasm: false,
-    needsRustBuild: false,
-    needsTypeScriptValidate: false,
-  });
+test.each(["gateway-native", "gateway-quality", "gateway-quality-syntax"])(
+  "native-only %s source does not schedule WASM compilation on ordinary PRs",
+  (name) => {
+    const ci = scopeCommand(["scripts/test-scope.ts", "--ci-json"], {}, `rust/crates/${name}/src/lib.rs`);
+    expect(ci.status).toBe(0);
+    expect(JSON.parse(ci.stdout)).toMatchObject({
+      affectedTests: [],
+      needsRustNative: true,
+      needsRustWasm: false,
+      needsRustBuild: false,
+      needsTypeScriptValidate: false,
+    });
+  }
+);
+
+test("parser launcher and staged Clippy tests are in the selected quality profile", () => {
+  for (const path of ["scripts/rust-quality.ts", "scripts/rust-quality-clippy.ts"]) {
+    const selected = scopeCommand(["scripts/test-runner.ts", "quality", "--list"], {}, path);
+    expect(selected.status).toBe(0);
+    const profiles = JSON.parse(selected.stdout) as { files: string[] }[];
+    expect(profiles.flatMap((profile) => profile.files)).toContain(path.replace(".ts", ".test.ts"));
+  }
 });

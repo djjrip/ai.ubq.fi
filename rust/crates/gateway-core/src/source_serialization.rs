@@ -1,6 +1,6 @@
 //! Shared JS JSON.stringify semantics lifted from frozen M31 text.rs.
 //! Grammar and UTF16 serialization remain SourceJson/JsString16; no I/O or storage codec is added.
-use crate::{GatewayError, js_string::JsString16, source_json::SourceJson};
+use crate::{error::GatewayError, js_string::JsString16, source_json::SourceJson};
 use std::collections::BTreeMap;
 fn fail() -> GatewayError {
     GatewayError::unavailable(

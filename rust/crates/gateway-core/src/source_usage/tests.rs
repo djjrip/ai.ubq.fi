@@ -5,7 +5,8 @@ use serde_json::json;
 fn frozen_bun_source_fixtures_share_one_engine() {
     // Actual pinned Bun 1.4.0 source extractUsageTokens oracle, 2026-10-19.
     // Function/helper text copied verbatim from src/openai-telemetry.ts and utils.ts.
-    let cases: Vec<Value> = serde_json::from_str(include_str!("source_usage_cases.json")).unwrap();
+    let cases: Vec<Value> =
+        serde_json::from_str(include_str!("../source_usage_cases.json")).unwrap();
     assert_eq!(cases.len(), 34);
     for case in cases {
         let name = case["name"].as_str().unwrap();

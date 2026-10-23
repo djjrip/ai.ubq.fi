@@ -6071,6 +6071,15 @@
     "wasmReceipt": "591bceabb6cc0ae63ee09ee9914b02c17ad0b9b53f9be3f4389670cde15755a5/df176e2f-7d0e-4973-b10b-fac53a8f83fc",
     "parserImplementationSha256": "1edcd7ea1bcfa0152302fc55a625cfa48ad94bf32adc22430ebe70b9af4b6bb1",
     "fingerprintAlgorithm": "syn-2.0.119-canonical-enclosing-item-v1",
-    "clippyImplementationSha256": "04ced585a33f635b78fdb452bfcbf9659c521d9a6eb65c1148e1c98dfa9d1f5e"
+    "clippyImplementationSha256": "04ced585a33f635b78fdb452bfcbf9659c521d9a6eb65c1148e1c98dfa9d1f5e",
+    "captureToolSourceGitSha": "b9b66cfdf9a72f14626a16d6083eb6e589d27c48",
+    "captureToolSourceTree": "d1c2f7cc2452c95c7e30290ca9cb1029b4268192",
+    "captureToolExecutableSha256": "69861e0fc6e174f7da65e793207a605174831f1705cb74585d4914b2ffef8af6",
+    "captureToolReceipt": "591bceabb6cc0ae63ee09ee9914b02c17ad0b9b53f9be3f4389670cde15755a5/023d68e2-a940-43d4-9acf-069d394b4190",
+    "captureToolManifestSha256": "fdb35fc5909e5faf73e137a835f6445f5f8e72dd85a6c494cde03f6ae71bcc54",
+    "nativeTarget": "aarch64-apple-darwin",
+    "wasmTarget": "wasm32-unknown-unknown",
+    "captureNativeDiagnosticsSha256": "e90d67f71d3a9fb900d00d9689a0da64bc982d0ecc0b9029ebbfc1d326eb53d9",
+    "captureWasmDiagnosticsSha256": "f814dd21c8c93958e3898d252067c6e7bdac2b77fdbf92025f4996c797f532af"
   }
 }

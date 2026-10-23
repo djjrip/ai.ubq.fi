@@ -40,6 +40,8 @@ Clippy diagnostic ingestion requires a successful complete Cargo JSON stream and
 
 The initial native and WASM diagnostic inventories come from the pristine adoption commit above, with pinned Rust 1.98.1 and exact locked dependencies. `rust/quality-baseline.json` records adoption source and receipt provenance. Structural updates use `bun --no-env-file scripts/rust-quality.ts --update`. Diagnostic updates use `bun --no-env-file scripts/rust-quality-clippy.ts --update native|wasm DIAGNOSTICS_JSONL SELECTED_PACKAGE...` with the matching current parser context directory and complete stage inventory.
 
+Native diagnostic adoption was observed on `aarch64-apple-darwin`; the separate WASM capture targets `wasm32-unknown-unknown`. This record does not assert a Linux native capture. Unobserved platform diagnostics remain unbaselined and fail closed. Capture-tool source SHA/tree, binary hash, and successful capture receipt are separate from the immutable adoption source SHA/tree; a metadata-only follow-up commit binds the final gate to its exact capture tool without a self-reference.
+
 Pinned Clippy 1.98.1 `disallowed_macros` was tested with actual aliased builtin `include!` and a `println!` positive control: it rejects the latter but permits the builtin alias. The gate therefore does not claim that compiler lint as inclusion enforcement; authored aliases and forwarded include operands are checked by the parser, and unrestricted generated expansion remains outside static proof.
 
 ## Compile performance

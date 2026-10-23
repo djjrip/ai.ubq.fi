@@ -680,7 +680,7 @@ fn errors_limit_does_not_truncate_five_xx_buckets() {
 
 #[test]
 fn claude_roster_rotation_preserves_identity_and_fences_prior_generations() {
-    use gateway_admin_runtime::claude::{source_secret::ClaudeSourceSecret, *};
+    use gateway_admin_runtime::claude::*;
     let store = Store::default();
     let host = Host::default();
     let seed = Bootstrap::default();

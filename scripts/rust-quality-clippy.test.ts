@@ -4,6 +4,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { checkClippyDiagnostics, clippyInventory, stagedClippyArguments, tightenClippyDiagnostics } from "./rust-quality-clippy.ts";
+import { RUST_NATIVE_ONLY_PACKAGES } from "./test-scope.ts";
 
 const temporary = mkdtempSync(join(tmpdir(), "uos-clippy-contract-"));
 afterAll(() => {
@@ -89,6 +90,20 @@ test("a selective run preserves allowances for unselected packages and updater r
     tightenClippyDiagnostics(root, "native", output(root), ["fixture"]);
   }, /complete stage package inventory/);
   assert.equal(readFileSync(join(root, "rust/quality-baseline.json"), "utf8"), before);
+});
+
+test("WASM updater uses the shared native-only package inventory", () => {
+  const root = fixture();
+  const members = ["fixture", ...RUST_NATIVE_ONLY_PACKAGES].map((name) => `crates/${name}`);
+  write(root, "rust/Cargo.toml", `[workspace]\nmembers=${JSON.stringify(members)}\n[workspace.package]\nversion="0.1.0"\n`);
+  const inventory = clippyInventory(root, output(root));
+  write(root, "rust/quality-baseline.json", JSON.stringify({ clippy: { native: inventory.counts, wasm: inventory.counts } }));
+  assert.doesNotThrow(() => {
+    tightenClippyDiagnostics(root, "wasm", output(root), ["fixture"]);
+  });
+  assert.throws(() => {
+    tightenClippyDiagnostics(root, "native", output(root), ["fixture"]);
+  }, /complete stage package inventory/);
 });
 
 test("malformed, incomplete, source-mismatched and identity-mismatched diagnostic data fail closed", () => {

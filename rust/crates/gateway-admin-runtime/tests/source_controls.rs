@@ -7,9 +7,8 @@ use gateway_admin_runtime::{
     AdminRuntime, RuntimeConfig, capabilities::RuntimeCapabilities, claude_access, parse,
 };
 use gateway_auth::{
-    types::{AuthHost, AuthMethod, AuthPrincipal, AuthResponse, conflict, invalid},
+    types::{AuthHost, AuthMethod, AuthPrincipal, AuthResponse},
     upstream::*,
-    *,
 };
 use gateway_core::{
     error::GatewayError,

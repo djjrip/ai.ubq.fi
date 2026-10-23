@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { RUST_NATIVE_ONLY_PACKAGES } from "./test-scope.ts";
 
 export const STAGED_CLIPPY_LINTS = ["pub_use", "too_many_lines", "excessive_nesting", "wildcard_imports", "unwrap_used", "expect_used"] as const;
 export const stagedClippyArguments = (): string[] => STAGED_CLIPPY_LINTS.flatMap((lint) => ["--force-warn", `clippy::${lint}`]);
@@ -191,7 +192,7 @@ export const tightenClippyDiagnostics = (root: string, stage: string, stdout: st
     throw new Error("Invalid explicit workspace members");
   const expected = members
     .map((member: string) => member.slice("crates/".length))
-    .filter((name) => stage === "native" || !["gateway-native", "gateway-quality", "gateway-quality-syntax"].includes(name))
+    .filter((name) => stage === "native" || !RUST_NATIVE_ONLY_PACKAGES.some((nativeOnly) => nativeOnly === name))
     .sort((left, right) => left.localeCompare(right));
   if (JSON.stringify([...selected].sort((left, right) => left.localeCompare(right))) !== JSON.stringify(expected))
     throw new Error("Clippy updater requires the complete stage package inventory");

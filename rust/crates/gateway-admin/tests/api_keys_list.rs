@@ -1,15 +1,14 @@
 use gateway_admin::{
-    keys::{self, *},
+    keys::*,
     operations::{AdminHost, AdminInput, PaidKeyFields, missing_capability},
     reads,
     routes::AdminOperation,
-    service::{self, AdminService},
+    service::AdminService,
 };
 use gateway_auth::{
     crypto::Secret,
     types::{AuthConfig, AuthHost, AuthRequest, AuthResponse},
     upstream::*,
-    *,
 };
 use gateway_core::{
     error::GatewayError,

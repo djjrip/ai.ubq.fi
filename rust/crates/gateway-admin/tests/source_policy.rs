@@ -2,7 +2,7 @@ use gateway_admin::{
     kernel_keys, keys,
     operations::{AdminHost, AdminInput, PaidKeyFields, missing_capability},
     routes::AdminOperation,
-    service::{self, AdminService},
+    service::AdminService,
     source_input as input,
 };
 use gateway_auth::{
@@ -10,10 +10,8 @@ use gateway_auth::{
     resolve::AuthService,
     types::{
         AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthResponse, NativePeer,
-        conflict,
     },
     upstream::*,
-    *,
 };
 use gateway_core::{
     error::GatewayError, js_string::JsString16, model::ModelId, query::*,

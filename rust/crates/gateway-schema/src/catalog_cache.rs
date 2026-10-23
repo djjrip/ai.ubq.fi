@@ -173,18 +173,22 @@ pub fn widen_catalog_windows(
         None
     }
 }
-#[allow(clippy::too_many_arguments)]
+pub struct CatalogIdentity<'a> {
+    pub client_version: &'a str,
+    pub auth_generation: &'a str,
+    pub body_generation: &'a str,
+}
 pub fn prepare_catalog(
-    version: &str,
-    auth_generation: &str,
-    body_generation: &str,
+    identity: CatalogIdentity<'_>,
     source_body: &str,
     etag: Option<&str>,
     content_type: Option<&str>,
     fetched_at_ms: i64,
     enrichment: &std::collections::BTreeMap<ModelId, MetadataHint>,
 ) -> Result<PreparedCatalog, GatewayError> {
-    if parse_client_version(version).is_none() || parse_catalog(source_body).is_none() {
+    if parse_client_version(identity.client_version).is_none()
+        || parse_catalog(source_body).is_none()
+    {
         return Err(GatewayError::new(
             502,
             "Codex upstream did not return a valid model catalog",
@@ -209,9 +213,9 @@ pub fn prepare_catalog(
             .map(str::to_owned)
     };
     let metadata = CatalogMetadata {
-        client_version: version.into(),
-        auth_generation: auth_generation.into(),
-        body_generation: body_generation.into(),
+        client_version: identity.client_version.into(),
+        auth_generation: identity.auth_generation.into(),
+        body_generation: identity.body_generation.into(),
         content_type: header(content_type).unwrap_or_else(|| "application/json".into()),
         etag: header(etag),
         fetched_at_ms,

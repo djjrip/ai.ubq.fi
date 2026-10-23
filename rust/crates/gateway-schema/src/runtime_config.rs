@@ -1,5 +1,5 @@
 //! Small runtime catalog projection; source model/effort controls never pass through Value.
-use crate::source_request::SourceRequestError;
+use crate::source_request::error::SourceRequestError;
 use crate::{
     model_control as c, prompt_cache::compact_capabilities_source, reasoning::ModelReasoning,
     snapshot::ModelSnapshot,

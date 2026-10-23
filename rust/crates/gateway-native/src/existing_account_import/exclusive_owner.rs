@@ -124,7 +124,7 @@ struct Anchor {
 }
 /// Verified kernel custody, NOT permission to mutate. No public constructor/serde/Clone/Debug.
 /// ```compile_fail
-/// use gateway_native::existing_account_import::ExclusiveManagedOwner;
+/// use gateway_native::existing_account_import::exclusive_owner::ExclusiveManagedOwner;
 /// let forged: ExclusiveManagedOwner = serde_json::from_str("{}").unwrap();
 /// ```
 pub struct ExclusiveManagedOwner {

@@ -1,5 +1,5 @@
 //! Fixed actual Child service. No credentials, import document or raw fd enters it.
-use super::{CustodianRuntime, actor_channel::OwnedImportChildChannel};
+use super::{actor_channel::OwnedImportChildChannel, custodian_runtime::CustodianRuntime};
 use crate::import_custody_protocol::unavailable;
 use gateway_auth::native_auth::NativeTransportIdentity;
 use gateway_authority::native_control::NativeRenewalCancellation;

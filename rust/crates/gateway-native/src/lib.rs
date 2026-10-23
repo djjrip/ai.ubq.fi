@@ -10,6 +10,10 @@ pub fn require_production_artifact() -> Result<(), gateway_auth::GatewayError> {
     }
     Ok(())
 }
+pub mod access_publication;
+#[cfg(unix)]
+pub mod authority_http;
+pub mod confinement;
 #[cfg(unix)]
 #[doc(hidden)]
 pub mod connector_fd;
@@ -20,31 +24,13 @@ pub mod connector_policy;
 #[doc(hidden)]
 pub mod connector_protocol;
 #[cfg(unix)]
-mod connector_supervisor;
+pub mod connector_supervisor;
 #[cfg(unix)]
 #[doc(hidden)]
 pub mod connector_worker;
+pub mod daemon_config;
 #[cfg(unix)]
 mod daemon_startup;
-#[cfg(unix)]
-mod native_request_process;
-#[cfg(unix)]
-pub use connector_supervisor::run_native_supervisor;
-#[cfg(unix)]
-pub use connector_worker::run_native_connector;
-#[cfg(unix)]
-pub use existing_account_import::import_process::run_native_import;
-#[cfg(all(unix, feature = "native-import-fixture"))]
-pub use existing_account_import::import_process::run_native_import_fixture;
-#[cfg(unix)]
-pub use native_request_process::run_native_request;
-pub mod access_publication;
-#[cfg(unix)]
-pub mod authority_http;
-pub mod confinement;
-pub mod control_publication;
-pub mod credentials;
-pub mod daemon_config;
 #[cfg(unix)]
 pub mod existing_account_import;
 #[cfg(unix)]
@@ -61,6 +47,8 @@ pub mod live_bridge;
 pub mod managed_publication_http;
 pub mod native_import;
 #[cfg(unix)]
+pub mod native_request_process;
+#[cfg(unix)]
 pub mod nonce_sqlite;
 pub mod owner_control;
 #[cfg(unix)]
@@ -69,7 +57,6 @@ pub mod owner_renewal;
 mod private_https;
 #[cfg(unix)]
 pub mod publication_http;
-pub mod redaction;
 pub mod supervisor;
 #[cfg(unix)]
 pub mod supervisor_brief;
@@ -84,7 +71,3 @@ pub mod supervisor_rollout;
 pub mod transport;
 #[cfg(unix)]
 pub mod unix;
-
-pub use credentials::*;
-pub use supervisor::*;
-pub use transport::*;

@@ -3,8 +3,8 @@
 #[doc(hidden)]
 pub mod import_body;
 use crate::owner_control::NativeControlContext;
-pub use gateway_auth::native_import::{NativeImportKind, NativeImportMetadata, NativeImportTarget};
-pub use gateway_authority::native_control::import::AuthenticatedNativeImport;
+use gateway_auth::native_import::{NativeImportKind, NativeImportMetadata};
+use gateway_authority::native_control::import::AuthenticatedNativeImport;
 use gateway_authority::{
     TokenSource,
     native_control::{NativeRenewalAuthority, NativeRenewalCancellation},

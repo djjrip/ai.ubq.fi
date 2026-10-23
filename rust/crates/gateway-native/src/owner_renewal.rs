@@ -1,10 +1,9 @@
 //! One fixed native owner action. Current actor/fences and start intent come
 //! from the authenticated shared-store reverse receiver, never a local ledger.
 use crate::{
-    NativeOwnerTransport,
     authority_http::{NativeAuthorityHttp, authority_deadline},
     owner_control::{NativeControlContext, NativeOwnerRenewalHandler, NativeRenewalGuard},
-    transport::renew_owned_guarded,
+    transport::{NativeOwnerTransport, renew_owned_guarded},
     unix::{NativeOwnerLocation, UnixOwnerTransport},
 };
 use gateway_auth::{

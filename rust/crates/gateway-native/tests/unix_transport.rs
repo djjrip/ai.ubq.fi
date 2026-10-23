@@ -1,9 +1,16 @@
 #![cfg(unix)]
 
 use gateway_auth::crypto::base64url;
+use gateway_auth::native_credentials::{
+    NativeGeneration, NativeOwnerId, OwnerFence, parse_native_document,
+};
 use gateway_native::{
+    supervisor::SUPERVISOR_FRAME_LIMIT,
+    transport::{
+        NativeOwnerTransport, RenewalStep, SupervisorMethod, SupervisorTransport,
+        renew_owned_guarded,
+    },
     unix::{NativeOwnerLocation, UnixOwnerTransport, UnixSupervisor},
-    *,
 };
 use serde_json::{Value, json};
 use std::{

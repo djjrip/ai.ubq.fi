@@ -20,9 +20,11 @@ use tungstenite::{
 };
 
 use crate::{
-    NativeCredentials, NativeOwnerId, NativeOwnerTransport, RenewalStep, SupervisorMethod,
-    SupervisorTransport, owner_unavailable, parse_native_document,
     supervisor::{RENEWAL_FRAME_LIMIT, SUPERVISOR_FRAME_LIMIT},
+    transport::{NativeOwnerTransport, RenewalStep, SupervisorMethod, SupervisorTransport},
+};
+use gateway_auth::native_credentials::{
+    NativeCredentials, NativeOwnerId, owner_unavailable, parse_native_document,
 };
 
 struct DeadlineStream {

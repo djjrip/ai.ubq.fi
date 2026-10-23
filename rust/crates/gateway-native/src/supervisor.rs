@@ -272,7 +272,7 @@ fn redacted_follow_entries(turn_id: &str, items: &Value) -> Vec<FollowEntry> {
         .into_iter()
         .map(|entry| (entry.index, entry.revision))
         .collect();
-    let sanitized = crate::redaction::sanitize_follow_items(items);
+    let sanitized = gateway_core::redaction::sanitize_follow_items(items);
     let mut entries = extract_follow(turn_id, &sanitized);
     for entry in &mut entries {
         if let Some(revision) = raw_revisions.get(&entry.index) {

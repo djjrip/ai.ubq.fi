@@ -1,6 +1,6 @@
 //! Trusted local startup input only. There is no dotenv discovery, default
 //! listener, public configuration route, command or caller-selected source path.
-use crate::SourceId;
+use crate::supervisor::SourceId;
 use gateway_auth::{
     GatewayError,
     crypto::{base64url, decode_base64url},

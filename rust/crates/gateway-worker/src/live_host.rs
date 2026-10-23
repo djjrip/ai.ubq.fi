@@ -1,11 +1,8 @@
 //! Fixed live HTTP/stream adapter. Account and owner capabilities are request-owned.
 mod account;
-mod body;
+pub(crate) mod body;
 mod health;
 mod platform;
-
-pub use account::CurrentLiveAccount;
-pub use body::{Body, into_response};
 
 use gateway_auth::{AuthConfig, AuthMethod, AuthPrincipal, AuthRequest};
 use gateway_authority::{

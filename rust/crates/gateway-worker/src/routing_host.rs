@@ -267,7 +267,7 @@ impl RoutingHost for Host {
             if self.cancelled() {
                 return Err(self.cancellation_error());
             }
-            crate::codex_admin_host::check_client(
+            crate::codex_admin_host::automatic::check_client(
                 &self.store,
                 &self.platform,
                 &self.platform.original,
@@ -302,7 +302,7 @@ impl RoutingHost for Host {
             Some(_) => return Ok(CodexRecovery::Reselect),
             None => proof.clone(),
         };
-        crate::codex_admin_host::recover_full_pool(
+        crate::codex_admin_host::automatic::recover_full_pool(
             &self.store,
             &self.platform,
             &self.platform.original,
@@ -499,5 +499,4 @@ async fn prepare_credential_catalog<
 }
 
 #[cfg(test)]
-#[path = "routing_paid_catalog_tests.rs"]
 mod paid_catalog_tests;

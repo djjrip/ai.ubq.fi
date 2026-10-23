@@ -191,7 +191,9 @@ impl CatalogHost for Host {
                     .insert(provider, binding(&name, &secret));
             }
         }
-        if let Some(claude) = crate::claude_host::publication(&self.store, &self.platform).await? {
+        if let Some(claude) =
+            crate::claude_host::catalog::publication(&self.store, &self.platform).await?
+        {
             publication
                 .providers
                 .insert(CatalogProvider::ClaudeCode, claude.binding);
@@ -208,7 +210,12 @@ impl CatalogHost for Host {
                 ..
             }
         ) {
-            return crate::claude_host::fetch_catalog(&self.store, &self.platform, request).await;
+            return crate::claude_host::catalog::fetch_catalog(
+                &self.store,
+                &self.platform,
+                request,
+            )
+            .await;
         }
         let timeout = request.remaining_timeout_ms(now_ms()?)?;
         let body_limit = request.max_body_bytes();

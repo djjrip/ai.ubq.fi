@@ -10,13 +10,9 @@ use std::{
     cell::{Cell, RefCell},
     rc::Rc,
 };
-#[path = "observability_admin.rs"]
 mod admin;
-#[path = "observability_diagnostics.rs"]
 mod diagnostics;
-#[path = "observability_inventory.rs"]
 mod inventory;
-#[path = "observability_probe.rs"]
 mod probe;
 
 thread_local! {static STATE:ObservabilityState=ObservabilityState::default();}

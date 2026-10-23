@@ -19,7 +19,7 @@ struct WireCase {
 
 #[test]
 fn compaction_host_jev_wire_matches_frozen_source_sdk_without_route_restrictions() {
-    let fixture: Golden = serde_json::from_str(include_str!("source_golden.json")).unwrap();
+    let fixture: Golden = serde_json::from_str(include_str!("../source_golden.json")).unwrap();
     assert_eq!(
         fixture.source_blob,
         "f2cf7a41e7c59e73bf5db9604027c4c42a0b15cb"

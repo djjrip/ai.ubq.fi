@@ -4,11 +4,9 @@ use gateway_auth::{AuthConfig, AuthRequest, AuthResponse, AuthService};
 use gateway_authority::native_control::actor::NativeRenewalActor;
 use gateway_core::GatewayError;
 
-mod automatic;
+pub(crate) mod automatic;
 mod manual;
 mod source_inventory;
-pub(crate) use automatic::check_client;
-pub use automatic::recover_full_pool;
 
 /// Request-owned authentication evidence, never decoded from an administrative command.
 pub struct OriginalAdmin<'a> {

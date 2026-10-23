@@ -107,7 +107,7 @@ impl NativeBindings {
         &self,
         action: &gateway_authority::native_live::NativeLiveAction,
         platform: &PlatformHost,
-    ) -> Result<crate::GatewayResponse, GatewayError> {
+    ) -> Result<crate::response::GatewayResponse, GatewayError> {
         self.transport()?
             .live_upgrade(action.action_ref(), platform)
             .await

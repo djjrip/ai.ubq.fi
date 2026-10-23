@@ -1,8 +1,7 @@
 //! Request-owned Claude selection and actual response receipts over the source runtime.
-mod admin;
-mod catalog;
+pub(crate) mod admin;
+pub(crate) mod catalog;
 mod platform;
-pub use admin::admin;
 
 use crate::{authority::RemoteAuthorityStore, host::PlatformHost};
 use gateway_admin_runtime::claude_generation::StateGeneration;
@@ -431,5 +430,3 @@ pub(crate) fn models_probe_request(
     crate::transport::outbound::construct_request(&target, worker::Method::Get, headers, &[])
         .map_err(|_| *crate::inference_local_lifecycle::wrapper_error().error)
 }
-
-pub use catalog::{fetch_catalog, publication};

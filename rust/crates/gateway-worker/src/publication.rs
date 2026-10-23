@@ -47,7 +47,7 @@ pub async fn handle(
         .ok()
         .is_some_and(|value| value.operation == "codex_auth_import_publish")
     {
-        return crate::native_authority::import_publication(
+        return crate::native_authority::import_dispatch::publication(
             &request, env, native, &store, receiver, &raw_body,
         )
         .await;

@@ -1,6 +1,4 @@
 use super::*;
-#[path = "../../gateway-observability/tests/support/mod.rs"]
-mod support;
 use gateway_auth::{
     crypto::{Secret, base64url},
     provider_credentials::{
@@ -12,9 +10,9 @@ use gateway_authority::{
 };
 use gateway_core::{identity::PoolVersionstamp, provider::CodexQuotaClass, state::StoredRecord};
 use gateway_observability::host_types::*;
+use gateway_observability_test_support::runtime::{Host, Memory, run};
 use serde_json::{Value, json};
 use std::cell::Cell;
-use support::{Host, Memory, run};
 const NOW: i64 = 1_800_000_000_000;
 #[derive(Clone)]
 struct Clock(i64);

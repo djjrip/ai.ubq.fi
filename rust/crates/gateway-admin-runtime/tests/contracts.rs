@@ -1,6 +1,6 @@
 use gateway_admin::{AdminHost, AdminInput, AdminOperation};
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::*};
-use gateway_auth::{upstream::*, webauthn::*, *};
+use gateway_auth::{native::NativeReadRequest, upstream::*, webauthn::*, *};
 use gateway_core::{
     GatewayError, js_string::JsString16, model::ModelId, query::*,
     source_control::encode_source_control_record, source_json::SourceJson, state::*,
@@ -16,7 +16,6 @@ use std::{
     task::{Context as TaskContext, Poll, Waker},
 };
 
-#[path = "contract_cases/manual_reset.rs"]
 mod manual_reset;
 
 // Assertions inspect the actual JSON wire of either explicit response arm.
@@ -671,7 +670,7 @@ fn errors_limit_does_not_truncate_five_xx_buckets() {
 
 #[test]
 fn claude_roster_rotation_preserves_identity_and_fences_prior_generations() {
-    use gateway_admin_runtime::claude::*;
+    use gateway_admin_runtime::claude::{source_secret::ClaudeSourceSecret, *};
     let store = Store::default();
     let host = Host::default();
     let seed = Bootstrap::default();
@@ -847,10 +846,10 @@ fn supervisor_follow_dispatches_only_validated_finite_identifiers() {
     impl RuntimeCapabilities for Follow {
         async fn native(
             &self,
-            request: NativeRequest,
+            request: NativeReadRequest,
             _: Context,
         ) -> Result<AuthResponse, GatewayError> {
-            let NativeRequest::SupervisorOutput {
+            let NativeReadRequest::SupervisorOutput {
                 source_id,
                 thread_id,
                 cursor,
@@ -1213,10 +1212,10 @@ fn shared_native_follow_descriptor_is_preserved_and_json_success_is_rejected() {
     impl RuntimeCapabilities for Native {
         async fn native(
             &self,
-            request: NativeRequest,
+            request: NativeReadRequest,
             _: Context,
         ) -> Result<AuthResponse, GatewayError> {
-            let NativeRequest::SupervisorOutput {
+            let NativeReadRequest::SupervisorOutput {
                 source_id,
                 thread_id,
                 cursor,

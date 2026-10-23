@@ -1082,6 +1082,7 @@ name = "gateway-observability-test-support"
 version = "0.1.0"
 dependencies = [
  "gateway-core",
+ "gateway-observability",
  "gateway-schema",
 ]
 
@@ -1168,9 +1169,11 @@ dependencies = [
  "gateway-live-runtime",
  "gateway-migration",
  "gateway-observability",
+ "gateway-observability-test-support",
  "gateway-providers",
  "gateway-publication",
  "gateway-routing-runtime",
+ "gateway-routing-runtime-test-support",
  "gateway-schema",
  "serde",
  "serde_json",

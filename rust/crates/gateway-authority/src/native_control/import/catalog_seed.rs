@@ -2,10 +2,12 @@
 use super::*;
 use gateway_auth::{
     native_auth::AuthenticatedNativeOwner,
-    native_import::catalog_seed::{
-        ImportCatalogSeedReplyData as Reply, ImportCatalogSeedRequestData as Request,
+    native_import::{
+        catalog_seed::{
+            ImportCatalogSeedReplyData as Reply, ImportCatalogSeedRequestData as Request,
+        },
+        publication::data::ImportCatalogDisposition,
     },
-    native_import::publication::ImportCatalogDisposition,
 };
 use gateway_core::{
     query::QueryStore,
@@ -117,9 +119,11 @@ impl<S: QueryStore, I: TokenSource, C: NativeRenewalCancellation>
                 false
             } else {
                 let prepared = catalog_cache::prepare_catalog(
-                    version,
-                    &generation,
-                    &body_generation,
+                    catalog_cache::CatalogIdentity {
+                        client_version: version,
+                        auth_generation: &generation,
+                        body_generation: &body_generation,
+                    },
                     &request.source_body,
                     request.etag.as_deref(),
                     request.content_type.as_deref(),

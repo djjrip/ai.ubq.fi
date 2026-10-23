@@ -2,13 +2,17 @@
 //! The production mutation boundary fails closed; a recovered durability receipt is not publication.
 use gateway_auth::crypto::sha256_hex;
 use gateway_authority::{
-    TokenSource,
     native_control::{
-        NativeRenewalAuthority, NativeRenewalCancellation,
-        import::{AuthenticatedNativeImport, NativeImportBinding, NativeImportClaim},
+        NativeRenewalCancellation,
+        import::{
+            AuthenticatedNativeImport,
+            effects::{NativeImportBinding, NativeImportClaim},
+        },
+        receiver::NativeRenewalAuthority,
     },
+    store::TokenSource,
 };
-use gateway_core::{GatewayError, state::AuthorityStore};
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use std::{fs::File, path::Path};
 mod acl_inspector;
 mod actor_channel;
@@ -39,7 +43,7 @@ pub struct ExistingAccountImportStore {
 }
 impl ExistingAccountImportStore {
     pub fn configured(
-        registered: &gateway_authority::native_control::RegisteredRenewalOwner,
+        registered: &gateway_authority::native_control::receiver::RegisteredRenewalOwner,
         account_id_hash: String,
     ) -> Result<Self, GatewayError> {
         let native_owner_id = registered.native_owner_id().to_owned();
@@ -59,7 +63,7 @@ impl ExistingAccountImportStore {
     /// Verify trusted bootstrap DATA against actual kernel custody; this does not grant mutation.
     pub fn prepare_exclusive_owner(
         &self,
-        registered: &gateway_authority::native_control::RegisteredRenewalOwner,
+        registered: &gateway_authority::native_control::receiver::RegisteredRenewalOwner,
         writer_uid: u32,
         native_client_uids: &[u32],
         inspector: &Path,
@@ -120,7 +124,7 @@ impl ExistingAccountImportStore {
     #[cfg(test)]
     pub(super) fn issue_fixture(
         &self,
-        start: gateway_authority::native_control::import::NativeImportStart<'_>,
+        start: gateway_authority::native_control::import::effects::NativeImportStart<'_>,
         proof: &AuthenticatedNativeImport,
         original_body: &[u8],
         context: &crate::native_import::NativeImportContext<'_>,

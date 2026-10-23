@@ -1,24 +1,23 @@
 //! Constructor-only native transport. Service bindings use a synthetic origin;
 //! HTTPS carriers pin their origin before any request-owned input is available.
-use std::rc::Rc;
-
-use gateway_auth::{
-    GatewayError,
-    crypto::base64url,
-    native::*,
-    native_auth::NativeTransportIdentity,
-    native_control::{NATIVE_CONTROL_MAX_BYTES, unverified},
-};
-use worker::js_sys::Uint8Array;
-use worker::worker_sys::ext::ResponseExt;
-use worker::{Fetcher, Headers, Method, RequestInit, RequestRedirect, Response, Url};
-
 use crate::{
     host::PlatformHost,
     transport::{
         outbound::{Cancellation, Deadline},
         random,
     },
+};
+use gateway_auth::{
+    crypto::base64url,
+    native::*,
+    native_auth::NativeTransportIdentity,
+    native_control::{NATIVE_CONTROL_MAX_BYTES, unverified},
+};
+use gateway_core::error::GatewayError;
+use std::rc::Rc;
+use worker::{
+    Fetcher, Headers, Method, RequestInit, RequestRedirect, Response, Url, js_sys::Uint8Array,
+    worker_sys::ext::ResponseExt,
 };
 
 #[derive(Clone)]
@@ -97,8 +96,7 @@ impl NativeTransport {
         &self,
         request: &worker::web_sys::Request,
     ) -> Result<worker::web_sys::Response, GatewayError> {
-        use worker::wasm_bindgen::JsCast;
-        use worker::wasm_bindgen_futures::JsFuture;
+        use worker::{wasm_bindgen::JsCast, wasm_bindgen_futures::JsFuture};
         let promise = match &self.carrier {
             NativeCarrier::Service(carrier) => {
                 let carrier: worker::worker_sys::Fetcher = carrier.clone().into_rpc();

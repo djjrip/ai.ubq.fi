@@ -6,7 +6,7 @@ use gateway_auth::{
     provider_credentials::{codex_source_pool_key, parse_codex_source_pool},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     model::ModelId,
     source_json::SourceJson,

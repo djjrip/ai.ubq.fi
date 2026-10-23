@@ -9,7 +9,7 @@ use gateway_catalog_runtime::{
     state,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     query::{QueryEntry, QueryPage, QueryRequest, QueryStore},
     source_json::SourceJson,
@@ -20,8 +20,10 @@ use gateway_core::{
 };
 use gateway_schema::{
     aliases::SourceStringCollator,
-    catalog::{ordinary_models as ordinary_models_source, public_catalog as public_catalog_source},
     catalog_store,
+    catalog_views::{
+        ordinary_models as ordinary_models_source, public_catalog as public_catalog_source,
+    },
     runtime_config::build_runtime_config as build_runtime_config_source,
     snapshot::{ModelSnapshot, SnapshotOverrides, normalize_snapshot as normalize_snapshot_source},
 };
@@ -55,7 +57,7 @@ fn build_runtime_config(
     model: Option<&str>,
     effort: Option<&str>,
     now: i64,
-) -> Result<Value, gateway_schema::source_request::SourceRequestError> {
+) -> Result<Value, gateway_schema::source_request::error::SourceRequestError> {
     build_runtime_config_source(
         snapshot,
         model.map(Into::into).as_ref(),

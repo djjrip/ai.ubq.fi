@@ -1,10 +1,3 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::BTreeMap,
-    future::Future,
-    task::{Context, Poll, Waker},
-};
-
 use gateway_auth::{
     crypto::base64url,
     origin::same_origin_mutation,
@@ -18,7 +11,7 @@ use gateway_auth::{
     webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::{AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, StoredRecord},
 };
 use rsa::{
@@ -30,6 +23,12 @@ use rsa::{
 };
 use serde_json::{Value, json};
 use sha2::Sha256;
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeMap,
+    future::Future,
+    task::{Context, Poll, Waker},
+};
 
 const PRIVATE_PEM: &str = "-----BEGIN PRIVATE KEY-----
 MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC2KZoerxCpwvKR

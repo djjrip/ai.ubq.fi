@@ -1,7 +1,7 @@
 use crate::source_tools::ToolMap;
 use gateway_core::{
-    js_string::JsString16, model::ModelId, provider::UpstreamProvider, source_json::SourceJson,
-    source_serialization,
+    error::GatewayError, js_string::JsString16, model::ModelId, provider::UpstreamProvider,
+    source_json::SourceJson, source_serialization,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -387,13 +387,11 @@ pub struct Elision {
     pub forwarded_bytes: usize,
     pub omitted_bytes: usize,
 }
-pub(crate) fn invalid(message: impl Into<String>, param: &str) -> gateway_core::GatewayError {
-    gateway_core::GatewayError::new(400, message, Some("invalid_request_error"))
-        .with_param(Some(param))
+pub(crate) fn invalid(message: impl Into<String>, param: &str) -> GatewayError {
+    GatewayError::new(400, message, Some("invalid_request_error")).with_param(Some(param))
 }
-pub(crate) fn malformed(message: impl Into<String>) -> gateway_core::GatewayError {
-    gateway_core::GatewayError::new(502, message, Some("upstream_stream_error"))
-        .with_type("server_error")
+pub(crate) fn malformed(message: impl Into<String>) -> GatewayError {
+    GatewayError::new(502, message, Some("upstream_stream_error")).with_type("server_error")
 }
 pub(crate) fn header<'a>(headers: &'a Headers, name: &str) -> Option<&'a str> {
     headers

@@ -1,8 +1,12 @@
 //! Source kernel public-key administration; these are verification keys, never private credentials.
 use crate::source_input as input;
-use gateway_auth::{AuthHost, AuthResponse, conflict, crypto::uuid_from_random, invalid, store};
+use gateway_auth::{
+    crypto::uuid_from_random,
+    store,
+    types::{AuthHost, AuthResponse, conflict, invalid},
+};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_control::{decode_source_control_record, encode_source_control_record},
     source_json::SourceJson,

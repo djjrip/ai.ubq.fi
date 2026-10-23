@@ -36,8 +36,10 @@ pub mod routing_types;
 mod source_models;
 pub mod store;
 
-use gateway_core::GatewayError;
-use gateway_core::identity::{MAX_SAFE_INTEGER, UnixMillis};
+use gateway_core::{
+    error::GatewayError,
+    identity::{MAX_SAFE_INTEGER, UnixMillis},
+};
 
 pub const MINUTE_MS: i64 = 60_000;
 pub const DAY_MS: i64 = 86_400_000;

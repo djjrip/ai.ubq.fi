@@ -7,12 +7,12 @@ use gateway_admin::{
 };
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::UnboundCapabilities};
 use gateway_auth::{
-    AuthHost, AuthMethod, AuthPrincipal, AuthResponse,
+    types::{AuthHost, AuthMethod, AuthPrincipal, AuthResponse},
     upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
     webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     query::*,
     source_control::{decode_source_control_record, encode_source_control_record},
@@ -96,12 +96,12 @@ impl QueryStore for Store {
     }
 }
 struct Clock;
-impl gateway_authority::AuthorityClock for Clock {
+impl gateway_authority::store::AuthorityClock for Clock {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(NOW)
     }
 }
-impl gateway_authority::TokenSource for Store {
+impl gateway_authority::store::TokenSource for Store {
     fn next_token(&self) -> Result<String, GatewayError> {
         let n = self.serial.get() + 1;
         self.serial.set(n);
@@ -363,7 +363,8 @@ fn nonreset_admin_preserves_actual_index_and_cas_while_live_retention_remains_or
         input(selector(&label, "repo", true)),
     ))
     .unwrap();
-    let authority = gateway_authority::Authority::with_clock(store.clone(), store.clone(), Clock);
+    let authority =
+        gateway_authority::store::Authority::with_clock(store.clone(), store.clone(), Clock);
     let reservation = run(authority.reserve_kernel(
         "owner",
         "repo",
@@ -410,7 +411,7 @@ fn nonreset_admin_preserves_actual_index_and_cas_while_live_retention_remains_or
     assert_eq!(*store.rows.borrow(), before);
     run(authority.record_kernel_terminal_intent(
         &reservation,
-        gateway_authority::quota::KernelTerminal::Committed,
+        gateway_authority::kernel::KernelTerminal::Committed,
         NOW,
     ))
     .unwrap();
@@ -457,7 +458,8 @@ fn positive_mapless_source_view_is_not_a_writable_or_live_bound_window() {
     let limit = body::member(&public, "limit").unwrap();
     assert!(body::member(&limit, "reservations").is_none());
     let state = store.rows.borrow().clone();
-    let authority = gateway_authority::Authority::with_clock(store.clone(), store.clone(), Clock);
+    let authority =
+        gateway_authority::store::Authority::with_clock(store.clone(), store.clone(), Clock);
     assert!(
         run(authority.reserve_kernel(
             "owner",
@@ -630,7 +632,8 @@ fn inherited_active_org_index_is_not_discarded_by_source_repo_policy_creation() 
         input(selector(&org, "org", true)),
     ))
     .unwrap();
-    let authority = gateway_authority::Authority::with_clock(store.clone(), store.clone(), Clock);
+    let authority =
+        gateway_authority::store::Authority::with_clock(store.clone(), store.clone(), Clock);
     let reservation = run(authority.reserve_kernel(
         "owner",
         "repo",

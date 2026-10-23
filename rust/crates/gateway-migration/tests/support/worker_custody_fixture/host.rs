@@ -5,7 +5,7 @@ use gateway_auth::{
     provider_credentials::{CodexSourcePool, codex_source_pool_key, parse_codex_source_pool},
 };
 use gateway_core::{
-    GatewayError, identity::MAX_SAFE_INTEGER, state::StoredRecord, tuple_key::TupleKey,
+    error::GatewayError, identity::MAX_SAFE_INTEGER, state::StoredRecord, tuple_key::TupleKey,
 };
 use gateway_migration::{
     native_capture::{NativeCapture, NativeValue},
@@ -13,7 +13,7 @@ use gateway_migration::{
     native_operator::{ConfiguredNativeCustody, NativeCustodyRegistration},
 };
 use gateway_native::{
-    NativeOwnerTransport,
+    transport::NativeOwnerTransport,
     unix::{NativeOwnerLocation, UnixOwnerTransport},
 };
 use std::{collections::BTreeMap, path::PathBuf};

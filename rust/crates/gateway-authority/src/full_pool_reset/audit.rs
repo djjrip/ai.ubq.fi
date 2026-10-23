@@ -1,6 +1,6 @@
 use super::{FullPoolFence, FullPoolShadowDecision, invalid};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::MAX_SAFE_INTEGER,
     js_string::JsString16,
     source_json::SourceJson,

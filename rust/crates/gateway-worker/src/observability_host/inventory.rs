@@ -1,13 +1,12 @@
 //! Passive provider metadata over the same request-owned authority; never refreshes credentials.
 use super::RequestHost;
-use gateway_admin_runtime::capabilities::Context;
-use gateway_admin_runtime::{claude, claude_access};
+use gateway_admin_runtime::{capabilities::Context, claude, claude_access};
 use gateway_auth::{
     crypto::sha256_hex,
     provider_credentials::{self as codex, CodexSourceAccount},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     source_json::SourceJson,
     state::{AuthorityStore, RevisionCheck},
 };
@@ -125,7 +124,7 @@ impl RequestHost {
             active_id = roster.roster.active_account_id;
             active_reason = Some(roster.roster.active_reason);
             for account in roster.roster.accounts {
-                let quota_key = gateway_claude_runtime::quota_key(&account);
+                let quota_key = gateway_claude_runtime::persistence::quota_key(&account);
                 let quota_row = self.store.read(&quota_key).await?;
                 let quota = quota_row
                     .as_ref()

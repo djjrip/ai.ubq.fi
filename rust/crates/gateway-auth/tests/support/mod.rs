@@ -4,7 +4,7 @@ use gateway_auth::{
     types::{AuthHost, AuthRequest},
     upstream::*,
 };
-use gateway_core::{GatewayError, state::*};
+use gateway_core::{error::GatewayError, state::*};
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,

@@ -1,12 +1,11 @@
 //! Native read adapter only; portable publication policy has one implementation.
 use crate::transport::NativeOwnerTransport;
 use gateway_auth::{
-    GatewayError,
     native_auth::{AuthenticatedNativeOwner, NativeTransportIdentity},
     native_credentials::{NativeCredentials, NativeOwnerId},
 };
-use gateway_authority::routing::SubscriptionPool;
-use gateway_core::state::AuthorityStore;
+use gateway_authority::routing_types::SubscriptionPool;
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use gateway_publication::access_publication::{AccessCredentialSource, RegisteredAccessOwner};
 
 struct NativeAccessSource<'a, T>(&'a T);

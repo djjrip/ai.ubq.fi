@@ -5,11 +5,13 @@ use crate::{
     types::{RoutingHost, RoutingResult},
 };
 use gateway_authority::{
-    AuthorityClock, TokenSource, keys,
-    quota::{ApiReservation, ApiUsageRequest, ApiUsageState, KernelReservation, KernelTerminal},
+    kernel::{KernelReservation, KernelTerminal},
+    keys,
+    quota::{ApiReservation, ApiUsageRequest, ApiUsageState},
+    store::{AuthorityClock, TokenSource},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     lifecycle::SemanticTerminal,
     local_work::LocalWorkPhase,
     query::QueryStore,

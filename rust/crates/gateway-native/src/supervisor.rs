@@ -1,10 +1,8 @@
-use std::collections::{BTreeMap, BTreeSet};
-
-use gateway_core::GatewayError;
+use crate::transport::{SupervisorMethod, SupervisorTransport};
+use gateway_core::error::GatewayError;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-
-use crate::transport::{SupervisorMethod, SupervisorTransport};
+use std::collections::{BTreeMap, BTreeSet};
 
 pub const MAX_SOURCES: usize = 8;
 pub const INVENTORY_LIMIT: usize = 60;

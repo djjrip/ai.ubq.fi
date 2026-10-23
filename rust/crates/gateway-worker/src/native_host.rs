@@ -1,9 +1,11 @@
 //! Trusted native bindings. No request-selected destination, default public
 //! target, provider token, arbitrary path, generic control or caller-selected owner.
-use std::{collections::BTreeSet, rc::Rc};
-
+use crate::{
+    host::{PlatformHost, response_bytes},
+    native_transport::{NativeTransport, unavailable},
+    transport::stream::{ObservationHandle, ObservedStream},
+};
 use gateway_auth::{
-    AuthResponse, GatewayError,
     crypto::{base64url, decode_base64url},
     native::*,
     native_auth::{NativeCapability, NativeTransportIdentity},
@@ -11,15 +13,12 @@ use gateway_auth::{
         NATIVE_CONTROL_MAX_BYTES, NATIVE_RENEWAL_MAX_MS, NativeControlEnvelope,
         NativeControlResponse, unverified,
     },
+    types::AuthResponse,
 };
+use gateway_core::error::GatewayError;
 use serde::Deserialize;
+use std::{collections::BTreeSet, rc::Rc};
 use worker::{Context, Env, Fetcher, Response};
-
-use crate::{
-    host::{PlatformHost, response_bytes},
-    native_transport::{NativeTransport, unavailable},
-    transport::stream::{ObservationHandle, ObservedStream},
-};
 
 /// One exact deployment binding. No binding-name scan or request-derived destination.
 pub const NATIVE_CARRIER_BINDING: &str = "UOS_NATIVE_CARRIER";
@@ -28,7 +27,7 @@ pub const NATIVE_CARRIER_CONFIG_MAX_BYTES: usize = 16_384;
 #[derive(Clone, Default)]
 pub struct NativeBindings {
     transport: Option<NativeTransport>,
-    renewal_owners: Option<Rc<gateway_authority::native_control::RegisteredRenewalOwners>>,
+    renewal_owners: Option<Rc<gateway_authority::native_control::owners::RegisteredRenewalOwners>>,
 }
 
 impl NativeBindings {
@@ -85,7 +84,7 @@ impl NativeBindings {
     /// supervisor carrier alone never supplies credential-renewal ownership.
     pub fn with_renewal_owners(
         mut self,
-        owners: gateway_authority::native_control::RegisteredRenewalOwners,
+        owners: gateway_authority::native_control::owners::RegisteredRenewalOwners,
     ) -> Self {
         self.renewal_owners = Some(Rc::new(owners));
         self
@@ -97,7 +96,8 @@ impl NativeBindings {
 
     pub(crate) fn renewal_owners(
         &self,
-    ) -> Result<&gateway_authority::native_control::RegisteredRenewalOwners, GatewayError> {
+    ) -> Result<&gateway_authority::native_control::owners::RegisteredRenewalOwners, GatewayError>
+    {
         self.renewal_owners.as_deref().ok_or_else(unavailable)
     }
 
@@ -119,7 +119,9 @@ impl NativeBindings {
         platform: &PlatformHost,
         original: &gateway_core::identity::RequestContext,
     ) -> Result<gateway_routing_runtime::types::RefreshOutcome, GatewayError> {
-        use gateway_authority::{Authority, native_control::NativeRenewalAuthority};
+        use gateway_authority::{
+            native_control::receiver::NativeRenewalAuthority, store::Authority,
+        };
         let gateway_routing_runtime::types::CredentialFence::Codex {
             admission,
             source_revision,
@@ -173,10 +175,10 @@ impl NativeBindings {
         actor: &gateway_authority::native_control::actor::NativeRenewalActor,
         selected: &gateway_authority::routing::LiveAccountSelection,
         platform: &PlatformHost,
-        config: &gateway_auth::AuthConfig,
+        config: &gateway_auth::types::AuthConfig,
     ) -> Result<(), GatewayError> {
         let transport = self.transport()?;
-        let authority = gateway_authority::Authority::with_clock(
+        let authority = gateway_authority::store::Authority::with_clock(
             platform.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,
@@ -185,13 +187,14 @@ impl NativeBindings {
             .renewal_owners()?
             .for_live_create(&authority, selected)
             .await?;
-        let receiver = gateway_authority::native_control::NativeRenewalAuthority::configured(
-            &authority,
-            &transport.identity,
-            owner,
-            config,
-            platform,
-        );
+        let receiver =
+            gateway_authority::native_control::receiver::NativeRenewalAuthority::configured(
+                &authority,
+                &transport.identity,
+                owner,
+                config,
+                platform,
+            );
         let action = receiver
             .prepare_live_create_renewal(actor, selected)
             .await?;
@@ -204,10 +207,10 @@ impl NativeBindings {
         actor: &gateway_authority::native_control::actor::NativeRenewalActor,
         call_id: &str,
         platform: &PlatformHost,
-        config: &gateway_auth::AuthConfig,
+        config: &gateway_auth::types::AuthConfig,
     ) -> Result<(), GatewayError> {
         let transport = self.transport()?;
-        let authority = gateway_authority::Authority::with_clock(
+        let authority = gateway_authority::store::Authority::with_clock(
             platform.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,
@@ -216,13 +219,14 @@ impl NativeBindings {
             .renewal_owners()?
             .for_live_mapped(&authority, actor, config, call_id)
             .await?;
-        let receiver = gateway_authority::native_control::NativeRenewalAuthority::configured(
-            &authority,
-            &transport.identity,
-            owner,
-            config,
-            platform,
-        );
+        let receiver =
+            gateway_authority::native_control::receiver::NativeRenewalAuthority::configured(
+                &authority,
+                &transport.identity,
+                owner,
+                config,
+                platform,
+            );
         let action = receiver.prepare_live_mapped_renewal(actor, call_id).await?;
         self.complete_renewal(&action, &receiver, platform).await?;
         Ok(())
@@ -233,10 +237,10 @@ impl NativeBindings {
         actor: &gateway_authority::native_control::actor::NativeRenewalActor,
         permit: &gateway_authority::cache_experiment::RefreshPermit,
         platform: &PlatformHost,
-        config: &gateway_auth::AuthConfig,
+        config: &gateway_auth::types::AuthConfig,
     ) -> Result<gateway_core::identity::PoolVersionstamp, GatewayError> {
         let transport = self.transport()?;
-        let authority = gateway_authority::Authority::with_clock(
+        let authority = gateway_authority::store::Authority::with_clock(
             platform.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,
@@ -245,13 +249,14 @@ impl NativeBindings {
             .renewal_owners()?
             .for_cache_experiment(&authority, permit)
             .await?;
-        let receiver = gateway_authority::native_control::NativeRenewalAuthority::configured(
-            &authority,
-            &transport.identity,
-            owner,
-            config,
-            platform,
-        );
+        let receiver =
+            gateway_authority::native_control::receiver::NativeRenewalAuthority::configured(
+                &authority,
+                &transport.identity,
+                owner,
+                config,
+                platform,
+            );
         let action = receiver
             .prepare_cache_experiment_renewal(actor, permit)
             .await?;
@@ -264,7 +269,7 @@ impl NativeBindings {
     async fn complete_renewal(
         &self,
         action: &gateway_authority::native_control::NativeRenewalAction,
-        receiver: &gateway_authority::native_control::NativeRenewalAuthority<
+        receiver: &gateway_authority::native_control::receiver::NativeRenewalAuthority<
             '_,
             crate::authority::RemoteAuthorityStore,
             crate::host::PlatformTokens,
@@ -406,7 +411,7 @@ impl NativeBindings {
         platform: &PlatformHost,
     ) -> Result<NativeControlResponse, GatewayError> {
         envelope.validate()?;
-        let authority = gateway_authority::Authority::with_clock(
+        let authority = gateway_authority::store::Authority::with_clock(
             platform.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,

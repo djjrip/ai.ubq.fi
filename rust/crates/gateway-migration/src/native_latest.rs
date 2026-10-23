@@ -1,11 +1,14 @@
 //! Native-private latest state, one genuine row at a time; no store mirror.
-use crate::engine::{Manifest, manifest_key, mapping_key};
-use crate::inverse::{ArtifactContext, CustodyRecord};
-use crate::native_capture::{NativeCapture, NativeEntry, NativeRevision};
-use crate::native_custody::NativeCustody;
-use crate::native_spool::Writer;
-use crate::staged::CanonicalRecord;
-use crate::{error::MigrationError, *};
+use crate::{
+    engine::{Manifest, manifest_key, mapping_key},
+    error::MigrationError,
+    inverse::{ArtifactContext, CustodyRecord},
+    native_capture::{NativeCapture, NativeEntry, NativeRevision},
+    native_custody::NativeCustody,
+    native_spool::Writer,
+    staged::CanonicalRecord,
+    *,
+};
 use gateway_core::query::{QueryRequest, QuerySelector, QueryStore};
 use serde_json::json;
 use std::{
@@ -235,13 +238,15 @@ fn validate(
             continue;
         }
         if starts(&p, &["uos_ai", "authority", "native_owner_renewal"]) {
-            gateway_authority::native_control::validate_native_control_custody(&key, record)?;
+            gateway_authority::native_control::custody::validate_native_control_custody(
+                &key, record,
+            )?;
             controls.push(k.clone());
             continue;
         }
         if starts(&p, &["uos_ai", "authority"]) {
             if key == gateway_authority::keys::kernel_defaults() {
-                let mut expected = gateway_authority::quota::KernelDefaults::default();
+                let mut expected = gateway_authority::kernel::KernelDefaults::default();
                 if let Some(source) =
                     all.get(&crate::key(json!(["default", "kernel_policy_limit_requests"])).0)?
                 {
@@ -255,7 +260,7 @@ fn validate(
                         gateway_admin_runtime::parse::positive(source.json_value()?)
                             .unwrap_or(604800000);
                 }
-                let actual: gateway_authority::quota::KernelDefaults =
+                let actual: gateway_authority::kernel::KernelDefaults =
                     decode(record.json_value()?)?;
                 if actual != expected {
                     return Err(invalid(

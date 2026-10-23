@@ -2,10 +2,10 @@
 use crate::{capture::SourceEntry, *};
 use gateway_admin_data::{
     migration::{self, ImportOptions, NormalizedEntry, Profile},
-    profile::{SourceDateHost, normalize_source_import_line_with_host},
+    profile::{SourceDateHost, source::normalize_source_import_line_with_host},
 };
 use gateway_admin_runtime::capabilities::{Context, MigrationProfile, MigrationRequest};
-use gateway_auth::AuthResponse;
+use gateway_auth::types::AuthResponse;
 use gateway_core::{
     query::QueryStore,
     state::{AtomicTransition, CommitOutcome, RecordMutation, RevisionCheck},

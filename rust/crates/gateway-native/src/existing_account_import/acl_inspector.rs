@@ -2,7 +2,7 @@
 #[cfg(target_os = "macos")]
 use super::exclusive_owner::Facts;
 use super::exclusive_owner::{PinnedExecutable, fail};
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::{fs::File, time::Instant};
 #[cfg(target_os = "macos")]
 use std::{

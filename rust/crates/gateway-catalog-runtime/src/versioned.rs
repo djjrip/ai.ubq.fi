@@ -1,6 +1,6 @@
 use crate::{CatalogRuntime, host::*, state};
 use gateway_core::{
-    GatewayError, model::ModelId, query::QueryStore, source_json::SourceJson,
+    error::GatewayError, model::ModelId, query::QueryStore, source_json::SourceJson,
     source_serialization as source,
 };
 use gateway_schema::{
@@ -587,9 +587,11 @@ async fn refresh<S: QueryStore, H: CatalogHost>(
         )
     };
     let prepared = catalog_cache::prepare_catalog(
-        lease.version,
-        lease.generation,
-        &revision,
+        catalog_cache::CatalogIdentity {
+            client_version: lease.version,
+            auth_generation: lease.generation,
+            body_generation: &revision,
+        },
         &body,
         etag,
         content_type,

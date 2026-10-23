@@ -1,25 +1,31 @@
 //! Deterministic conformance store, not a Worker/runtime acceptance substitute.
-use std::collections::{BTreeMap, BTreeSet};
-use std::future::Future;
-use std::sync::atomic::{AtomicI64, AtomicU64, AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
-use std::task::{Context, Poll, Waker};
-
-use gateway_authority::quota::ApiKeyPolicy;
-use gateway_authority::routing_types::{
-    AdmittedAccount, PoolAccount, QuotaBlock, QuotaBlockSource, RouteSelection, SubscriptionPool,
+use gateway_authority::{
+    quota::ApiKeyPolicy,
+    routing_types::{
+        AdmittedAccount, PoolAccount, QuotaBlock, QuotaBlockSource, RouteSelection,
+        SubscriptionPool,
+    },
+    store::{Authority, AuthorityClock, TokenSource},
 };
-use gateway_authority::store::{Authority, AuthorityClock, TokenSource};
-use gateway_core::GatewayError;
-use gateway_core::identity::{
-    ApiKeyId, PoolVersionstamp, RoutingAccountHash, SubscriptionSelectionHash,
+use gateway_core::{
+    error::GatewayError,
+    identity::{ApiKeyId, PoolVersionstamp, RoutingAccountHash, SubscriptionSelectionHash},
+    provider::CodexQuotaClass,
+    state::{
+        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
+    },
+    tuple_key::TupleKey,
 };
-use gateway_core::provider::CodexQuotaClass;
-use gateway_core::state::{
-    AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
-};
-use gateway_core::tuple_key::TupleKey;
 use serde::Serialize;
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    future::Future,
+    sync::{
+        Arc, Mutex,
+        atomic::{AtomicI64, AtomicU64, AtomicUsize, Ordering},
+    },
+    task::{Context, Poll, Waker},
+};
 
 pub const NOW: i64 = 1_792_329_600_000;
 

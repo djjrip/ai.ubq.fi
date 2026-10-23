@@ -1,9 +1,9 @@
 //! Finite admin adapters. Pure projections read the one source-compatible QueryStore.
 use crate::{ObservabilityRuntime, store, types::ObservabilityHost};
 use gateway_admin_runtime::capabilities::{AnalyticsRequest, Context, ProviderRequest};
-use gateway_auth::AuthResponse;
+use gateway_auth::types::AuthResponse;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::{QuerySelector, QueryStore},
     source_json::SourceJson,
 };
@@ -231,7 +231,7 @@ impl<S: QueryStore, H: ObservabilityHost> ObservabilityRuntime<S, H> {
         let history = history.ok();
         let snapshot = snapshot.ok().flatten();
         let collator = self.host.source_string_collator();
-        let body = gateway_admin_data::projection::project_quota_source(
+        let body = gateway_admin_data::projection::source::project_quota_source(
             rollups.as_deref(),
             snapshot.as_ref(),
             history.as_deref(),

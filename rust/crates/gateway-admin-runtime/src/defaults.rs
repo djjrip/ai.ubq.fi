@@ -6,12 +6,12 @@ use crate::{
 };
 use gateway_admin::{operations::AdminInput, routes::AdminOperation, source_input as source_body};
 use gateway_auth::{
-    AuthHost, AuthResponse, conflict, invalid,
     store::{check, commit, put},
+    types::{AuthHost, AuthResponse, conflict, invalid},
 };
-use gateway_authority::{keys, quota::KernelDefaults};
+use gateway_authority::{kernel::KernelDefaults, keys};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     model::ModelId,
     query::QueryStore,
@@ -101,7 +101,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminRuntime<'_, S, H, 
                     .encode_utf16()
                     .collect::<Vec<_>>();
                 units.extend_from_slice(name.as_units());
-                let error = gateway_schema::source_request::SourceRequestError::new(
+                let error = gateway_schema::source_request::error::SourceRequestError::new(
                     400,
                     JsString16::from_units(units),
                     "invalid_request_error",

@@ -1,18 +1,19 @@
 //! API-key dispatch charging and kernel semantic quota are independent source contracts.
-use std::collections::BTreeMap;
-
-use gateway_core::GatewayError;
-use gateway_core::identity::{ApiKeyId, RequestId};
-use gateway_core::model::ModelId;
-use gateway_core::provider::UpstreamProvider;
-use gateway_core::state::AuthorityStore;
-use serde::{Deserialize, Serialize};
-
-use crate::store::{Authority, TokenSource};
 use crate::{
     QUOTA_RETENTION_MS, REQUEST_LEASE_MS, add, invalid, keys, nonnegative, positive, quota_error,
-    retention, text, unavailable,
+    retention,
+    store::{Authority, TokenSource},
+    text, unavailable,
 };
+use gateway_core::{
+    error::GatewayError,
+    identity::{ApiKeyId, RequestId},
+    model::ModelId,
+    provider::UpstreamProvider,
+    state::AuthorityStore,
+};
+use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct ApiKeyPolicy {

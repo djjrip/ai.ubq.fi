@@ -4,15 +4,19 @@ use super::{
     receiver::RegisteredRenewalOwner,
     rows::{self, ActionRow, fail},
 };
-use crate::store::{Authority, TokenSource, Transaction};
-use crate::{keys, routing::LiveAccountSelection, routing_types::SubscriptionPool};
+use crate::{
+    keys,
+    routing::LiveAccountSelection,
+    routing_types::SubscriptionPool,
+    store::{Authority, TokenSource, Transaction},
+};
 use gateway_auth::{
-    AuthConfig,
     crypto::sha256_hex,
     provider_credentials::{codex_source_pool_key, parse_codex_source_pool},
+    types::AuthConfig,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::AccountBinding,
     state::{AuthorityStore, RecordKey},
     tuple_key::{ScalarKeyPart, TupleKey},

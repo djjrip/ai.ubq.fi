@@ -60,8 +60,7 @@ fn paid_input(
     model: &str,
 ) -> gateway_routing_runtime::types::RoutingInput {
     use gateway_authority::{keys, paid_control::*};
-    use gateway_core::provider::PaidProvider;
-    use gateway_core::state::AuthorityStore;
+    use gateway_core::{provider::PaidProvider, state::AuthorityStore};
     let mut request = input(id, model, &["surplus", "openlux"]);
     let models = ["paid-model", "deepseek-v4.1-flash"]
         .map(|id| {
@@ -125,7 +124,7 @@ fn paid_input(
     store.seed(
         keys::paid_routing(),
         PaidRoutingProjection {
-            policy: gateway_authority::paid::PaidRoutingPolicy {
+            policy: gateway_authority::paid_types::PaidRoutingPolicy {
                 v: 2,
                 codex_enabled: true,
                 codex_models: vec!["gpt-test".into()],
@@ -228,7 +227,7 @@ fn paid_receipt_matches_current_host_custody_and_rechecks_before_dispatch() {
 
 #[test]
 fn paid_original_api_release_prevents_new_paid_exposure() {
-    use gateway_authority::{Authority, keys, quota::ApiReservation};
+    use gateway_authority::{keys, quota::ApiReservation, store::Authority};
     use gateway_core::tuple_key::{ScalarKeyPart, TupleKey};
 
     run(async {
@@ -372,7 +371,7 @@ fn paid_synthetic_hop_uses_server_pinned_context_and_distinct_billing_identity()
 #[test]
 fn extras_children_cannot_refund_started_siblings_or_finish_the_outer_kernel() {
     run(async {
-        use gateway_authority::quota::KernelTerminal;
+        use gateway_authority::kernel::KernelTerminal;
         use gateway_routing_runtime::extras::ExtrasFamily;
         let store = Store::new();
         seed_key(&store);
@@ -432,7 +431,7 @@ fn extras_children_cannot_refund_started_siblings_or_finish_the_outer_kernel() {
 #[test]
 fn extras_known_no_transport_refunds_but_unknown_intent_recovery_does_not() {
     run(async {
-        use gateway_authority::quota::KernelTerminal;
+        use gateway_authority::kernel::KernelTerminal;
         use gateway_routing_runtime::extras::ExtrasFamily;
         let store = Store::new();
         seed_key(&store);
@@ -499,7 +498,7 @@ fn extras_known_no_transport_refunds_but_unknown_intent_recovery_does_not() {
 #[test]
 fn sequential_extras_reuse_original_scope_and_cannot_borrow_another_ticket() {
     run(async {
-        use gateway_authority::quota::KernelTerminal;
+        use gateway_authority::kernel::KernelTerminal;
         use gateway_routing_runtime::extras::ExtrasFamily;
         let store = Store::new();
         seed_key(&store);
@@ -565,7 +564,7 @@ fn sequential_extras_reuse_original_scope_and_cannot_borrow_another_ticket() {
 #[test]
 fn image_child_uses_codex_only_and_aggregate_dispatch_without_second_admission() {
     run(async {
-        use gateway_authority::quota::KernelTerminal;
+        use gateway_authority::kernel::KernelTerminal;
         use gateway_routing_runtime::extras::ExtrasFamily;
         let store = Store::new();
         seed_key(&store);
@@ -608,7 +607,7 @@ fn image_child_uses_codex_only_and_aggregate_dispatch_without_second_admission()
 #[test]
 fn embedding_job_read_without_retry_releases_and_never_commits_kernel_admission() {
     run(async {
-        use gateway_authority::quota::KernelTerminal;
+        use gateway_authority::kernel::KernelTerminal;
         use gateway_routing_runtime::extras::ExtrasFamily;
         let store = Store::new();
         seed_key(&store);
@@ -671,24 +670,24 @@ fn complete() -> TransportObservation {
 #[test]
 fn paid_capability_endpoint_and_logical_model_stay_separate_from_wire_alias() {
     assert_eq!(
-        policy::endpoint(gateway_providers::ClientSurface::Responses),
+        policy::endpoint(gateway_providers::types::ClientSurface::Responses),
         "openai-response"
     );
     assert_eq!(
-        policy::endpoint(gateway_providers::ClientSurface::Chat),
+        policy::endpoint(gateway_providers::types::ClientSurface::Chat),
         "openai"
     );
     let raw = json!({"model":"gpt-5.6-sol","input":"source fixture","reasoning":{"effort":"none"}});
-    let options = gateway_providers::PrepareOptions {
-        auth: gateway_providers::AuthMaterial {
+    let options = gateway_providers::types::PrepareOptions {
+        auth: gateway_providers::types::AuthMaterial {
             secret: "fixture".into(),
             ..Default::default()
         },
         ..Default::default()
     };
-    let prepared = gateway_providers::prepare_request(
+    let prepared = gateway_providers::request::prepare_request(
         UpstreamProvider::Metered,
-        gateway_providers::ClientSurface::Responses,
+        gateway_providers::types::ClientSurface::Responses,
         &raw,
         &options,
     )
@@ -723,7 +722,7 @@ fn source_availability_gate_preserves_full_compact_paid_and_reserve_cases() {
         &json!({"id":"paid-model","supported_endpoint_types":["openai"],"input_price_per_token":0.001,"output_price_per_token":0.002}),
     )];
     assert_eq!(source_plan(&paid).unwrap_err().error.status, 404);
-    paid.surface = gateway_providers::ClientSurface::Chat;
+    paid.surface = gateway_providers::types::ClientSurface::Chat;
     // Keep the model/content/control intent in the actual Chat envelope.
     paid.raw = fixture(&json!({
         "model":"paid-model",
@@ -1170,7 +1169,7 @@ fn source_deepseek_extension_uses_one_captured_route_selection() {
         let store = Store::new();
         seed_key(&store);
         let mut request = input("captured-selection", "deepseek-flash", &["deepseek"]);
-        request.surface = gateway_providers::ClientSurface::Chat;
+        request.surface = gateway_providers::types::ClientSurface::Chat;
         request.raw = fixture(
             &json!({"model":"deepseek-flash","messages":[{"role":"user","content":"fixture"}],"thinking":{"type":"disabled"}}),
         );

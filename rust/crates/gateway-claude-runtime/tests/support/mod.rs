@@ -4,7 +4,7 @@ use gateway_admin_runtime::{
     claude_access,
 };
 use gateway_auth::{
-    AuthHost,
+    types::AuthHost,
     upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
     webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
 };
@@ -18,15 +18,15 @@ use gateway_claude_runtime::{
     pool::ClaudePoolSession,
     quota, response,
 };
-use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
 use gateway_core::{
-    GatewayError,
+    claude::ClaudeErrorEvidence as ErrorEvidence,
+    error::GatewayError,
     js_string::JsString16,
     state::{
         AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RevisionCheck, StoredRecord,
     },
 };
-use gateway_providers::Headers;
+use gateway_providers::types::Headers;
 use gateway_schema::catalog::ProviderCatalog;
 use rusqlite::{Connection, OptionalExtension, params};
 use serde_json::{Value, json};

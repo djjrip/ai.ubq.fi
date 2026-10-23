@@ -7,7 +7,7 @@ use crate::{
     native_capture::{NativeCapture, prepare_native},
     native_inverse::{NativeRollbackBundle, export_native_rollback_bundle},
 };
-use gateway_core::{GatewayError, identity::MAX_SAFE_INTEGER, query::QueryStore};
+use gateway_core::{error::GatewayError, identity::MAX_SAFE_INTEGER, query::QueryStore};
 use serde::{Deserialize, Serialize};
 
 pub const PRIVATE_WIRE_MAX_BYTES: usize = 32 * 1024 * 1024;

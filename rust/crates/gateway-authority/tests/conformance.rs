@@ -8,25 +8,29 @@ mod reset_spend;
 mod routing_source_cases;
 mod source_model_cases;
 mod support;
+use gateway_authority::{
+    DAY_MS, PAID_RETENTION_MS, QUOTA_RETENTION_MS,
+    kernel::{KernelPolicy, KernelTerminal, KernelWindow},
+    keys,
+    paid_types::{
+        PaidAdmission, PaidAuthorization, PaidCorrelation, PaidRequest, PaidRoutingPolicy,
+        PaidUsage, PaidWindow,
+    },
+    quota::ApiUsageWindow,
+    reset::utc_day,
+    reset_types::{
+        AccountDayBudget, ResetCandidate, ResetClaim, ResetConfig, ResetCredit, ResetMode,
+        ResetState, reset_invocation,
+    },
+    routing_types::RouteSelection,
+};
+use gateway_core::{
+    identity::{ApiKeyId, PaidAttemptId, PoolVersionstamp, RequestId},
+    lifecycle::{BillingState, PaidTerminalState},
+    provider::{CodexQuotaClass, PaidProvider, UpstreamProvider},
+    state::AuthorityStore,
+};
 use std::sync::atomic::Ordering;
-
-use gateway_authority::kernel::{KernelPolicy, KernelTerminal, KernelWindow};
-use gateway_authority::paid_types::{
-    PaidAdmission, PaidAuthorization, PaidCorrelation, PaidRequest, PaidRoutingPolicy, PaidUsage,
-    PaidWindow,
-};
-use gateway_authority::quota::ApiUsageWindow;
-use gateway_authority::reset::utc_day;
-use gateway_authority::reset_types::{
-    AccountDayBudget, ResetCandidate, ResetClaim, ResetConfig, ResetCredit, ResetMode, ResetState,
-    reset_invocation,
-};
-use gateway_authority::routing_types::RouteSelection;
-use gateway_authority::{DAY_MS, PAID_RETENTION_MS, QUOTA_RETENTION_MS, keys};
-use gateway_core::identity::{ApiKeyId, PaidAttemptId, PoolVersionstamp, RequestId};
-use gateway_core::lifecycle::{BillingState, PaidTerminalState};
-use gateway_core::provider::{CodexQuotaClass, PaidProvider, UpstreamProvider};
-use gateway_core::state::AuthorityStore;
 use support::*;
 
 fn id(value: &str) -> RequestId {
@@ -58,7 +62,7 @@ async fn reserve_paid(
     input: &PaidRequest,
     authorization: &PaidAuthorization,
     now: i64,
-) -> Result<PaidAdmission, gateway_core::GatewayError> {
+) -> Result<PaidAdmission, gateway_core::error::GatewayError> {
     authority.store().clock(now);
     let context = paid_control_cases::context(input);
     let receipt = paid_original::authorize(authority, input, &context, now).await?;
@@ -822,8 +826,10 @@ fn expired_paid_detail_clears_its_marker_without_refunding_retained_exposure() {
 
 #[test]
 fn domain_rows_require_declared_json_and_never_guess_from_value_shapes() {
-    use gateway_core::state::{AtomicTransition, RecordMutation, RevisionCheck, StoredRecord};
-    use gateway_core::value::PortableValue;
+    use gateway_core::{
+        state::{AtomicTransition, RecordMutation, RevisionCheck, StoredRecord},
+        value::PortableValue,
+    };
 
     let store = MemoryStore::default();
     let typed = StoredRecord::profile(

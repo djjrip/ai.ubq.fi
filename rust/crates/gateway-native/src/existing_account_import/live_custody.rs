@@ -5,10 +5,12 @@ use crate::{
     native_import::NativeImportContext,
 };
 use gateway_authority::native_control::import::{
-    AuthenticatedImportTerminal, AuthenticatedNativeImport, ImportCustodyStartedRequest,
-    NativeImportBinding, NativeImportStart,
+    AuthenticatedNativeImport,
+    custody_session::ImportCustodyStartedRequest,
+    effects::{NativeImportBinding, NativeImportStart},
+    remote::AuthenticatedImportTerminal,
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::{
     os::unix::fs::MetadataExt,
     time::{Duration, Instant},

@@ -1,5 +1,5 @@
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::*,
     source_control::{decode_source_control_record, encode_source_control_record},
     source_json::SourceJson,

@@ -233,7 +233,7 @@ pub(crate) async fn bind<S: QueryStore>(
     if starts(p, &["uos_ai", "paid_fallback", "v3", "pending"])
         || starts(p, &["uos_ai", "paid_fallback", "v3", "reconciliation_gate"])
     {
-        use gateway_authority::paid::{PendingPaid, ReconciliationGate};
+        use gateway_authority::paid_types::{PendingPaid, ReconciliationGate};
         let gate_key = gateway_authority::keys::paid_gate();
         let observed = store.read(&gate_key).await?;
         let current = if gate_key == *input.key {

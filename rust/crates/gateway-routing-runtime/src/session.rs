@@ -4,20 +4,20 @@ use crate::{
     settlement,
     types::*,
 };
-use gateway_auth::AuthMethod;
+use gateway_auth::types::AuthMethod;
 use gateway_authority::{
-    Authority, AuthorityClock, TokenSource,
-    paid::PaidAuthorization,
+    kernel::KernelTerminal,
     paid_control::{PaidRequestContext, PaidRoutingReceipt, PaidSyntheticHop},
-    quota::KernelTerminal,
-    routing::{AdmittedAccount, RouteSelection},
+    paid_types::PaidAuthorization,
+    routing_types::{AdmittedAccount, RouteSelection},
+    store::{Authority, AuthorityClock, TokenSource},
 };
 use gateway_core::{
-    GatewayError, identity::ApiKeyId, model::ModelId, provider::UpstreamProvider, query::QueryStore,
+    error::GatewayError, identity::ApiKeyId, model::ModelId, provider::UpstreamProvider,
+    query::QueryStore,
 };
 use gateway_providers::policy::{LithosWindows, WaitBudget};
-use std::cell::RefCell;
-use std::collections::BTreeSet;
+use std::{cell::RefCell, collections::BTreeSet};
 
 pub struct RoutingSession<S, I, C, H> {
     pub(crate) admission: crate::currentness::OriginalRoutingAdmission,
@@ -31,7 +31,7 @@ pub struct RoutingSession<S, I, C, H> {
     pub(crate) lithos_no_retry: RefCell<BTreeSet<ModelId>>,
     pub(crate) lithos_attempted: RefCell<BTreeSet<ModelId>>,
     pub(crate) claude_ordinary:
-        RefCell<Option<(ModelId, gateway_providers::PreparedClaudeOrdinary)>>,
+        RefCell<Option<(ModelId, gateway_providers::types::PreparedClaudeOrdinary)>>,
     pub(crate) waits: RefCell<WaitBudget>,
     conversation_id: String,
     pub(crate) elapsed_wait_ms: std::cell::Cell<i64>,
@@ -385,7 +385,7 @@ impl<
     pub(crate) fn claude_ordinary(
         &self,
         model: &ModelId,
-    ) -> RoutingResult<gateway_providers::PreparedClaudeOrdinary> {
+    ) -> RoutingResult<gateway_providers::types::PreparedClaudeOrdinary> {
         let mut retained = self.claude_ordinary.borrow_mut();
         if retained.is_none() {
             let phase = crate::wire::claude_ordinary(&self.input, model, self.now()?)?;
@@ -521,7 +521,7 @@ pub(crate) async fn reserve_original<
     I: TokenSource + Clone,
     C: AuthorityClock + Clone + 'static,
 >(
-    principal: &gateway_auth::AuthPrincipal,
+    principal: &gateway_auth::types::AuthPrincipal,
     context: &gateway_core::identity::RequestContext,
     row: &mut Journal,
     store: &S,

@@ -7,7 +7,7 @@ pub mod usage;
 
 use super::{ObservedRow, starts};
 use crate::{integer, number, text};
-use gateway_core::{GatewayError, js_string::JsString16, source_json::SourceJson};
+use gateway_core::{error::GatewayError, js_string::JsString16, source_json::SourceJson};
 use serde::Serialize;
 use serde_json::{Value, json};
 use std::collections::BTreeMap;

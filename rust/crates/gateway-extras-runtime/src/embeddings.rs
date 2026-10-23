@@ -5,8 +5,10 @@ use crate::{
     types::*,
 };
 use chrono::{DateTime, Utc};
-use gateway_core::{GatewayError, lifecycle::SemanticTerminal, query::QueryStore};
-use gateway_core::{js_string::JsString16, source_json::SourceJson};
+use gateway_core::{
+    error::GatewayError, js_string::JsString16, lifecycle::SemanticTerminal, query::QueryStore,
+    source_json::SourceJson,
+};
 use gateway_providers::{
     extras::{self, EmbeddingsProfile},
     types::PrepareOptions,

@@ -1,17 +1,23 @@
 //! One authenticated/current opaque plan and one fixed import publication CAS.
 //! Config DATA is supplied only by the trusted publication receiver, never wire.
-use super::super::rows::{GenerationEffect, OperationRow, Phase, TerminalPublication};
-use super::*;
-use crate::store::Transaction;
+use super::{
+    super::rows::{GenerationEffect, OperationRow, Phase, TerminalPublication},
+    *,
+};
 use crate::{
     keys,
     paid_control::{PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner},
+    store::Transaction,
 };
 use gateway_auth::{
-    crypto::Secret,
-    crypto::sha256_hex,
+    crypto::{Secret, sha256_hex},
     native::NATIVE_PUBLICATION_PATH,
     native_auth::{AuthenticatedNativeOwner, NativeCapability},
+    native_import::publication::{
+        NativeImportPublication, NativeImportPublicationDisposition,
+        command::{ImportPublicationCommandData, import_publication_max_bytes},
+        data::{ImportCatalogDisposition, ImportPublicationDataV1},
+    },
     provider_credentials::codex_credential_identity,
 };
 use gateway_core::{
@@ -21,11 +27,6 @@ use gateway_core::{
     state::{AtomicTransition, CommitOutcome, RecordMutation, StoredRecord},
 };
 use gateway_schema::catalog_store;
-
-use gateway_auth::native_import::publication::{
-    ImportCatalogDisposition, ImportPublicationCommandData, ImportPublicationDataV1,
-    NativeImportPublication, NativeImportPublicationDisposition, import_publication_max_bytes,
-};
 pub struct PreparedNativeImportPublication<'c, 'a, S, I, C> {
     control: &'c NativeRenewalAuthority<'a, S, I, C>,
     peer: &'c AuthenticatedNativeOwner,

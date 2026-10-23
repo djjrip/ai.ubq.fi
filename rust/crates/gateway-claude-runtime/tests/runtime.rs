@@ -8,7 +8,7 @@ use gateway_claude_runtime::{
     pool::ClaudePoolSession,
     quota,
 };
-use gateway_providers::Headers;
+use gateway_providers::types::Headers;
 use serde_json::{Value, json};
 use support::*;
 
@@ -842,8 +842,8 @@ fn source_capability_options_preserve_actual_same_binding_scalar_auth() {
     let first = selected(&session, &store, &host, &raw);
     let binding = first.binding();
     let secret = binding.credential.secret.try_scalar_secret().unwrap();
-    let base = gateway_providers::PrepareOptions {
-        auth: gateway_providers::AuthMaterial {
+    let base = gateway_providers::types::PrepareOptions {
+        auth: gateway_providers::types::AuthMaterial {
             secret: secret.expose().into(),
             api_key: binding.credential.kind == claude::CredentialKind::ApiKey,
             account_id: Some(binding.account_id.clone()),

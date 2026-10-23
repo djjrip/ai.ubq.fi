@@ -7,7 +7,7 @@ use gateway_auth::{
     provider_credentials::*,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_graph::{GraphAtom, GraphNode, SourceGraph},
     state::*,
@@ -24,7 +24,7 @@ use gateway_migration::{
     },
 };
 use gateway_native::{
-    NativeOwnerTransport,
+    transport::NativeOwnerTransport,
     unix::{NativeOwnerLocation, UnixOwnerTransport},
 };
 use serde_json::{Value, json};
@@ -416,8 +416,10 @@ fn full_local_source_sanitizes_then_restarts_and_inverts_only_under_current_nati
 
 #[test]
 fn configured_operator_composes_access_only_request_and_empty_store_adoption() {
-    use gateway_migration::native_operator::{NativeCustodyRegistration, prepare_local_bootstrap};
-    use gateway_migration::operational::{NativeMigrationRequest, NativeOperation, execute_native};
+    use gateway_migration::{
+        native_operator::{NativeCustodyRegistration, prepare_local_bootstrap},
+        operational::{NativeMigrationRequest, NativeOperation, execute_native},
+    };
     use std::time::{SystemTime, UNIX_EPOCH};
     let directory = Directory::new();
     let home = directory.file("actual-configured-operator");
@@ -487,7 +489,7 @@ fn configured_operator_composes_access_only_request_and_empty_store_adoption() {
     let normalized = run(store.read(&gateway_authority::keys::pool()))
         .unwrap()
         .unwrap();
-    let normalized: gateway_authority::routing::SubscriptionPool =
+    let normalized: gateway_authority::routing_types::SubscriptionPool =
         serde_json::from_value(normalized.value).unwrap();
     assert_eq!(normalized.pool_versionstamp.0, snapshot.revision);
     assert_eq!(normalized.accounts.len(), 1);
@@ -500,7 +502,7 @@ fn configured_operator_composes_access_only_request_and_empty_store_adoption() {
         expected.credential_version
     );
     struct Tokens(std::sync::atomic::AtomicU64);
-    impl gateway_authority::TokenSource for Tokens {
+    impl gateway_authority::store::TokenSource for Tokens {
         fn next_token(&self) -> Result<String, GatewayError> {
             Ok(format!(
                 "operator-route-{}",
@@ -509,12 +511,12 @@ fn configured_operator_composes_access_only_request_and_empty_store_adoption() {
         }
     }
     struct Clock;
-    impl gateway_authority::AuthorityClock for Clock {
+    impl gateway_authority::store::AuthorityClock for Clock {
         fn now_ms(&self) -> Result<i64, GatewayError> {
             Ok(2300)
         }
     }
-    let authority = gateway_authority::Authority::with_clock(
+    let authority = gateway_authority::store::Authority::with_clock(
         store,
         Tokens(std::sync::atomic::AtomicU64::new(1)),
         Clock,
@@ -526,7 +528,7 @@ fn configured_operator_composes_access_only_request_and_empty_store_adoption() {
         2300,
     ))
     .unwrap();
-    let gateway_authority::routing::RouteSelection::Eligible(selected) = selected else {
+    let gateway_authority::routing_types::RouteSelection::Eligible(selected) = selected else {
         panic!("The adopted real routing projection did not select the source account");
     };
     assert_eq!(

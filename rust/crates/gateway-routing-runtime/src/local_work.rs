@@ -5,13 +5,15 @@ use crate::{
     session::{RoutingSession, reserve_original},
     types::{RecoveredSession, RevisionCheckWire, RoutingHost, RoutingResult},
 };
-use gateway_auth::{AuthPrincipal, crypto::sha256_hex};
+use gateway_auth::{crypto::sha256_hex, types::AuthPrincipal};
 use gateway_authority::{
-    Authority, AuthorityClock, TokenSource, keys,
-    quota::{ApiReservation, ApiUsageRequest, ApiUsageState, KernelReservation, KernelTerminal},
+    kernel::{KernelReservation, KernelTerminal},
+    keys,
+    quota::{ApiReservation, ApiUsageRequest, ApiUsageState},
+    store::{Authority, AuthorityClock, TokenSource},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{MAX_SAFE_INTEGER, RequestContext},
     lifecycle::TransportObservation,
     local_work::{
@@ -136,7 +138,7 @@ impl<
         let now = clock.now_ms()?;
         let context = &input.metadata.context;
         let expected_key = match &input.metadata.principal.method {
-            gateway_auth::AuthMethod::KvApiKey { key_id, .. } => Some(key_id.as_str()),
+            gateway_auth::types::AuthMethod::KvApiKey { key_id, .. } => Some(key_id.as_str()),
             _ => None,
         };
         if !(0..=MAX_SAFE_INTEGER).contains(&now)

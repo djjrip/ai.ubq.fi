@@ -1,6 +1,6 @@
 //! Scalar compatibility entrypoints delegate to the one lossless source engine.
 use crate::source_request as source;
-use gateway_core::{GatewayError, source_json::SourceJson};
+use gateway_core::{error::GatewayError, source_json::SourceJson};
 use serde_json::Value;
 fn raw(value: &Value) -> Result<SourceJson, GatewayError> {
     SourceJson::from_serializable(value)

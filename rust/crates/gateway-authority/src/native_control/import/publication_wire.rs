@@ -2,14 +2,15 @@
 //! and finite validators are shared with authentication without a reverse edge.
 use super::unavailable;
 #[cfg(test)]
-use gateway_auth::native_import::publication::{
+use gateway_auth::native_import::publication::command::{
     ACCESS_MAX_BYTES, ImportAccessDocument, ImportPublicationCommandData,
     import_publication_max_bytes,
 };
 use gateway_auth::native_import::publication::{
-    ImportCatalogData, ImportCatalogDisposition, SNAPSHOT_MAX_BYTES,
+    command::{ImportCatalogData, SNAPSHOT_MAX_BYTES},
+    data::ImportCatalogDisposition,
 };
-use gateway_core::{GatewayError, source_json::SourceJson};
+use gateway_core::{error::GatewayError, source_json::SourceJson};
 
 pub fn prepare_import_catalog(
     snapshot: &SourceJson,

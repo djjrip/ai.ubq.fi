@@ -1,10 +1,3 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::BTreeMap,
-    future::Future,
-    task::{Context, Poll, Waker},
-};
-
 use gateway_auth::{
     api_keys,
     crypto::{Secret, base64url},
@@ -14,8 +7,14 @@ use gateway_auth::{
     types::*,
     upstream::*,
 };
-use gateway_core::{GatewayError, state::*};
+use gateway_core::{error::GatewayError, state::*};
 use serde_json::json;
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeMap,
+    future::Future,
+    task::{Context, Poll, Waker},
+};
 
 #[test]
 fn authentication_requires_declared_json_and_never_guesses_profile_tags() {

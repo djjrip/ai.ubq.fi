@@ -1,6 +1,6 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
-use gateway_admin_data::profile::{CanonicalDates, to_source_profile};
+use gateway_admin_data::profile::{CanonicalDates, source::to_source_profile};
 use gateway_core::{
     source_control::decode_source_control_record,
     source_json::SourceJson,
@@ -382,7 +382,7 @@ fn unfinished_v3_does_not_require_missing_rows_or_reject_unrelated_generation_hi
 #[test]
 fn valid_legacy_renewal_utf16_models_are_untouched_by_v3_terminal_dispatch() {
     use gateway_authority::native_control::{
-        NativeRenewalContext, NativeRenewalFence, validate_native_control_custody,
+        NativeRenewalContext, NativeRenewalFence, custody::validate_native_control_custody,
     };
     use gateway_core::{
         js_string::JsString16, model::ModelId, source_control::encode_source_control_record,

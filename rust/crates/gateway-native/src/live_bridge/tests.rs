@@ -1,5 +1,4 @@
-use super::authority::LiveAuthorization;
-use super::*;
+use super::{authority::LiveAuthorization, *};
 use gateway_auth::{
     native::*,
     native_auth::{
@@ -7,7 +6,7 @@ use gateway_auth::{
     },
     native_live::{NATIVE_LIVE_ACTION_HEADER, NativeLiveAuthenticator},
 };
-use gateway_authority::native_live::{NativeLiveAccess, NativeLiveFence};
+use gateway_authority::native_live::wire::{NativeLiveAccess, NativeLiveFence};
 use rustls::{
     ServerConfig, ServerConnection, StreamOwned,
     pki_types::{CertificateDer, PrivateKeyDer, PrivatePkcs8KeyDer, ServerName},

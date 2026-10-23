@@ -1,7 +1,11 @@
 use aes_gcm::{Aes256Gcm, KeyInit, Nonce, aead::Aead};
-use gateway_auth::{AuthMethod, AuthPrincipal, api_keys::ApiKeyPolicy, crypto::Secret};
+use gateway_auth::{
+    api_keys::ApiKeyPolicy,
+    crypto::Secret,
+    types::{AuthMethod, AuthPrincipal},
+};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{ApiKeyId, PrincipalId, RequestContext, RequestId},
     lifecycle::SemanticTerminal,
     query::{QueryEntry, QueryPage, QueryRequest, QueryStore},

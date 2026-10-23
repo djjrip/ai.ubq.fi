@@ -1,7 +1,7 @@
 //! Finite admin delegation; the actor and prepared target belong to this original request only.
 use super::RequestHost;
 use gateway_authority::native_control::actor::{NativeActorScope, NativeRenewalActor};
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use gateway_observability::{
     host_types::{
         CacheExperimentTarget, PaidBackfillReceipt, PaidRequestBackfill, PaidWindowBackfill,
@@ -30,7 +30,7 @@ impl RequestHost {
         limit: u32,
     ) -> Result<PaidBackfillReceipt, GatewayError> {
         self.admin_actor()?;
-        let receipt = gateway_authority::Authority::with_clock(
+        let receipt = gateway_authority::store::Authority::with_clock(
             self.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,
@@ -54,7 +54,7 @@ impl RequestHost {
     }
     pub(super) async fn recheck_slot(&self, slot: u8) -> Result<bool, GatewayError> {
         let actor = self.admin_actor()?;
-        gateway_authority::Authority::with_clock(
+        gateway_authority::store::Authority::with_clock(
             self.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,

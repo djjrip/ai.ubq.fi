@@ -1,4 +1,5 @@
 //! Fixed synthetic source -> one persisted authority -> latest native inverse.
+use gateway_core::error::GatewayError;
 #[cfg(not(target_arch = "wasm32"))]
 mod fixture;
 #[cfg(not(target_arch = "wasm32"))]
@@ -20,8 +21,8 @@ fn main() {
     };
     use sqlite_store::SqliteStore;
     struct Tokens(std::sync::atomic::AtomicU64);
-    impl gateway_authority::TokenSource for Tokens {
-        fn next_token(&self) -> Result<String, gateway_core::GatewayError> {
+    impl gateway_authority::store::TokenSource for Tokens {
+        fn next_token(&self) -> Result<String, GatewayError> {
             Ok(format!(
                 "native-fixture-{}",
                 self.0.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
@@ -29,8 +30,8 @@ fn main() {
         }
     }
     struct Clock;
-    impl gateway_authority::AuthorityClock for Clock {
-        fn now_ms(&self) -> Result<i64, gateway_core::GatewayError> {
+    impl gateway_authority::store::AuthorityClock for Clock {
+        fn now_ms(&self) -> Result<i64, GatewayError> {
             Ok(2300)
         }
     }
@@ -49,7 +50,7 @@ fn main() {
             .key_id,
         "offline-key"
     );
-    let authority = gateway_authority::Authority::with_clock(
+    let authority = gateway_authority::store::Authority::with_clock(
         store.clone(),
         Tokens(std::sync::atomic::AtomicU64::new(1)),
         Clock,

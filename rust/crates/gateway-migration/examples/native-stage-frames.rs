@@ -68,7 +68,7 @@ struct Receipt {
     summary: gateway_migration::staged::StagePlanSummary,
 }
 fn failure(message: &str) -> gateway_migration::error::MigrationError {
-    gateway_core::GatewayError::unavailable(message, "m20_stage_frames_invalid").into()
+    gateway_core::error::GatewayError::unavailable(message, "m20_stage_frames_invalid").into()
 }
 fn sha256_file(path: &Path) -> Result<String, gateway_migration::error::MigrationError> {
     let mut file = File::open(path).map_err(|_| failure("Private capture cannot be hashed"))?;

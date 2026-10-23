@@ -7,7 +7,7 @@ use crate::import_custody_protocol::{
     self as wire, Frame, Header, HeaderView, Stopped, unavailable,
 };
 use gateway_auth::crypto::sha256_hex;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use serde::{Deserialize, Serialize};
 use std::{
     io::{Read, Write},

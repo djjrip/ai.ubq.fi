@@ -1,6 +1,12 @@
 use crate::*;
 use gateway_auth::passkeys::{PasskeyCredential, PasskeyUser};
-use gateway_authority::{keys, paid::*, quota::*};
+use gateway_authority::{
+    kernel::{KernelDefaults, KernelReservation, KernelWindow},
+    keys,
+    paid::source_records::decode_paid_attempt_record,
+    paid_types::{PaidAttempt, PaidRequest, PaidWindow, PendingPaid, ReconciliationGate},
+    quota::*,
+};
 use gateway_core::{identity::ApiKeyId, lifecycle::BillingState};
 use serde_json::json;
 use std::collections::{BTreeMap, BTreeSet};
@@ -16,7 +22,7 @@ pub(super) struct PaidAccounting {
 
 pub(super) fn account_paid(
     accounting: &mut BTreeMap<(String, i64), PaidAccounting>,
-    attempt: &gateway_authority::paid::PaidAttempt,
+    attempt: &gateway_authority::paid_types::PaidAttempt,
 ) -> Result<(), GatewayError> {
     let entry = accounting
         .entry((
@@ -138,7 +144,7 @@ pub(crate) fn bind(
             .iter()
             .map(|account| {
                 let identity = account.identity();
-                gateway_authority::routing::PoolAccount {
+                gateway_authority::routing_types::PoolAccount {
                     account_id_hash: identity.routing_account_hash,
                     admin_account_hash: identity.administrative_account_hash,
                     credential_version: identity.credential_version,
@@ -148,7 +154,7 @@ pub(crate) fn bind(
                 }
             })
             .collect();
-        let normalized = gateway_authority::routing::SubscriptionPool {
+        let normalized = gateway_authority::routing_types::SubscriptionPool {
             v: 1,
             pool_versionstamp: gateway_core::identity::PoolVersionstamp(source.revision.clone()),
             accounts,
@@ -284,8 +290,10 @@ pub(crate) fn bind(
                 }
             }
             Transform::PaidRequest => {
-                let attempt =
-                    gateway_authority::paid::decode_paid_attempt_record(&row.key, &row.record)?;
+                let attempt = gateway_authority::paid::source_records::decode_paid_attempt_record(
+                    &row.key,
+                    &row.record,
+                )?;
                 if attempt.reservation.window_reset_at_ms > now {
                     account_paid(&mut paid_accounting, &attempt)?;
                 }
@@ -326,8 +334,10 @@ pub(crate) fn bind(
                 let attempt = snapshot
                     .get(&attempt_key.0)
                     .ok_or_else(|| invalid("Pending paid marker has missing or expired request"))?;
-                let attempt =
-                    gateway_authority::paid::decode_paid_attempt_record(&attempt_key, attempt)?;
+                let attempt = gateway_authority::paid::source_records::decode_paid_attempt_record(
+                    &attempt_key,
+                    attempt,
+                )?;
                 if !matches!(
                     attempt.billing_state,
                     BillingState::Pending | BillingState::Unresolved

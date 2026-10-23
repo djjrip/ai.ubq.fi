@@ -1,10 +1,3 @@
-use gateway_core::{
-    GatewayError,
-    state::{AuthorityStore, RecordKey, RecordMutation},
-};
-use serde::{Deserialize, Serialize};
-use serde_json::{Value, json};
-
 use crate::{
     crypto::{base64url, decode_base64url, sha256_hex, uuid_from_random},
     origin::{passkey_meta, request_audience, trusted_relay_origin},
@@ -14,6 +7,12 @@ use crate::{
         unauthorized,
     },
 };
+use gateway_core::{
+    error::GatewayError,
+    state::{AuthorityStore, RecordKey, RecordMutation},
+};
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
 
 pub const CHALLENGE_TTL_MS: i64 = 300_000;
 pub const SESSION_TTL_MS: i64 = 604_800_000;

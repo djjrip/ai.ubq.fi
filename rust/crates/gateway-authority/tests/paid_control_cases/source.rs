@@ -1,8 +1,9 @@
 use super::*;
 use gateway_authority::paid_types::{PaidAttempt, PaidReservation};
 use gateway_core::{
-    js_string::JsString16, model::ModelId, source_control::decode_source_control_record,
-    source_json::SourceJson, source_serialization as source, value::ValueEncoding,
+    error::GatewayError, js_string::JsString16, model::ModelId,
+    source_control::decode_source_control_record, source_json::SourceJson,
+    source_serialization as source, value::ValueEncoding,
 };
 
 fn logical(units: &[u16]) -> ModelId {
@@ -253,7 +254,7 @@ impl gateway_schema::aliases::SourceStringCollator for FixtureOnlyCollator {
         &self,
         left: &JsString16,
         right: &JsString16,
-    ) -> Result<std::cmp::Ordering, gateway_core::GatewayError> {
+    ) -> Result<std::cmp::Ordering, GatewayError> {
         self.calls.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let find = |value: &JsString16| {
             self.data
@@ -262,7 +263,7 @@ impl gateway_schema::aliases::SourceStringCollator for FixtureOnlyCollator {
                 .position(|units| units == value.as_units())
         };
         let (Some(left), Some(right)) = (find(left), find(right)) else {
-            return Err(gateway_core::GatewayError::unavailable(
+            return Err(GatewayError::unavailable(
                 "Fixture-only collation pair was not captured.",
                 "fixture_collation_unknown",
             ));

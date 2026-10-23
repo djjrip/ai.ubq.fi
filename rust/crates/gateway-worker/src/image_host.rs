@@ -7,9 +7,11 @@ use crate::{
         outbound::{self, Cancellation, DispatchAttempt, PinnedDestination},
     },
 };
-use gateway_core::{GatewayError, model::ModelId, source_json::SourceJson};
-use gateway_extras_runtime::{DispatchFailure, DispatchFailureOrigin, ImageKind, UpstreamResponse};
-use gateway_providers::{decode_response, policy::HopFailure};
+use gateway_core::{error::GatewayError, model::ModelId, source_json::SourceJson};
+use gateway_extras_runtime::types::{
+    DispatchFailure, DispatchFailureOrigin, ImageKind, UpstreamResponse,
+};
+use gateway_providers::{policy::HopFailure, response::decode_response};
 use gateway_routing_runtime::{
     extras::{ChildScope, DispatchTicket},
     types::{AttemptFailure, RefusalDecision, TransportState},
@@ -219,7 +221,7 @@ impl Images {
             let mut headers = response
                 .headers()
                 .entries()
-                .collect::<gateway_providers::Headers>();
+                .collect::<gateway_providers::types::Headers>();
             headers.insert(
                 "x-uos-upstream".into(),
                 gateway_providers::policy::direct_provider_label(

@@ -1,6 +1,6 @@
 mod support;
 use gateway_core::{
-    GatewayError, js_string::JsString16, model::ModelId, source_json::SourceJson,
+    error::GatewayError, js_string::JsString16, model::ModelId, source_json::SourceJson,
     source_serialization as source,
 };
 use gateway_schema::{

@@ -1,7 +1,7 @@
 //! Source ba5ef05e provider/health.ts and paid-fallback/health.ts.
 use crate::{ObservabilityRuntime, completion::Completion, store, types::*};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::QueryStore,
     state::{AuthorityStore, RecordKey},
 };

@@ -1,5 +1,7 @@
-use gateway_core::GatewayError;
-use gateway_core::health::{DEPLOYMENT_ID_HEADER, GIT_SHA_HEADER, ReleaseIdentity};
+use gateway_core::{
+    error::GatewayError,
+    health::{DEPLOYMENT_ID_HEADER, GIT_SHA_HEADER, ReleaseIdentity},
+};
 use native_host::NativeBindings;
 use response::GatewayResponse;
 use std::rc::Rc;

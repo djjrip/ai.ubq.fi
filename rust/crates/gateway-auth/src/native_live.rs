@@ -7,7 +7,7 @@ use crate::{
         NativeAuthHeaders, NativeCapability, NativeNonceAuthority, NativeTransportIdentity,
     },
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 

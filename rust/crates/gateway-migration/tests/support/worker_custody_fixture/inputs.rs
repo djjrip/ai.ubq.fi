@@ -6,7 +6,7 @@ use gateway_auth::{
     provider_credentials::codex_source_pool_key, store::key,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_graph::{GraphAtom, GraphNode, SourceGraph},
     tuple_key::TupleKey,

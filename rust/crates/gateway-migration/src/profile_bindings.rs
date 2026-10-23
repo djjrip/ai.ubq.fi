@@ -53,7 +53,7 @@ pub(crate) async fn bind<S: QueryStore>(
             .iter()
             .any(|name| p[1] == *name)
     {
-        let mut defaults = gateway_authority::quota::KernelDefaults::default();
+        let mut defaults = gateway_authority::kernel::KernelDefaults::default();
         for name in ["kernel_policy_limit_requests", "kernel_policy_window_ms"] {
             let key = key(json!(["default", name]));
             if let Some(row) =
@@ -114,7 +114,7 @@ pub(crate) async fn bind<S: QueryStore>(
                     && hash == parsed.policy
                     && row.as_ref().is_some_and(|r| {
                         r.json_value().is_ok_and(|v| {
-                            gateway_admin_data::migration::audit::valid_key_policy(v, true)
+                            gateway_admin_data::migration::audit::keys::valid_key_policy(v, true)
                         })
                     })
                 {

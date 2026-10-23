@@ -1,6 +1,6 @@
 //! Finite native/provider capabilities. No URL, process, path, SQL, or Bun relay interface.
-use gateway_auth::{AuthResponse, native::NativeReadRequest};
-use gateway_core::{GatewayError, model::ModelId, source_json::SourceJson};
+use gateway_auth::{native::NativeReadRequest, types::AuthResponse};
+use gateway_core::{error::GatewayError, model::ModelId, source_json::SourceJson};
 use serde_json::Value;
 use std::{collections::BTreeMap, future::Future};
 

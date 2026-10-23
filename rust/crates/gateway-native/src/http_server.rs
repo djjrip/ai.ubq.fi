@@ -9,7 +9,6 @@ use crate::{
     unix::UnixSupervisor,
 };
 use gateway_auth::{
-    GatewayError,
     native::*,
     native_auth::{
         NativeAuthHeaders, NativeAuthenticator, NativeCapability, NativeTransportIdentity,
@@ -21,6 +20,7 @@ use gateway_auth::{
     native_live::{NATIVE_LIVE_ACTION_HEADER, NATIVE_LIVE_PATH, NativeLiveAuthenticator},
     native_replay::StoreNonceAuthority,
 };
+use gateway_core::error::GatewayError;
 use serde_json::{Value, json};
 use std::{
     collections::BTreeMap,
@@ -67,14 +67,14 @@ impl NativeHttpService {
     /// Fixed trusted import construction: real shared authority/owner/config, no auth callback.
     pub fn with_imports<S, I, H>(
         mut self,
-        authority: gateway_authority::Authority<S, I>,
-        owner: gateway_authority::native_control::RegisteredRenewalOwner,
-        current_config: gateway_auth::AuthConfig,
+        authority: gateway_authority::store::Authority<S, I>,
+        owner: gateway_authority::native_control::receiver::RegisteredRenewalOwner,
+        current_config: gateway_auth::types::AuthConfig,
         handler: H,
     ) -> Self
     where
         S: gateway_core::state::AuthorityStore + Send + Sync + 'static,
-        I: gateway_authority::TokenSource + Send + Sync + 'static,
+        I: gateway_authority::store::TokenSource + Send + Sync + 'static,
         H: crate::native_import::NativeImportHandler + 'static,
     {
         self.imports = Some(crate::import_ingress::configured(

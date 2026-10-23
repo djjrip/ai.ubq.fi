@@ -2,7 +2,7 @@
 //! above this crate and cannot be reconstructed by deserializing these frames.
 use super::{NativeImportMetadata, NativeImportTarget};
 use crate::native_control::{NATIVE_CONTROL_ERROR_MAX_BYTES, NATIVE_RENEWAL_MAX_MS};
-use gateway_core::{GatewayError, identity::MAX_SAFE_INTEGER};
+use gateway_core::{error::GatewayError, identity::MAX_SAFE_INTEGER};
 use serde::{Deserialize, Serialize};
 
 pub const IMPORT_AUTHORITY_OPERATION: &str = "codex_auth_import_authority";

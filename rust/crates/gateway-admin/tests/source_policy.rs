@@ -5,10 +5,20 @@ use gateway_admin::{
     service::{self, AdminService},
     source_input as input,
 };
-use gateway_auth::{crypto::Secret, upstream::*, *};
+use gateway_auth::{
+    crypto::Secret,
+    resolve::AuthService,
+    types::{
+        AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthResponse, NativePeer,
+        conflict,
+    },
+    upstream::*,
+    *,
+};
 use gateway_core::{
-    js_string::JsString16, model::ModelId, query::*, source_control::decode_source_control_record,
-    source_json::SourceJson, state::*, value::ValueEncoding,
+    error::GatewayError, js_string::JsString16, model::ModelId, query::*,
+    source_control::decode_source_control_record, source_json::SourceJson, state::*,
+    value::ValueEncoding,
 };
 use serde_json::{Value, json};
 use std::{

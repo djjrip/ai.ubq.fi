@@ -1,7 +1,7 @@
 //! Actual TLS and response authentication only, never a durable completion issuer.
 use super::*;
-use gateway_authority::native_control::import::{
-    ImportPublicationDataV1, NativeImportPublicationDisposition,
+use gateway_auth::native_import::publication::{
+    NativeImportPublicationDisposition, data::ImportPublicationDataV1,
 };
 use gateway_core::source_json::SourceJson;
 use rustls::{ServerConfig, ServerConnection, StreamOwned, pki_types::*};
@@ -175,7 +175,7 @@ impl Peer {
                     }
                 }
                 if bytes.len()
-                    > gateway_authority::native_control::import::import_publication_max_bytes()
+                    > gateway_auth::native_import::publication::command::import_publication_max_bytes()
                         + 16_384
                 {
                     return None;

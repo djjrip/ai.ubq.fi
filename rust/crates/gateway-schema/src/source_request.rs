@@ -1,4 +1,5 @@
 //! Ordinary-request data views; no provider dispatch or authority is implemented here.
+use gateway_core::error::GatewayError;
 macro_rules! json {
     ({$($key:literal:$value:expr),*$(,)?})=>{$crate::source_request::value::Value::object(vec![$((gateway_core::js_string::JsString16::from_utf8($key),$crate::source_request::value::Value::from_serializable(&$value).expect("Source normalization fields serialize"))),*])};
     ($value:expr)=>{$crate::source_request::value::Value::from_serializable(&$value).expect("Source normalization value serializes")};
@@ -167,12 +168,12 @@ pub fn resolve_model(
     match model_request(value)? {
         SourceModelRequest::Named(value) => Ok(value),
         SourceModelRequest::Default => default.map(JsString16::from_utf8).ok_or_else(|| SourceRequestError::from_scalar(
-            gateway_core::GatewayError::new(503, "Default model is unavailable: no configured default model or Codex model snapshot.", Some("server_error")))),
+            GatewayError::new(503, "Default model is unavailable: no configured default model or Codex model snapshot.", Some("server_error")))),
     }
 }
 
 pub(crate) fn scalar_value(
     value: Option<&serde_json::Value>,
-) -> Result<Option<SourceJson>, gateway_core::GatewayError> {
+) -> Result<Option<SourceJson>, GatewayError> {
     value.map(SourceJson::from_serializable).transpose()
 }

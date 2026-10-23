@@ -1,6 +1,6 @@
 //! Source request syntax. Provider-specific interpretation remains outside official allowlists.
 use crate::util::*;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use serde_json::{Value, json};
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RequestSurface {

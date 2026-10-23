@@ -1,5 +1,5 @@
 //! Observed prompt cache metadata is distinct from the official request control schema.
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use serde_json::Value;
 pub const SCOPE_PROFILE: &str = "responses_implicit_input_text_keyed_cycle_isolated_v5";
 pub const CODEX_PROVIDER: &str = "codex_chatgpt";

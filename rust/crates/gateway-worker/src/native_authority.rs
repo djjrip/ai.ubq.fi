@@ -1,24 +1,5 @@
 //! Fixed reverse native protocols, authenticated against the common durable nonce authority.
 pub(crate) mod import_dispatch;
-use gateway_auth::{
-    GatewayError,
-    native::*,
-    native_auth::{NativeAuthHeaders, NativeAuthenticator, NativeCapability},
-    native_replay::StoreNonceAuthority,
-};
-use gateway_authority::{
-    Authority,
-    native_control::{
-        NativeRenewalAuthority, NativeRenewalCancellation, NativeRenewalControl,
-        wire::{
-            NativeRenewalAuthorityRequest as RenewalRequest,
-            NativeRenewalAuthorityResponse as RenewalResponse,
-        },
-    },
-};
-use serde::Serialize;
-use worker::{Env, Method, Request, Response};
-
 use crate::{
     authority::RemoteAuthorityStore,
     host::{PlatformClock, PlatformTokens},
@@ -26,6 +7,25 @@ use crate::{
     storage::now_ms,
     transport::{HeaderLimits, body::request_bytes, bounded_headers, outbound::Cancellation},
 };
+use gateway_auth::{
+    native::*,
+    native_auth::{NativeAuthHeaders, NativeAuthenticator, NativeCapability},
+    native_replay::StoreNonceAuthority,
+};
+use gateway_authority::{
+    native_control::{
+        NativeRenewalCancellation, NativeRenewalControl,
+        receiver::NativeRenewalAuthority,
+        wire::{
+            NativeRenewalAuthorityRequest as RenewalRequest,
+            NativeRenewalAuthorityResponse as RenewalResponse,
+        },
+    },
+    store::Authority,
+};
+use gateway_core::error::GatewayError;
+use serde::Serialize;
+use worker::{Env, Method, Request, Response};
 
 pub fn is_path(path: &str) -> bool {
     path == NATIVE_RENEWAL_AUTHORITY_PATH
@@ -382,7 +382,7 @@ pub async fn managed_publication(
         &config,
         &incoming,
     );
-    use gateway_authority::native_control::NativeManagedPublicationDisposition as Disposition;
+    use gateway_authority::native_control::managed::NativeManagedPublicationDisposition as Disposition;
     use gateway_publication::{managed::ManagedPublicationReceipt, wire::PublicationDisposition};
     let applied = receiver
         .publish_managed(&proof, bytes)

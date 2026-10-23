@@ -6,9 +6,13 @@ use gateway_admin::{
 use gateway_admin_runtime::{
     AdminRuntime, RuntimeConfig, capabilities::RuntimeCapabilities, claude_access, parse,
 };
-use gateway_auth::{upstream::*, *};
+use gateway_auth::{
+    types::{AuthHost, AuthMethod, AuthPrincipal, AuthResponse, conflict, invalid},
+    upstream::*,
+    *,
+};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     model::ModelId,
     query::*,

@@ -1,4 +1,4 @@
-use gateway_core::{GatewayError, query::*, state::*, tuple_key::TupleKey};
+use gateway_core::{error::GatewayError, query::*, state::*, tuple_key::TupleKey};
 use rusqlite::{Connection, OptionalExtension};
 use std::{cell::RefCell, path::Path, rc::Rc};
 fn err(e: impl std::fmt::Display) -> GatewayError {

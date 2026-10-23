@@ -12,19 +12,20 @@ use crate::{
         stream::{FinishHook, ObservationHandle, ObservedStream},
     },
 };
-use gateway_auth::{AuthMethod, AuthPrincipal};
-use gateway_authority::quota::KernelTerminal;
+use gateway_auth::types::{AuthMethod, AuthPrincipal};
+use gateway_authority::kernel::KernelTerminal;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{ApiKeyId, PrincipalId, RequestContext, RequestId},
     model::ModelId,
     source_json::SourceJson,
     source_serialization as source,
 };
 use gateway_extras_runtime::{
-    ExtrasRequest, ExtrasRoute, ExtrasRuntime, ImageKind, KernelDisposition,
+    ExtrasRuntime,
+    types::{ExtrasRequest, ExtrasRoute, ImageKind, KernelDisposition},
 };
-use gateway_providers::ClientSurface;
+use gateway_providers::types::ClientSurface;
 use gateway_routing_runtime::{extras::ExtrasFamily, session::RoutingSession, types::RoutingInput};
 use std::rc::Rc;
 use worker::{Method, Request, Response};
@@ -119,10 +120,12 @@ pub async fn run(
         let raw = match gateway_schema::source_request::parse_http_body(&bytes) {
             Ok(raw) => raw,
             Err(error) => {
-                return crate::runtime::auth_response(gateway_auth::AuthResponse::source_json(
-                    error.status,
-                    error.body().clone(),
-                ));
+                return crate::runtime::auth_response(
+                    gateway_auth::types::AuthResponse::source_json(
+                        error.status,
+                        error.body().clone(),
+                    ),
+                );
             }
         };
         (raw, None)

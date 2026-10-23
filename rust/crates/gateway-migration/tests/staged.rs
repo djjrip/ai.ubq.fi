@@ -161,8 +161,8 @@ fn sealed_file_inventory_matches_slice_audit_and_rejects_truncated_native_docume
         async fn observe(
             &self,
             _: &str,
-        ) -> Result<OwnedNativeSnapshot, gateway_core::GatewayError> {
-            Err(gateway_core::GatewayError::unavailable(
+        ) -> Result<OwnedNativeSnapshot, gateway_core::error::GatewayError> {
+            Err(gateway_core::error::GatewayError::unavailable(
                 "Unexpected custody request",
                 "fixture",
             ))
@@ -320,15 +320,17 @@ fn sealed_file_inventory_matches_slice_audit_and_rejects_truncated_native_docume
 
 #[test]
 fn sealed_native_frame_emitter_refuses_spool_and_sink_faults() {
-    use std::io::{Seek, SeekFrom, Write};
-    use std::os::unix::fs::PermissionsExt;
+    use std::{
+        io::{Seek, SeekFrom, Write},
+        os::unix::fs::PermissionsExt,
+    };
     struct Host;
     impl NativeCustody for Host {
         async fn observe(
             &self,
             _: &str,
-        ) -> Result<OwnedNativeSnapshot, gateway_core::GatewayError> {
-            Err(gateway_core::GatewayError::unavailable(
+        ) -> Result<OwnedNativeSnapshot, gateway_core::error::GatewayError> {
+            Err(gateway_core::error::GatewayError::unavailable(
                 "Unexpected custody request",
                 "fixture",
             ))

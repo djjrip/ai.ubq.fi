@@ -1,4 +1,6 @@
 #[cfg(unix)]
+use gateway_core::error::GatewayError;
+#[cfg(unix)]
 fn main() {
     if let Err(error) = run() {
         eprintln!(
@@ -20,7 +22,7 @@ fn main() {
 }
 
 #[cfg(unix)]
-fn run() -> Result<(), gateway_auth::GatewayError> {
+fn run() -> Result<(), GatewayError> {
     gateway_native::require_production_artifact()?;
     use gateway_native::{
         confinement::{NativeConfinement, enforce},
@@ -36,7 +38,7 @@ fn run() -> Result<(), gateway_auth::GatewayError> {
         .nonce_database
         .parent()
         .ok_or_else(|| {
-            gateway_auth::GatewayError::unavailable(
+            GatewayError::unavailable(
                 "Replay database has no parent",
                 "native_nonce_store_unavailable",
             )
@@ -47,7 +49,7 @@ fn run() -> Result<(), gateway_auth::GatewayError> {
         .file_name()
         .and_then(|name| name.to_str())
         .ok_or_else(|| {
-            gateway_auth::GatewayError::unavailable(
+            GatewayError::unavailable(
                 "Replay database name is invalid",
                 "native_nonce_store_unavailable",
             )
@@ -58,13 +60,13 @@ fn run() -> Result<(), gateway_auth::GatewayError> {
         format!("{database_name}-shm"),
     ];
     for entry in std::fs::read_dir(&replay_directory).map_err(|_| {
-        gateway_auth::GatewayError::unavailable(
+        GatewayError::unavailable(
             "Private replay directory is unavailable",
             "native_nonce_store_unavailable",
         )
     })? {
         let entry = entry.map_err(|_| {
-            gateway_auth::GatewayError::unavailable(
+            GatewayError::unavailable(
                 "Private replay directory is unavailable",
                 "native_nonce_store_unavailable",
             )
@@ -73,20 +75,20 @@ fn run() -> Result<(), gateway_auth::GatewayError> {
             .iter()
             .any(|name| entry.file_name() == std::ffi::OsStr::new(name))
         {
-            return Err(gateway_auth::GatewayError::unavailable(
+            return Err(GatewayError::unavailable(
                 "Replay storage must have a dedicated directory",
                 "native_nonce_store_unavailable",
             ));
         }
     }
     let listener = TcpListener::bind(config.listen).map_err(|_| {
-        gateway_auth::GatewayError::unavailable(
+        GatewayError::unavailable(
             "Native listener could not bind",
             "native_listener_unavailable",
         )
     })?;
     let address = listener.local_addr().map_err(|_| {
-        gateway_auth::GatewayError::unavailable(
+        GatewayError::unavailable(
             "Native listener has no address",
             "native_listener_unavailable",
         )
@@ -110,20 +112,20 @@ fn run() -> Result<(), gateway_auth::GatewayError> {
                 continue;
             }
             let canonical_home = std::fs::canonicalize(home).map_err(|_| {
-                gateway_auth::GatewayError::unavailable(
+                GatewayError::unavailable(
                     "Configured source home is unavailable",
                     "native_source_unavailable",
                 )
             })?;
             list_directories.push(canonical_home.clone());
             for entry in std::fs::read_dir(home).map_err(|_| {
-                gateway_auth::GatewayError::unavailable(
+                GatewayError::unavailable(
                     "Configured source directory is unavailable",
                     "native_source_unavailable",
                 )
             })? {
                 let entry = entry.map_err(|_| {
-                    gateway_auth::GatewayError::unavailable(
+                    GatewayError::unavailable(
                         "Configured source entry is unavailable",
                         "native_source_unavailable",
                     )
@@ -139,13 +141,13 @@ fn run() -> Result<(), gateway_auth::GatewayError> {
                         })
                 {
                     let canonical = std::fs::canonicalize(entry.path()).map_err(|_| {
-                        gateway_auth::GatewayError::unavailable(
+                        GatewayError::unavailable(
                             "Configured source path is unavailable",
                             "native_source_unavailable",
                         )
                     })?;
                     if !canonical.starts_with(&canonical_home) {
-                        return Err(gateway_auth::GatewayError::unavailable(
+                        return Err(GatewayError::unavailable(
                             "Configured source path escapes its home",
                             "native_source_unavailable",
                         ));
@@ -212,7 +214,7 @@ fn prepare_owner_renewal(
     gateway_native::owner_renewal::NativeOwnerRenewalService<
         gateway_native::managed_publication_http::NativeAccessPublicationHttp,
     >,
-    gateway_auth::GatewayError,
+    GatewayError,
 > {
     use gateway_auth::{
         native::{NATIVE_PUBLICATION_PATH, NATIVE_RENEWAL_AUTHORITY_PATH},
@@ -269,7 +271,7 @@ fn prepare_owner_renewal(
 }
 
 #[cfg(unix)]
-fn preconnect(target: &url::Url) -> Result<std::net::TcpStream, gateway_auth::GatewayError> {
+fn preconnect(target: &url::Url) -> Result<std::net::TcpStream, GatewayError> {
     use std::{net::ToSocketAddrs, time::Duration};
     let host = target.host_str().ok_or_else(renewal_unavailable)?;
     let port = target
@@ -288,8 +290,8 @@ fn preconnect(target: &url::Url) -> Result<std::net::TcpStream, gateway_auth::Ga
 }
 
 #[cfg(unix)]
-fn renewal_unavailable() -> gateway_auth::GatewayError {
-    gateway_auth::GatewayError::unavailable(
+fn renewal_unavailable() -> GatewayError {
+    GatewayError::unavailable(
         "Configured native owner renewal is unavailable",
         "native_owner_renewal_unavailable",
     )

@@ -1,5 +1,6 @@
 use gateway_admin_data::migration::{ObservedRow, audit};
 use gateway_core::{
+    error::GatewayError,
     source_control::{
         decode_source_control_record, encode_source_control_record, source_json_tree,
     },
@@ -196,8 +197,8 @@ struct Replay<'a>(&'a [ObservedRow]);
 impl audit::AuditInventory for Replay<'_> {
     fn visit(
         &self,
-        callback: &mut dyn FnMut(&ObservedRow) -> Result<(), gateway_core::GatewayError>,
-    ) -> Result<(), gateway_core::GatewayError> {
+        callback: &mut dyn FnMut(&ObservedRow) -> Result<(), GatewayError>,
+    ) -> Result<(), GatewayError> {
         for row in self.0 {
             let decoded = row.clone();
             callback(&decoded)?;
@@ -207,7 +208,7 @@ impl audit::AuditInventory for Replay<'_> {
 }
 fn inspect_key_pairs(
     rows: &[ObservedRow],
-) -> Result<(Vec<audit::keys::AuditedKeyPair>, audit::Audit), gateway_core::GatewayError> {
+) -> Result<(Vec<audit::keys::AuditedKeyPair>, audit::Audit), GatewayError> {
     let result = audit::keys::inspect_key_pairs(rows);
     let replay = audit::inspect_inventory(&Replay(rows), 1000);
     match (&result, replay) {

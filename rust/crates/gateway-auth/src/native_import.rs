@@ -10,7 +10,7 @@ use crate::{
         NativeTransportIdentity,
     },
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
 use sha2::Sha256;

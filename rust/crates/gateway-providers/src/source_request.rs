@@ -6,12 +6,12 @@ use crate::{
     types::*,
 };
 use gateway_core::{
-    GatewayError, js_string::JsString16, model::ModelId, provider::UpstreamProvider,
+    error::GatewayError, js_string::JsString16, model::ModelId, provider::UpstreamProvider,
     source_json::SourceJson, source_serialization as json,
 };
 use gateway_schema::{
     request::RequestSurface,
-    source_request::{SourceModelRequest, SourceRequestDocument, SourceRequestError},
+    source_request::{SourceModelRequest, SourceRequestDocument, error::SourceRequestError},
 };
 fn lift(error: GatewayError) -> SourceRequestError {
     SourceRequestError::from_gateway(error)

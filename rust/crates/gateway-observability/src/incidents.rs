@@ -1,14 +1,14 @@
 //! Source incident-outbox.ts: durable safe classifications, never raw request data.
-use crate::{ObservabilityRuntime, types::ObservabilityHost};
 use crate::{
-    replay_model as model,
+    ObservabilityRuntime, replay_model as model,
     replay_values::{SourceObject, read_json_record},
     store,
+    types::ObservabilityHost,
 };
 use gateway_admin_runtime::capabilities::{CaptureRequest, Context};
-use gateway_auth::{AuthResponse, crypto::sha256_hex};
+use gateway_auth::{crypto::sha256_hex, types::AuthResponse};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     query::{QueryRequest, QuerySelector, QueryStore},
     source_json::SourceJson,

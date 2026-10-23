@@ -2,9 +2,12 @@ use crate::{
     journal::{self, Journal, Phase},
     types::{RecoveredSession, RevisionCheckWire, RoutingHost},
 };
-use gateway_authority::{Authority, AuthorityClock, TokenSource, quota::KernelTerminal};
+use gateway_authority::{
+    kernel::KernelTerminal,
+    store::{Authority, AuthorityClock, TokenSource},
+};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     lifecycle::{SemanticTerminal, TransportObservation},
     query::{QueryRequest, QuerySelector, QueryStore},
     state::{AuthorityStore, RevisionCheck},

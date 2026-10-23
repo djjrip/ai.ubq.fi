@@ -5,9 +5,9 @@ use super::{
 };
 use crate::import_custody_protocol::{Header, unavailable};
 use gateway_authority::native_control::import::{
-    VerifiedCurrentImportStarted, VerifiedCurrentImportTerminal,
+    custody_session::VerifiedCurrentImportStarted, remote::VerifiedCurrentImportTerminal,
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::time::{Duration, Instant};
 
 pub(crate) struct KernelSnapshot {

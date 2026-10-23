@@ -5,7 +5,7 @@ use super::{
 };
 use crate::error;
 use gateway_core::{
-    GatewayError, js_string::JsString16, source_json::SourceJson, value::PortableValue,
+    error::GatewayError, js_string::JsString16, source_json::SourceJson, value::PortableValue,
 };
 use serde_json::Value;
 

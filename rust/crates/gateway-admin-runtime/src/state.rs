@@ -5,11 +5,12 @@ use crate::{
 };
 use gateway_admin::{operations::AdminInput, routes::AdminOperation, source_input as source_body};
 use gateway_auth::{
-    AuthHost, AuthResponse, conflict, invalid,
     store::{check, commit, put},
+    types::{AuthHost, AuthResponse, conflict, invalid},
 };
-use gateway_core::{GatewayError, query::QueryStore};
-use gateway_core::{js_string::JsString16, source_json::SourceJson};
+use gateway_core::{
+    error::GatewayError, js_string::JsString16, query::QueryStore, source_json::SourceJson,
+};
 use serde_json::{Value, json};
 use std::collections::BTreeSet;
 
@@ -223,7 +224,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminRuntime<'_, S, H, 
             if let Ok(message) = message.try_utf8() {
                 return Err(invalid(&message));
             }
-            let error = gateway_schema::source_request::SourceRequestError::new(
+            let error = gateway_schema::source_request::error::SourceRequestError::new(
                 400,
                 message,
                 "invalid_request_error",

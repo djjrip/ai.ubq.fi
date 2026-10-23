@@ -1,11 +1,14 @@
 use super::*;
 use crate::types::direct_credential;
-use gateway_auth::{AuthMethod, AuthPrincipal, crypto::Secret};
+use gateway_auth::{
+    crypto::Secret,
+    types::{AuthMethod, AuthPrincipal},
+};
 use gateway_core::identity::{PrincipalId, RequestContext, RequestId};
 use gateway_providers::{
-    ClaudeBodyOptions, ClaudeCredentialKind, Headers, PrepareOptions, ResponseDecode,
-    StreamDecoder, decode_response,
-    response::{response_plan, translated_response_id},
+    response::{decode_response, response_plan, translated_response_id},
+    sse::StreamDecoder,
+    types::{ClaudeBodyOptions, ClaudeCredentialKind, Headers, PrepareOptions, ResponseDecode},
 };
 use gateway_schema::catalog::CatalogInput;
 use serde_json::{Value, json};
@@ -74,7 +77,7 @@ fn decode(
     request: &PreparedWireRequest,
     response_headers: &Headers,
     value: &Value,
-) -> gateway_providers::DecodedResponse {
+) -> gateway_providers::types::DecodedResponse {
     decode_response(
         request.decode(),
         200,
@@ -98,7 +101,7 @@ fn codex_replay(output: &Value) -> Value {
         &original,
         &"gpt-test".into(),
         &PrepareOptions {
-            auth: gateway_providers::AuthMaterial {
+            auth: gateway_providers::types::AuthMaterial {
                 secret: "synthetic-only".into(),
                 account_id: Some("synthetic-account".into()),
                 ..Default::default()

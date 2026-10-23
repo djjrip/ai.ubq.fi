@@ -402,7 +402,7 @@ fn selected_core_adopts_restarts_reads_quota_and_round_trips_current_accounting(
         listed["data"][0]["paid_fallback_reserved_credits"].as_f64(),
         Some(0.000005)
     );
-    let authority = gateway_authority::Authority::with_clock(
+    let authority = gateway_authority::store::Authority::with_clock(
         store.clone(),
         support_clock::Tokens(std::sync::atomic::AtomicU64::new(1)),
         support_clock::Clock,
@@ -418,7 +418,9 @@ fn selected_core_adopts_restarts_reads_quota_and_round_trips_current_accounting(
     drop(authority);
     let paid_key = gateway_authority::keys::paid_attempt("core-key", "current");
     let paid = run(store.read(&paid_key)).unwrap().unwrap();
-    let paid = gateway_authority::paid::decode_paid_attempt_record(&paid_key, &paid).unwrap();
+    let paid =
+        gateway_authority::paid::source_records::decode_paid_attempt_record(&paid_key, &paid)
+            .unwrap();
     assert_eq!(
         paid.billing_state,
         gateway_core::lifecycle::BillingState::Unresolved
@@ -507,8 +509,11 @@ fn bounded_core_staging_uses_the_same_spool_and_write_budget() {
 
 struct NoCustody;
 impl NativeCustody for NoCustody {
-    async fn observe(&self, _: &str) -> Result<OwnedNativeSnapshot, gateway_core::GatewayError> {
-        Err(gateway_core::GatewayError::unavailable(
+    async fn observe(
+        &self,
+        _: &str,
+    ) -> Result<OwnedNativeSnapshot, gateway_core::error::GatewayError> {
+        Err(gateway_core::error::GatewayError::unavailable(
             "no native custody in synthetic core-state fixture",
             "migration_native_custody_required",
         ))
@@ -516,9 +521,9 @@ impl NativeCustody for NoCustody {
 }
 
 mod support_clock {
-    use gateway_core::GatewayError;
+    use gateway_core::error::GatewayError;
     pub struct Tokens(pub std::sync::atomic::AtomicU64);
-    impl gateway_authority::TokenSource for Tokens {
+    impl gateway_authority::store::TokenSource for Tokens {
         fn next_token(&self) -> Result<String, GatewayError> {
             Ok(format!(
                 "core-fixture-{}",
@@ -527,7 +532,7 @@ mod support_clock {
         }
     }
     pub struct Clock;
-    impl gateway_authority::AuthorityClock for Clock {
+    impl gateway_authority::store::AuthorityClock for Clock {
         fn now_ms(&self) -> Result<i64, GatewayError> {
             Ok(2300)
         }

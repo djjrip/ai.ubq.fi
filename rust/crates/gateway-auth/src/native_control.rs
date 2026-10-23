@@ -1,9 +1,8 @@
 //! The physical native control boundary has one operation. References name
 //! server-owned authority; deserializing this wire never creates permission.
-use serde::{Deserialize, Serialize};
-
 use crate::{crypto::sha256_hex, native::*};
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
+use serde::{Deserialize, Serialize};
 
 pub const NATIVE_CONTROL_MAX_BYTES: usize = 65_536;
 pub const NATIVE_CONTROL_ERROR_MAX_BYTES: usize = 4096;

@@ -1,10 +1,9 @@
 //! Fixed owner-renewal coordination in the existing authority store.
 //! Wire selectors and fence DTOs are observations, never permissions to mutate native state.
-use std::future::Future;
-
 use gateway_auth::native_auth::AuthenticatedNativeOwner;
-use gateway_core::{GatewayError, model::ModelId};
+use gateway_core::{error::GatewayError, model::ModelId};
 use serde::{Deserialize, Serialize};
+use std::future::Future;
 
 pub mod actor;
 mod context_codec;

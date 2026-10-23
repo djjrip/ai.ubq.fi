@@ -7,7 +7,6 @@ use crate::{
     unix::{NativeOwnerLocation, UnixOwnerTransport},
 };
 use gateway_auth::{
-    GatewayError,
     crypto::base64url,
     managed_access::ManagedAccessProjection,
     native_auth::AuthenticatedNativeOwner,
@@ -26,6 +25,7 @@ use gateway_authority::native_control::{
         OriginalControlHeaders,
     },
 };
+use gateway_core::error::GatewayError;
 use std::cell::RefCell;
 
 pub(crate) fn require_current_fence(fence: &NativeRenewalFence) -> Result<(), GatewayError> {

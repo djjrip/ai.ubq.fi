@@ -1,17 +1,4 @@
 //! Fixed catalog reads bound to credential-owner publications and source revisions.
-use std::{collections::BTreeMap, rc::Rc};
-
-use gateway_auth::provider_credentials::{codex_source_pool_key, read_codex_source_pool};
-use gateway_catalog_runtime::{
-    CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CodexAccount,
-    CredentialPublication, ProviderBinding,
-};
-use gateway_core::{
-    GatewayError,
-    state::{AuthorityStore, RevisionCheck},
-};
-use worker::{Env, Fetch, Headers, Method, Request, RequestInit, RequestRedirect, Url};
-
 use crate::{
     authority::RemoteAuthorityStore,
     host::{PlatformHost, provider_secret, response_bytes, setting},
@@ -21,6 +8,17 @@ use crate::{
         random,
     },
 };
+use gateway_auth::provider_credentials::{codex_source_pool_key, read_codex_source_pool};
+use gateway_catalog_runtime::host::{
+    CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CodexAccount,
+    CredentialPublication, ProviderBinding,
+};
+use gateway_core::{
+    error::GatewayError,
+    state::{AuthorityStore, RevisionCheck},
+};
+use std::{collections::BTreeMap, rc::Rc};
+use worker::{Env, Fetch, Headers, Method, Request, RequestInit, RequestRedirect, Url};
 
 #[derive(Clone)]
 pub struct Host {
@@ -148,7 +146,7 @@ impl CatalogHost for Host {
             ..Default::default()
         };
         if let Some(normalized) = normalized.as_ref() {
-            let pool: gateway_authority::routing::SubscriptionPool =
+            let pool: gateway_authority::routing_types::SubscriptionPool =
                 serde_json::from_value(normalized.json_value()?.clone())
                     .map_err(|_| unavailable("Codex routing pool is invalid."))?;
             let source = snapshot

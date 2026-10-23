@@ -1,8 +1,8 @@
 use crate::{store::*, types::ExtrasHost};
 use chrono::{DateTime, SecondsFormat, Utc};
-use gateway_core::js_string::JsString16;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
+    js_string::JsString16,
     query::{QueryRequest, QuerySelector, QueryStore},
     state::{RecordKey, RecordMutation},
     tuple_key::{DecodedKeyPart, TupleKey},

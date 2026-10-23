@@ -4,17 +4,17 @@ use super::{
     model::*,
     state::{CyclePermit, record_key},
 };
-use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
     routing::{model_quota_class, read_pinned_view},
     routing_types::{ProbeCircuit, ProbeLease},
+    store::{Authority, TokenSource, Transaction},
 };
 use gateway_auth::{
     crypto::Secret,
     provider_credentials::{CodexSourcePool, codex_source_pool_key, parse_codex_source_pool},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{AccountBinding, PoolVersionstamp},
     state::AuthorityStore,
 };

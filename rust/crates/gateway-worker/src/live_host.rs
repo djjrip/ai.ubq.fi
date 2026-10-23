@@ -4,23 +4,22 @@ pub(crate) mod body;
 mod health;
 mod platform;
 
-use gateway_auth::{AuthConfig, AuthMethod, AuthPrincipal, AuthRequest};
+use crate::{
+    host::{PlatformClock, PlatformHost, PlatformTokens},
+    storage::now_ms,
+};
+use gateway_auth::types::{AuthConfig, AuthMethod, AuthPrincipal, AuthRequest};
 use gateway_authority::{
-    Authority,
     native_control::actor::{NativeRenewalActor, authenticate_client_actor},
+    store::Authority,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{ApiKeyId, PrincipalId, RequestContext, RequestId},
 };
 use gateway_live_runtime::protocol::{LiveRoute, live_route, principal_id};
 use std::rc::Rc;
 use worker::Context;
-
-use crate::{
-    host::{PlatformClock, PlatformHost, PlatformTokens},
-    storage::now_ms,
-};
 
 /// Captures the actual authenticated request, not an actor reconstructed from request ID/time.
 pub struct WorkerLiveHost {

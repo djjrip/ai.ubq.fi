@@ -10,7 +10,7 @@ use gateway_catalog_runtime::{
     state::{self, source_key},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::{QueryEntry, QueryPage, QueryRequest, QueryStore},
     source_json::SourceJson,
     state::{
@@ -78,9 +78,11 @@ impl Store {
     fn seed(&self, version: &str, fetched: i64, body: &str, upstream_etag: Option<&str>) {
         self.put(catalog_store::auth_generation_key(), "g", "g".into());
         let prepared = catalog_cache::prepare_catalog(
-            version,
-            "g",
-            &format!("seed-{version}-{fetched}"),
+            catalog_cache::CatalogIdentity {
+                client_version: version,
+                auth_generation: "g",
+                body_generation: &format!("seed-{version}-{fetched}"),
+            },
             body,
             upstream_etag,
             None,
@@ -1316,10 +1318,11 @@ fn later_official_deepseek_public_metadata_overwrites_paid_enrichment_only_for_i
     ]})));
     run(runtime.refresh_provider(&store, &host, CatalogProvider::Openrouter, true)).unwrap();
     let state = run(runtime.load_state(&store, &host.published.borrow(), store.now.get())).unwrap();
-    let catalog = gateway_schema::catalog::build_catalog_snapshot(&state.input, &loader_fixture())
-        .unwrap()
-        .deserialize::<Value>()
-        .unwrap();
+    let catalog =
+        gateway_schema::catalog_views::build_catalog_snapshot(&state.input, &loader_fixture())
+            .unwrap()
+            .deserialize::<Value>()
+            .unwrap();
     let rows = catalog["models"].as_array().unwrap();
     let official = rows
         .iter()

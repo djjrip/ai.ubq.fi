@@ -1,10 +1,11 @@
-use crate::{ObservabilityRuntime, types::ObservabilityHost};
 use crate::{
+    ObservabilityRuntime,
     capacity_events::{event_key, valid_event},
     capacity_math, capacity_shapes as shape, store,
+    types::ObservabilityHost,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::{QuerySelector, QueryStore},
     state::{RecordKey, RecordMutation, StoredRecord},
 };

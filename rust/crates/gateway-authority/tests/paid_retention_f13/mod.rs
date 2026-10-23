@@ -2,15 +2,17 @@
 //! Source b6e25555179ad2b195b0bab93e946be834ecda6c native-authority.test.ts1097-1113
 //! is a fixture-only generic service with permanent attempt_lifetime rows, not a live Rust RPC.
 use super::support;
-use gateway_authority::paid_control::*;
-use gateway_authority::paid_types::{
-    PaidAdmission, PaidAuthorization, PaidRequest, PaidRoutingPolicy,
+use gateway_authority::{
+    PAID_RETENTION_MS, keys,
+    paid_control::*,
+    paid_types::{PaidAdmission, PaidAuthorization, PaidRequest, PaidRoutingPolicy},
 };
-use gateway_authority::{PAID_RETENTION_MS, keys};
-use gateway_core::identity::{ApiKeyId, PaidAttemptId, RequestId};
-use gateway_core::provider::{PaidProvider, UpstreamProvider};
-use gateway_core::state::{AuthorityStore, RecordKey};
-use gateway_providers::ClientSurface;
+use gateway_core::{
+    identity::{ApiKeyId, PaidAttemptId, RequestId},
+    provider::{PaidProvider, UpstreamProvider},
+    state::{AuthorityStore, RecordKey},
+};
+use gateway_providers::types::ClientSurface;
 use serde_json::{Value, json};
 use support::*;
 pub fn context(input: &PaidRequest) -> PaidRequestContext {

@@ -1,6 +1,6 @@
 mod support;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     query::QueryStore,
     source_control::encode_source_control_record,
@@ -65,7 +65,7 @@ fn units(row: &SourceJson, name: &str) -> Vec<u16> {
         .unwrap()
         .into_units()
 }
-fn response_source(response: &gateway_auth::AuthResponse) -> SourceJson {
+fn response_source(response: &gateway_auth::types::AuthResponse) -> SourceJson {
     SourceJson::parse_bytes(&response.body.to_bytes().unwrap()).unwrap()
 }
 fn model_rows(body: &SourceJson) -> Vec<SourceJson> {

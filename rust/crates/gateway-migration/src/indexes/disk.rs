@@ -1,8 +1,7 @@
 //! Same index predicates, with native-private independent cursor lookups.
 use super::*;
 use crate::native_spool::{Spool, Writer};
-use std::collections::BTreeSet;
-use std::path::Path;
+use std::{collections::BTreeSet, path::Path};
 type BoundRows = (Spool<Row>, Vec<(RecordKey, StoredRecord)>);
 pub(crate) fn bind_spooled(
     rows: &Spool<Row>,
@@ -74,7 +73,7 @@ pub(crate) fn bind_spooled(
             .iter()
             .map(|account| {
                 let identity = account.identity();
-                gateway_authority::routing::PoolAccount {
+                gateway_authority::routing_types::PoolAccount {
                     account_id_hash: identity.routing_account_hash,
                     admin_account_hash: identity.administrative_account_hash,
                     credential_version: identity.credential_version,
@@ -84,7 +83,7 @@ pub(crate) fn bind_spooled(
                 }
             })
             .collect();
-        let normalized = gateway_authority::routing::SubscriptionPool {
+        let normalized = gateway_authority::routing_types::SubscriptionPool {
             v: 1,
             pool_versionstamp: gateway_core::identity::PoolVersionstamp(source.revision.clone()),
             accounts,
@@ -256,7 +255,10 @@ pub(crate) fn bind_spooled(
                 }
                 Transform::PaidRequest => {
                     let attempt =
-                        gateway_authority::paid::decode_paid_attempt_record(&row.key, &row.record)?;
+                        gateway_authority::paid::source_records::decode_paid_attempt_record(
+                            &row.key,
+                            &row.record,
+                        )?;
                     if attempt.reservation.window_reset_at_ms > now {
                         account_paid(&mut paid_accounting, &attempt)?;
                     }
@@ -295,10 +297,11 @@ pub(crate) fn bind_spooled(
                     let attempt = get(&attempt_key.0)?.ok_or_else(|| {
                         invalid("Pending paid marker has missing or expired request")
                     })?;
-                    let attempt = gateway_authority::paid::decode_paid_attempt_record(
-                        &attempt_key,
-                        &attempt,
-                    )?;
+                    let attempt =
+                        gateway_authority::paid::source_records::decode_paid_attempt_record(
+                            &attempt_key,
+                            &attempt,
+                        )?;
                     if !matches!(
                         attempt.billing_state,
                         BillingState::Pending | BillingState::Unresolved

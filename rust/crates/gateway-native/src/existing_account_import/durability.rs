@@ -228,7 +228,7 @@ pub(super) fn recheck(
 #[cfg(test)]
 pub(super) fn issue_fixture(
     store: &ExistingAccountImportStore,
-    start: gateway_authority::native_control::import::NativeImportStart<'_>,
+    start: gateway_authority::native_control::import::effects::NativeImportStart<'_>,
     proof: &AuthenticatedNativeImport,
     original_body: &[u8],
     context: &crate::native_import::NativeImportContext<'_>,

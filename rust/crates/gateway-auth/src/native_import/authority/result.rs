@@ -1,13 +1,12 @@
 //! One field declaration generates serialization and direct per-variant decode.
 //! No tagged Content/Value buffer can lose the completion's source UTF16.
-use super::completion::ImportCompletionData;
 use super::{
     IMPORT_AUTHORITY_OPERATION, ImportAuthorityClaimMode, ImportAuthorityCommand,
     ImportAuthorityRequestData, ImportAuthorityStateData, ImportAuthorityTerminalData,
-    ImportCustodyStartedWire, import_authority_reply_max_bytes_for, invalid, nullable, reference,
-    text,
+    ImportCustodyStartedWire, completion::ImportCompletionData,
+    import_authority_reply_max_bytes_for, invalid, nullable, reference, text,
 };
-use gateway_core::{GatewayError, source_json::SourceJson};
+use gateway_core::{error::GatewayError, source_json::SourceJson};
 use serde::{Deserialize, Serialize};
 macro_rules! results {
     ($( $variant:ident $phase:literal { $( $(#[$attr:meta])* $field:ident : $ty:ty, )* } ),* $(,)?) => {

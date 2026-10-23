@@ -5,7 +5,7 @@ use super::{
 };
 use crate::store::{Authority, TokenSource, Transaction};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::{AuthorityStore, RecordKey},
 };
 use serde::{Deserialize, Serialize};

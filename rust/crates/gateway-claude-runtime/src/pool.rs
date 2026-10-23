@@ -10,15 +10,15 @@ use gateway_admin_runtime::{
 };
 use gateway_catalog_runtime::{host::ProviderBinding, state::checks_current};
 use gateway_core::{
-    GatewayError,
     claude::ClaudeErrorEvidence as ErrorEvidence,
+    error::GatewayError,
     js_string::JsString16,
     model::ModelId,
     source_json::SourceJson,
     source_serialization as source,
     state::{AuthorityStore, RevisionCheck},
 };
-use gateway_providers::Headers;
+use gateway_providers::types::Headers;
 use gateway_schema::selection::ProviderSelection;
 use serde::Serialize;
 use std::{

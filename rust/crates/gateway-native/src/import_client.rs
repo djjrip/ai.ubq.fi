@@ -1,7 +1,6 @@
 //! Same-host import preparation and signed request construction only.
 //! No sockets, document readers, Worker relay, refresh, response or completion.
 use gateway_auth::{
-    AuthConfig,
     crypto::sha256_hex,
     native::*,
     native_auth::NativeTransportIdentity,
@@ -9,15 +8,18 @@ use gateway_auth::{
         NATIVE_IMPORT_ACTION_HEADER, NATIVE_IMPORT_BODY_HEADER, NATIVE_IMPORT_OPERATION_HEADER,
         NativeImportMetadata, NativeImportTarget,
     },
+    types::AuthConfig,
 };
 use gateway_authority::{
-    Authority, TokenSource,
     native_control::{
-        NativeRenewalAuthority, NativeRenewalCancellation, RegisteredRenewalOwner,
-        actor::NativeRenewalActor, import::PreparedNativeImport,
+        NativeRenewalCancellation,
+        actor::NativeRenewalActor,
+        import::PreparedNativeImport,
+        receiver::{NativeRenewalAuthority, RegisteredRenewalOwner},
     },
+    store::{Authority, TokenSource},
 };
-use gateway_core::{GatewayError, state::AuthorityStore};
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use std::{collections::BTreeMap, net::SocketAddr, sync::Arc};
 
 /// Local construction/preparation errors, not an HTTP/provider status policy.

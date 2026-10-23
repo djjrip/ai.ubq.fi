@@ -2,11 +2,11 @@
 //! attempt; this module cannot reset, refresh credentials or select paid hops.
 use gateway_auth::provider_credentials::{CodexSourceSnapshot, read_codex_source_pool};
 use gateway_authority::{
-    Authority, TokenSource,
     capacity::{CodexCapacityAccountRef, CodexCapacitySample},
-    routing::{CapacityState, CohortProof, RouteSelection},
+    routing_types::{CapacityState, CohortProof, RouteSelection},
+    store::{Authority, TokenSource},
 };
-use gateway_core::{GatewayError, model::ModelId, state::AuthorityStore};
+use gateway_core::{error::GatewayError, model::ModelId, state::AuthorityStore};
 use gateway_observability::{
     capacity_shapes,
     host_types::{CapacityAccountRef, CapacityProbe},

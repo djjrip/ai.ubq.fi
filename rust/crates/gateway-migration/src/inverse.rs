@@ -1,7 +1,10 @@
-use crate::capture::{PrivateCapture, SourceEntry};
-use crate::engine::{Manifest, manifest_key, mapping_key};
-use crate::{error::MigrationError, *};
-use gateway_admin_data::profile::{encode_base64, to_source_profile as to_profile};
+use crate::{
+    capture::{PrivateCapture, SourceEntry},
+    engine::{Manifest, manifest_key, mapping_key},
+    error::MigrationError,
+    *,
+};
+use gateway_admin_data::profile::{encode_base64, source::to_source_profile as to_profile};
 use gateway_core::{
     query::{QueryRequest, QuerySelector, QueryStore},
     tuple_key::DecodedKeyPart,
@@ -117,7 +120,7 @@ pub(crate) fn inverse_value(
     }
     let current = record.json_value()?;
     let original = source
-        .map(|s| gateway_admin_data::profile::from_source_profile(&s.value))
+        .map(|s| gateway_admin_data::profile::source::from_source_profile(&s.value))
         .transpose()?
         .and_then(|v| v.to_json_lossless())
         .unwrap_or(json!({}));
@@ -374,13 +377,15 @@ pub(crate) async fn export_rows<S: QueryStore>(
             continue;
         }
         if starts(&p, &["uos_ai", "authority", "native_owner_renewal"]) {
-            gateway_authority::native_control::validate_native_control_custody(&key, record)?;
+            gateway_authority::native_control::custody::validate_native_control_custody(
+                &key, record,
+            )?;
             controls.push(k.clone());
             continue;
         }
         if starts(&p, &["uos_ai", "authority"]) {
             if key == gateway_authority::keys::kernel_defaults() {
-                let mut expected = gateway_authority::quota::KernelDefaults::default();
+                let mut expected = gateway_authority::kernel::KernelDefaults::default();
                 if let Some(source) =
                     all.get(&crate::key(json!(["default", "kernel_policy_limit_requests"])).0)
                 {
@@ -394,7 +399,7 @@ pub(crate) async fn export_rows<S: QueryStore>(
                         gateway_admin_runtime::parse::positive(source.json_value()?)
                             .unwrap_or(604800000);
                 }
-                let actual: gateway_authority::quota::KernelDefaults =
+                let actual: gateway_authority::kernel::KernelDefaults =
                     decode(record.json_value()?)?;
                 if actual != expected {
                     return Err(invalid(

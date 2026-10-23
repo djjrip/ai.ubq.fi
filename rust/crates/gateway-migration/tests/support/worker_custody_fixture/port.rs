@@ -1,6 +1,6 @@
 //! Fixture-only synchronous port to the existing private authority wire.
 //! The controller forwards requests to the actual common DO, never a local mirror.
-use gateway_core::{GatewayError, query::*, state::*};
+use gateway_core::{error::GatewayError, query::*, state::*};
 use serde::{Deserialize, Serialize};
 use std::{
     cell::Cell,

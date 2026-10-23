@@ -1,20 +1,21 @@
 //! Global serial subscription selection; source routing-serial.ts and routing-evaluation.ts.
-use gateway_core::{js_string::JsString16, model::ModelId};
-use std::collections::{BTreeMap, BTreeSet};
-
-use gateway_core::GatewayError;
-use gateway_core::identity::{
-    AccountBinding, ActiveSelection, ActiveTransitionReason, RoutingAccountHash,
+use crate::{
+    capacity_rules::{capacity_for, parse_capacity_store},
+    generation, invalid, keys, next_generation, nonnegative,
+    routing_codec::{normalize, parse_routing_state},
+    routing_types::*,
+    store::{Authority, TokenSource, Transaction},
+    text, unavailable,
 };
-use gateway_core::provider::{CodexQuotaClass, OveragePermission};
-use gateway_core::state::AuthorityStore;
-
-use crate::store::{Authority, TokenSource, Transaction};
-use crate::{generation, invalid, keys, next_generation, nonnegative, text, unavailable};
-
-use crate::capacity_rules::{capacity_for, parse_capacity_store};
-use crate::routing_codec::{normalize, parse_routing_state};
-use crate::routing_types::*;
+use gateway_core::{
+    error::GatewayError,
+    identity::{AccountBinding, ActiveSelection, ActiveTransitionReason, RoutingAccountHash},
+    js_string::JsString16,
+    model::ModelId,
+    provider::{CodexQuotaClass, OveragePermission},
+    state::AuthorityStore,
+};
+use std::collections::{BTreeMap, BTreeSet};
 
 pub fn model_quota_class(model: &ModelId) -> CodexQuotaClass {
     let trimmed = gateway_schema::reasoning::js_trim_source(model.as_js_string());

@@ -1,18 +1,16 @@
 use crate::{host::*, providers};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
+    model::ModelId,
     query::QueryStore,
+    source_control::{decode_source_control_record, encode_source_control_record},
+    source_json::SourceJson,
+    source_serialization as source,
     state::{
         AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, RevisionCheck,
         StoredRecord,
     },
     tuple_key::{ScalarKeyPart, TupleKey},
-};
-use gateway_core::{
-    model::ModelId,
-    source_control::{decode_source_control_record, encode_source_control_record},
-    source_json::SourceJson,
-    source_serialization as source,
 };
 use gateway_schema::{
     catalog::{CatalogInput, ProviderCatalog},

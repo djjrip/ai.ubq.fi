@@ -6,7 +6,15 @@ use gateway_auth::{
     },
 };
 use gateway_authority::{
-    AuthorityClock, capacity::*, keys, paid_control::PaidControlOwner, routing::*,
+    capacity::*,
+    capacity_rules::parse_capacity_store,
+    keys,
+    paid_control::PaidControlOwner,
+    routing_codec::parse_routing_state,
+    routing_types::{
+        CohortProof, PoolAccount, QuotaBlock, QuotaBlockSource, RouteSelection, SubscriptionPool,
+    },
+    store::AuthorityClock,
 };
 use gateway_core::{identity::PoolVersionstamp, provider::CodexQuotaClass, state::StoredRecord};
 use gateway_observability::host_types::*;

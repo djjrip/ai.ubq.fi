@@ -2,10 +2,10 @@
 //! listener, public configuration route, command or caller-selected source path.
 use crate::supervisor::SourceId;
 use gateway_auth::{
-    GatewayError,
     crypto::{base64url, decode_base64url},
     native_auth::{NativeCapability, NativeTransportIdentity},
 };
+use gateway_core::error::GatewayError;
 use serde::Deserialize;
 use std::{collections::BTreeSet, io::Read, net::SocketAddr, path::PathBuf};
 

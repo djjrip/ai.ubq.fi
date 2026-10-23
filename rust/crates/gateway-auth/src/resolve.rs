@@ -1,9 +1,3 @@
-use std::{cell::RefCell, collections::BTreeMap};
-
-use gateway_core::state::AuthorityStore;
-use serde_json::{Value, json};
-use url::Url;
-
 use crate::{
     api_keys,
     crypto::{Secret, sha256_base64url, sha256_hex},
@@ -14,7 +8,10 @@ use crate::{
     },
     upstream::*,
 };
-use gateway_core::GatewayError;
+use gateway_core::{error::GatewayError, state::AuthorityStore};
+use serde_json::{Value, json};
+use std::{cell::RefCell, collections::BTreeMap};
+use url::Url;
 
 pub struct AuthService<'a, S, H> {
     pub store: &'a S,

@@ -1,28 +1,8 @@
 //! Actual schema -> admission -> provider -> terminal transport path.
-use std::{cell::RefCell, collections::VecDeque, rc::Rc};
-
-use futures_util::StreamExt;
-use gateway_auth::AuthPrincipal;
-use gateway_core::{
-    GatewayError, identity::RequestId, lifecycle::SemanticTerminal, provider::UpstreamProvider,
-};
-use gateway_providers::{ClientSurface, ProviderEvent, StreamDecoder, decode_response};
-use gateway_routing_runtime::{
-    session::RoutingSession,
-    types::{
-        AttemptFailure, FailureOrigin, PreparedAttempt, RefusalDecision, RoutingInput,
-        TransportState,
-    },
-};
-use gateway_schema::source_request::{SourceRequestDocument, parse_http_body};
-use serde_json::json;
-use worker::{Context, Method, Request, Response, ResponseBody};
-
 use crate::{
     authority::RemoteAuthorityStore,
     catalog::CatalogState,
-    host::PlatformHost,
-    host::{PlatformClock, PlatformTokens},
+    host::{PlatformClock, PlatformHost, PlatformTokens},
     inference_lifecycle::{Lifecycle, Session, Usage, finish_hook},
     routing_host,
     storage::now_ms,
@@ -33,6 +13,28 @@ use crate::{
         stream::{ObservationHandle, ObservedStream},
     },
 };
+use futures_util::StreamExt;
+use gateway_auth::types::AuthPrincipal;
+use gateway_core::{
+    error::GatewayError, identity::RequestId, lifecycle::SemanticTerminal,
+    provider::UpstreamProvider,
+};
+use gateway_providers::{
+    response::decode_response,
+    sse::StreamDecoder,
+    types::{ClientSurface, ProviderEvent},
+};
+use gateway_routing_runtime::{
+    session::RoutingSession,
+    types::{
+        AttemptFailure, FailureOrigin, PreparedAttempt, RefusalDecision, RoutingInput,
+        TransportState,
+    },
+};
+use gateway_schema::source_request::{SourceRequestDocument, parse_http_body};
+use serde_json::json;
+use std::{cell::RefCell, collections::VecDeque, rc::Rc};
+use worker::{Context, Method, Request, Response, ResponseBody};
 
 const ATTEMPT_DEADLINE_MS: i32 = 1_800_000;
 
@@ -199,7 +201,7 @@ async fn dispatch_attempts(
         let headers = response
             .headers()
             .entries()
-            .collect::<gateway_providers::Headers>();
+            .collect::<gateway_providers::types::Headers>();
         if !continuing {
             session.transport_started(&attempt).await?;
         }
@@ -362,7 +364,7 @@ pub async fn run(
                 principal,
             )),
             key_id: match &principal.method {
-                gateway_auth::AuthMethod::KvApiKey { key_id, .. } => {
+                gateway_auth::types::AuthMethod::KvApiKey { key_id, .. } => {
                     Some(gateway_core::identity::ApiKeyId(key_id.clone()))
                 }
                 _ => None,
@@ -482,7 +484,7 @@ pub async fn run(
         let headers = upstream
             .headers()
             .entries()
-            .collect::<gateway_providers::Headers>();
+            .collect::<gateway_providers::types::Headers>();
         let decode_plan = gateway_providers::response::response_plan(prepared.decode(), &headers);
         capture.correlate(correlation(provider, &headers));
         let pricing = crate::inference_source::pricing_metadata(
@@ -1035,7 +1037,7 @@ fn apply_warnings(response: &mut Response, warnings: &[String]) -> Result<(), Ga
 
 struct Relay {
     source: worker::ByteStream,
-    plan: gateway_providers::DecodePlan,
+    plan: gateway_providers::types::DecodePlan,
     decoder: StreamDecoder,
     queue: VecDeque<Vec<u8>>,
     done: bool,
@@ -1074,7 +1076,7 @@ fn observe_event(observation: &ObservationHandle, event: &ProviderEvent) {
 
 fn copy_headers(
     response: &mut Response,
-    headers: &gateway_providers::Headers,
+    headers: &gateway_providers::types::Headers,
 ) -> Result<(), GatewayError> {
     for (name, value) in headers {
         let lower = name.to_ascii_lowercase();
@@ -1097,7 +1099,10 @@ fn copy_headers(
     Ok(())
 }
 
-fn correlation(provider: UpstreamProvider, headers: &gateway_providers::Headers) -> Option<&str> {
+fn correlation(
+    provider: UpstreamProvider,
+    headers: &gateway_providers::types::Headers,
+) -> Option<&str> {
     let names: &[&str] = if provider == UpstreamProvider::Deepseek {
         &["x-request-id", "x-ds-request-id", "x-deepseek-request-id"]
     } else if provider == UpstreamProvider::Cerebras {
@@ -1126,7 +1131,7 @@ fn correlation(provider: UpstreamProvider, headers: &gateway_providers::Headers)
 fn provider_correlation(
     response: &mut Response,
     provider: UpstreamProvider,
-    headers: &gateway_providers::Headers,
+    headers: &gateway_providers::types::Headers,
 ) -> Result<(), GatewayError> {
     let id = correlation(provider, headers);
     for name in [

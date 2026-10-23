@@ -4,14 +4,14 @@ mod facts;
 mod selection;
 pub mod types;
 
-use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
     keys,
     reset_types::{ResetConfig, ResetMode},
     routing_types::CohortProof,
+    store::{Authority, TokenSource, Transaction},
 };
 use gateway_core::{
-    GatewayError, identity::RequestContext, source_json::SourceJson, state::AuthorityStore,
+    error::GatewayError, identity::RequestContext, source_json::SourceJson, state::AuthorityStore,
     value::ValueEncoding,
 };
 use types::{

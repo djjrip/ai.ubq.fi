@@ -6,7 +6,8 @@ use gateway_auth::{
 };
 use gateway_authority::initial_control_owner::*;
 use gateway_core::{
-    GatewayError, js_string::JsString16, query::*, source_graph::*, state::*, tuple_key::TupleKey,
+    error::GatewayError, js_string::JsString16, query::*, source_graph::*, state::*,
+    tuple_key::TupleKey,
 };
 use gateway_migration::{
     engine::{PreparedAdoption, adopt_empty, adopt_empty_with_initial_control_owner},

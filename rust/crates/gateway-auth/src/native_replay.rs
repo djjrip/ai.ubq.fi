@@ -6,7 +6,7 @@ use crate::{
     native_auth::NativeNonceAuthority,
     store,
 };
-use gateway_core::{GatewayError, state::AuthorityStore};
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use std::collections::BTreeMap;

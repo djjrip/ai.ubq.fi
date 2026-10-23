@@ -1,8 +1,8 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
-use gateway_admin_data::profile::{CanonicalDates, to_source_profile};
+use gateway_admin_data::profile::{CanonicalDates, source::to_source_profile};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::*,
     state::*,
     tuple_key::{DecodedKeyPart, TupleKey},

@@ -1,8 +1,7 @@
 //! Default-off compile-only trust preparation, not an import permission issuer.
-use super::remote_tls::Roots;
-use super::{NativeRenewalCancellation, RemoteImportAuthority, unavailable};
+use super::{NativeRenewalCancellation, RemoteImportAuthority, remote_tls::Roots, unavailable};
 use gateway_auth::native_auth::NativeTransportIdentity;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::{
     net::{SocketAddr, TcpStream},
     time::Instant,

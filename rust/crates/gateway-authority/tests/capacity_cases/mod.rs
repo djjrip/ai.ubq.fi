@@ -10,7 +10,7 @@ use gateway_authority::{
     store::{Authority, AuthorityClock},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::{
         AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
     },

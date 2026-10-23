@@ -3,9 +3,18 @@ use gateway_admin::{
     routes::AdminOperation,
 };
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::*};
-use gateway_auth::{native::NativeReadRequest, upstream::*, webauthn::*, *};
+use gateway_auth::{
+    native::NativeReadRequest,
+    types::{
+        AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthResponse,
+        AuthResponseBody, unauthorized,
+    },
+    upstream::*,
+    webauthn::*,
+    *,
+};
 use gateway_core::{
-    GatewayError, js_string::JsString16, model::ModelId, query::*,
+    error::GatewayError, js_string::JsString16, model::ModelId, query::*,
     source_control::encode_source_control_record, source_json::SourceJson, state::*,
 };
 use gateway_schema::{
@@ -756,7 +765,7 @@ fn claude_roster_rotation_preserves_identity_and_fences_prior_generations() {
 
 #[test]
 fn claude_tombstone_refuses_legacy_or_environment_resurrection() {
-    use gateway_admin_runtime::claude::*;
+    use gateway_admin_runtime::claude::{source_secret::ClaudeSourceSecret, *};
     let store = Store::default();
     let host = Host::default();
     let credential = parse_credential(

@@ -1,21 +1,27 @@
 //! Fixed same-authority derived control metadata; these DTOs grant no write capability.
-use gateway_core::provider::PaidProvider;
-use gateway_core::state::RevisionCheck;
-use gateway_core::{model::ModelId, source_json::SourceJson, source_serialization as source};
-use gateway_providers::ClientSurface;
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
-
-use crate::paid_types::{PaidRequest, PaidRoutingPolicy};
-use crate::store::{Authority, TokenSource, Transaction};
-use crate::{keys, positive, text, unavailable};
+use crate::{
+    keys,
+    paid_types::{PaidRequest, PaidRoutingPolicy},
+    positive,
+    store::{Authority, TokenSource, Transaction},
+    text, unavailable,
+};
 use gateway_core::{
-    GatewayError,
-    state::{AuthorityStore, RecordKey},
+    error::GatewayError,
+    model::ModelId,
+    provider::PaidProvider,
+    source_json::SourceJson,
+    source_serialization as source,
+    state::{AuthorityStore, RecordKey, RevisionCheck},
     tuple_key::{ScalarKeyPart, TupleKey},
 };
-use gateway_providers::policy::{self, DeepseekHop, PaidRoutingInput};
+use gateway_providers::{
+    policy::{self, DeepseekHop, PaidRoutingInput},
+    types::ClientSurface,
+};
 use gateway_schema::{catalog_store, selection::ProviderSelection};
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::collections::BTreeSet;
 mod original;
 

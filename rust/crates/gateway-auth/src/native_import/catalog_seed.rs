@@ -1,7 +1,7 @@
 //! Optional catalog DATA only; a frame never creates import/store permission.
 use super::{authority::ImportAuthorityStateData, publication::valid_client_version};
 use crate::native::NATIVE_MAX_BODY_BYTES;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use serde::{Deserialize, Serialize};
 
 pub const IMPORT_CATALOG_SEED_OPERATION: &str = "codex_auth_import_catalog_seed";

@@ -4,7 +4,7 @@ use gateway_claude_runtime::{
     host, persistence::quota_key, pool::ClaudePoolSession, quota, response,
 };
 use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
-use gateway_providers::Headers;
+use gateway_providers::types::Headers;
 use serde_json::Value;
 
 fn fixture() -> Value {

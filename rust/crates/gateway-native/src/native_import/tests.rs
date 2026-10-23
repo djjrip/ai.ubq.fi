@@ -1,7 +1,6 @@
 //! Real proof/authority fixtures for native typed AUTH context only.
 use super::*;
 use gateway_auth::{
-    AuthConfig, AuthHost, AuthRequest, GatewayError,
     crypto::{Secret, base64url, sha256_hex},
     native::*,
     native_auth::{
@@ -15,19 +14,23 @@ use gateway_auth::{
         ManagedNativeSource, codex_source_pool_key,
     },
     session_index,
+    types::{AuthConfig, AuthHost, AuthRequest},
     upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
 };
 use gateway_authority::{
-    Authority, AuthorityClock, TokenSource, keys,
+    keys,
     native_control::{
-        NativeRenewalAuthority, NativeRenewalCancellation, RegisteredRenewalOwner, actor,
+        NativeRenewalCancellation, actor,
+        receiver::{NativeRenewalAuthority, RegisteredRenewalOwner},
     },
     paid_control::{
         PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner, PaidSourceCheck,
     },
-    routing::{PoolAccount, SubscriptionPool},
+    routing_types::{PoolAccount, SubscriptionPool},
+    store::{Authority, AuthorityClock, TokenSource},
 };
 use gateway_core::{
+    error::GatewayError,
     identity::{PoolVersionstamp, PrincipalId, RequestContext, RequestId},
     state::{
         AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,

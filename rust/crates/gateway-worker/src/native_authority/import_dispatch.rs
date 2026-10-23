@@ -1,7 +1,6 @@
 //! Exact existing import operations on the canonical Worker/carrier path.
 use super::*;
 use gateway_auth::{
-    AuthConfig,
     native_auth::AuthenticatedNativeOwner,
     native_import::{
         authority::{
@@ -10,6 +9,7 @@ use gateway_auth::{
         },
         catalog_seed::{IMPORT_CATALOG_SEED_OPERATION, ImportCatalogSeedRequestData},
     },
+    types::AuthConfig,
 };
 use gateway_publication::transport::PublicationReceiver;
 
@@ -105,7 +105,9 @@ pub async fn publication(
         return Err(invalid());
     }
     let command =
-        gateway_authority::native_control::import::ImportPublicationCommandData::parse(bytes)?;
+        gateway_auth::native_import::publication::command::ImportPublicationCommandData::parse(
+            bytes,
+        )?;
     let transport = native.transport()?;
     let headers = Headers::read(request)?;
     let incoming = Incoming(Cancellation::from_request(request)?);

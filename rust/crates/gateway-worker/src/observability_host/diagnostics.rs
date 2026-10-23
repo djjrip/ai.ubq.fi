@@ -1,7 +1,7 @@
 //! Source read-only reset-credit and overage displays. These GETs never authorize a redemption.
 use super::{RequestHost, unavailable};
 use gateway_auth::provider_credentials::CodexSourceAccount;
-use gateway_core::{GatewayError, js_string::JsString16, source_json::SourceJson};
+use gateway_core::{error::GatewayError, js_string::JsString16, source_json::SourceJson};
 use gateway_observability::host_types::{CapacityAccountRef, ResetCreditDiagnostic};
 use serde_json::Value;
 use std::collections::{BTreeMap, BTreeSet};

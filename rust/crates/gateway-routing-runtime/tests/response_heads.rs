@@ -1,7 +1,10 @@
 use gateway_core::{
     claude::ClaudeErrorEvidence, lifecycle::TransportObservation, provider::UpstreamProvider,
 };
-use gateway_providers::{ClaudeBodyOptions, ClaudeCredentialKind, policy::HopFailure};
+use gateway_providers::{
+    policy::HopFailure,
+    types::{ClaudeBodyOptions, ClaudeCredentialKind},
+};
 use gateway_routing_runtime::{extras::*, session::*, types::*};
 use gateway_routing_runtime_test_support::{exec::*, host::*, input::*, seed::*, store::*};
 use serde_json::json;
@@ -331,7 +334,7 @@ fn systemone_and_retrying_job_poll_use_actual_provider_and_original_quota() {
             handle
                 .finish(
                     TransportObservation::default(),
-                    gateway_authority::quota::KernelTerminal::Released,
+                    gateway_authority::kernel::KernelTerminal::Released,
                     "source-read-or-failure",
                 )
                 .await
@@ -437,7 +440,7 @@ fn invalid_image_request_releases_an_empty_source_plan_without_provider_dispatch
             handle
                 .finish(
                     TransportObservation::default(),
-                    gateway_authority::quota::KernelTerminal::Committed,
+                    gateway_authority::kernel::KernelTerminal::Committed,
                     "invalid-image"
                 )
                 .await
@@ -446,7 +449,7 @@ fn invalid_image_request_releases_an_empty_source_plan_without_provider_dispatch
         let finished = handle
             .finish(
                 TransportObservation::default(),
-                gateway_authority::quota::KernelTerminal::Released,
+                gateway_authority::kernel::KernelTerminal::Released,
                 "invalid-image",
             )
             .await

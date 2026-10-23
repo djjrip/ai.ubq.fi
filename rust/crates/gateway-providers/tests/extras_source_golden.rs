@@ -1,6 +1,6 @@
 //! Golden cases from src/embeddings/voyage.ts, src/images.ts and
 //! src/systemone/handlers.ts at 1b7b9737; no live provider calls.
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use gateway_providers::{extras, types::PrepareOptions};
 use serde_json::{Value, json};
 

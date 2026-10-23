@@ -14,10 +14,16 @@ mod state;
 mod store;
 
 use capabilities::*;
-use gateway_admin::operations::{AdminHost, AdminInput, PaidKeyFields};
-use gateway_admin::{routes::AdminOperation, source_input as source_body};
-use gateway_auth::{AuthHost, AuthResponse, invalid, native::NativeReadRequest};
-use gateway_core::{GatewayError, query::QueryStore, state::RevisionCheck};
+use gateway_admin::{
+    operations::{AdminHost, AdminInput, PaidKeyFields},
+    routes::AdminOperation,
+    source_input as source_body,
+};
+use gateway_auth::{
+    native::NativeReadRequest,
+    types::{AuthHost, AuthResponse, invalid},
+};
+use gateway_core::{error::GatewayError, query::QueryStore, state::RevisionCheck};
 use serde_json::{Value, json};
 
 #[derive(Clone, Debug, Default)]
@@ -41,7 +47,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminHost for AdminRunt
     ) -> Result<AuthResponse, GatewayError> {
         // Defense in depth for callers outside AdminService. There is deliberately no super-admin tier.
         if !input.actor.is_admin {
-            return Err(gateway_auth::unauthorized());
+            return Err(gateway_auth::types::unauthorized());
         }
         if !(0..=gateway_core::identity::MAX_SAFE_INTEGER).contains(&input.now_ms) {
             return Err(invalid("Admin request clock is invalid"));
@@ -630,7 +636,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminRuntime<'_, S, H, 
             )
             .await?
             {
-                return Err(gateway_auth::conflict(
+                return Err(gateway_auth::types::conflict(
                     "Prompt instructions changed concurrently; retry",
                 ));
             }
@@ -651,7 +657,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminRuntime<'_, S, H, 
             )
             .await?
             {
-                return Err(gateway_auth::conflict(
+                return Err(gateway_auth::types::conflict(
                     "Prompt instructions changed concurrently; retry",
                 ));
             }

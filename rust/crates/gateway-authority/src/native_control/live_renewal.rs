@@ -7,12 +7,12 @@ use super::{
     receiver::NativeRenewalAuthority,
     rows::{self, ActionRow, conflict, fail},
 };
-use crate::store::{TokenSource, Transaction};
 use crate::{
     keys,
     paid_control::{PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner},
     routing::LiveAccountSelection,
     routing_types::SubscriptionPool,
+    store::{TokenSource, Transaction},
 };
 use gateway_auth::{
     crypto::sha256_hex,
@@ -21,7 +21,7 @@ use gateway_auth::{
     },
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::ActiveSelection,
     state::AuthorityStore,
     tuple_key::{ScalarKeyPart, TupleKey},

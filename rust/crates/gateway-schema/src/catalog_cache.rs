@@ -1,13 +1,14 @@
 //! Exact-version cache values, real portable gzip and deterministic refresh decisions.
-use crate::model_control as c;
-use crate::{metadata::MetadataHint, snapshot::parse_client_version, util::*};
+use crate::{metadata::MetadataHint, model_control as c, snapshot::parse_client_version, util::*};
 use flate2::{Compression, read::GzDecoder, write::GzEncoder};
 use gateway_core::{
-    GatewayError, model::ModelId, source_json::SourceJson, source_serialization as source,
+    error::GatewayError, model::ModelId, source_json::SourceJson, source_serialization as source,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::VecDeque;
-use std::io::{Read, Write};
+use std::{
+    collections::VecDeque,
+    io::{Read, Write},
+};
 pub const FRESH_MS: i64 = 300_000;
 pub const RETENTION_MS: i64 = 86_400_000;
 pub const REFRESH_LEASE_MS: i64 = 15_000;

@@ -1,10 +1,11 @@
 //! Finite original-import phases. Authentication and coherent authority reads,
 //! never request DATA, select the actual one-use operation/start permission.
-use super::super::rows::{GenerationEffect, Phase};
-use super::custody_session::ImportCustodyStartedRequest;
-use super::effects::NativeImportMode;
-use super::*;
-use gateway_auth::native_import::authority::{ImportCompletionData, ImportCompletionModelsData};
+use super::{
+    super::rows::{GenerationEffect, Phase},
+    custody_session::ImportCustodyStartedRequest,
+    effects::NativeImportMode,
+    *,
+};
 use gateway_auth::{
     native::NATIVE_RENEWAL_AUTHORITY_PATH,
     native_auth::{
@@ -12,9 +13,10 @@ use gateway_auth::{
     },
     native_import::authority::{
         IMPORT_STARTED_OPERATION, ImportAuthorityClaimMode, ImportAuthorityCommand as Command,
-        ImportAuthorityReplyData as Reply, ImportAuthorityRequestData as Request,
-        ImportAuthorityResult as ResultData, ImportAuthorityStateData as State,
+        ImportAuthorityRequestData as Request, ImportAuthorityStateData as State,
         ImportAuthorityTerminalData, ImportCustodyStartedReplyData, ImportCustodyStartedWire,
+        completion::{ImportCompletionData, ImportCompletionModelsData},
+        result::{ImportAuthorityReplyData as Reply, ImportAuthorityResult as ResultData},
     },
 };
 use gateway_schema::{catalog_store, snapshot::ModelSnapshot};

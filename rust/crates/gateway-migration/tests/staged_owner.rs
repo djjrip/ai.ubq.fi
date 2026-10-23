@@ -1,7 +1,8 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
 use gateway_core::{
-    GatewayError, js_string::JsString16, query::*, source_graph::*, state::*, tuple_key::TupleKey,
+    error::GatewayError, js_string::JsString16, query::*, source_graph::*, state::*,
+    tuple_key::TupleKey,
 };
 use gateway_migration::{
     graph_transport,

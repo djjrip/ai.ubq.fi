@@ -3,12 +3,12 @@ pub mod source_secret;
 
 use crate::store;
 use gateway_auth::{
-    AuthHost,
     crypto::sha256_hex,
     store::{check, commit},
+    types::AuthHost,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_control::{decode_source_control_record, encode_source_control_record},
     source_json::SourceJson,
@@ -17,9 +17,8 @@ use gateway_core::{
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use std::{collections::BTreeSet, sync::Arc};
-
 use source_secret::ClaudeSourceSecret;
+use std::{collections::BTreeSet, sync::Arc};
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -525,7 +524,7 @@ pub async fn load_roster<S: AuthorityStore, H: AuthHost>(
             });
         }
     }
-    Err(gateway_auth::conflict(
+    Err(gateway_auth::types::conflict(
         "Claude account bootstrap changed repeatedly",
     ))
 }
@@ -592,14 +591,16 @@ pub async fn update_account<S: AuthorityStore, H: AuthHost>(
             })
         };
         if input.account_id.is_some() && previous.is_none() {
-            return Err(gateway_auth::conflict("Claude account was not found"));
+            return Err(gateway_auth::types::conflict(
+                "Claude account was not found",
+            ));
         }
         if input
             .expected
             .as_ref()
             .is_some_and(|e| previous.is_none_or(|p| !same_binding(p, e)))
         {
-            return Err(gateway_auth::conflict(
+            return Err(gateway_auth::types::conflict(
                 "Claude account changed before update",
             ));
         }
@@ -607,9 +608,9 @@ pub async fn update_account<S: AuthorityStore, H: AuthHost>(
             .credential
             .clone()
             .or_else(|| previous.map(|p| p.credential.clone()))
-            .ok_or_else(|| gateway_auth::invalid("Claude credential is required"))?;
+            .ok_or_else(|| gateway_auth::types::invalid("Claude credential is required"))?;
         if previous.is_none() && roster.accounts.len() >= 32 {
-            return Err(gateway_auth::conflict(
+            return Err(gateway_auth::types::conflict(
                 "Claude account storage limit reached",
             ));
         }
@@ -624,7 +625,7 @@ pub async fn update_account<S: AuthorityStore, H: AuthHost>(
                 .iter()
                 .any(|a| a.credential_fingerprint == account.credential_fingerprint)
         {
-            return Err(gateway_auth::conflict(
+            return Err(gateway_auth::types::conflict(
                 "This credential/workspace binding is already configured",
             ));
         }
@@ -657,7 +658,7 @@ pub async fn update_account<S: AuthorityStore, H: AuthHost>(
             return Ok(account);
         }
     }
-    Err(gateway_auth::conflict(
+    Err(gateway_auth::types::conflict(
         "Claude account update changed repeatedly",
     ))
 }

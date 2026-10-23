@@ -4,15 +4,17 @@ use gateway_auth::{
     crypto::Secret,
     provider_credentials::{codex_source_pool_key, parse_codex_source_pool},
 };
-use gateway_authority::cache_experiment::{
-    RefreshPermit,
-    model::{STEPS, Sample, TargetBinding, Usage},
-    run::{ExperimentIo, ReadSample},
-    transport::CacheDispatch,
+use gateway_authority::{
+    cache_experiment::{
+        RefreshPermit,
+        model::{STEPS, Sample, TargetBinding, Usage},
+        run::{ExperimentIo, ReadSample},
+        transport::CacheDispatch,
+    },
+    routing_types::{PoolAccount, SubscriptionPool},
 };
-use gateway_authority::routing_types::{PoolAccount, SubscriptionPool};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::PoolVersionstamp,
     tuple_key::{ScalarKeyPart::String as Text, TupleKey},
 };

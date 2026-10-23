@@ -1,12 +1,12 @@
 //! Source class-fallback and capacity reconciliation rules, separate from producer custody.
-use crate::capacity_rules::{capacity_headroom_for_observation, capacity_observation_is_fresh};
-use crate::routing_codec::CLASSES;
 use crate::{
+    capacity_rules::{capacity_headroom_for_observation, capacity_observation_is_fresh},
     next_generation,
     routing::class_name,
+    routing_codec::CLASSES,
     routing_types::{CapacityObservation, QuotaBlock, RoutingSlot, RoutingState},
 };
-use gateway_core::{GatewayError, model::ModelId, provider::CodexQuotaClass};
+use gateway_core::{error::GatewayError, model::ModelId, provider::CodexQuotaClass};
 use std::collections::BTreeMap;
 
 impl RoutingSlot {

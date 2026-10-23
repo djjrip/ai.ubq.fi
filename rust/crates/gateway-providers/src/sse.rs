@@ -1,7 +1,6 @@
 //! Bounded incremental SSE parsing. Reader EOF never substitutes for a Responses terminal.
 use crate::{source_collector::ChatCollector, types::*, writer::ResponseWriter};
-use gateway_core::GatewayError;
-use gateway_core::provider::UpstreamProvider;
+use gateway_core::{error::GatewayError, provider::UpstreamProvider};
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 pub const MAX_RESPONSES_EVENT_BYTES: usize = 16 * 1024 * 1024;

@@ -1,9 +1,9 @@
 //! Fixed paid control publications, derived in the same store as admission/accounting.
 //! These records are provenance and a coarse index; only authority issues a request receipt.
 use crate::{CatalogRuntime, host::*, state};
-use gateway_authority::{keys, paid::PaidRoutingPolicy, paid_control::*};
+use gateway_authority::{keys, paid_control::*, paid_types::PaidRoutingPolicy};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::MAX_SAFE_INTEGER,
     model::ModelId,
     provider::PaidProvider,

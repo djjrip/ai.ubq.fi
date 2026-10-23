@@ -5,9 +5,9 @@ use gateway_admin::{
     operations::{AdminHost, AdminInput},
     routes::AdminOperation,
 };
-use gateway_auth::{AuthHost, store::key};
+use gateway_auth::{store::key, types::AuthHost};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{ApiKeyId, RequestId},
     source_graph::GraphNode,
     state::*,
@@ -33,7 +33,7 @@ impl AuthorityStore for &port::Store {
     }
 }
 struct Tokens(AtomicU64);
-impl gateway_authority::TokenSource for Tokens {
+impl gateway_authority::store::TokenSource for Tokens {
     fn next_token(&self) -> Result<String, GatewayError> {
         Ok(format!(
             "native-fixture-{}",
@@ -42,7 +42,7 @@ impl gateway_authority::TokenSource for Tokens {
     }
 }
 struct Clock(i64);
-impl gateway_authority::AuthorityClock for Clock {
+impl gateway_authority::store::AuthorityClock for Clock {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(self.0)
     }
@@ -92,9 +92,9 @@ fn admin(body: Value, now_ms: i64) -> AdminInput {
         parameter: None,
         query: Default::default(),
         body: gateway_core::source_json::SourceJson::from_serializable(&body).unwrap(),
-        actor: gateway_auth::AuthPrincipal {
+        actor: gateway_auth::types::AuthPrincipal {
             token: None,
-            method: gateway_auth::AuthMethod::AdminAllowlist,
+            method: gateway_auth::types::AuthMethod::AdminAllowlist,
             is_admin: true,
             is_super_admin: false,
         },
@@ -113,8 +113,11 @@ pub fn exercise(
     if policy.key_id != "offline-key" {
         return Err(port::error("Original offline API-key fixture differs"));
     }
-    let authority =
-        gateway_authority::Authority::with_clock(store, Tokens(AtomicU64::new(1)), Clock(now));
+    let authority = gateway_authority::store::Authority::with_clock(
+        store,
+        Tokens(AtomicU64::new(1)),
+        Clock(now),
+    );
     let reservation = support_run(authority.reserve_api_key(
         &ApiKeyId("offline-key".into()),
         &RequestId("native-post-restart-admission".into()),

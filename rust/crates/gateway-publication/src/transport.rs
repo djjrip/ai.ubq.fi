@@ -11,7 +11,6 @@ use crate::{
     },
 };
 use gateway_auth::{
-    GatewayError,
     crypto::base64url,
     native::*,
     native_auth::{
@@ -21,7 +20,7 @@ use gateway_auth::{
     native_credentials::{NativeCredentials, NativeOwnerId},
     native_replay::StoreNonceAuthority,
 };
-use gateway_core::state::AuthorityStore;
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use std::future::Future;
 
 #[derive(Clone)]

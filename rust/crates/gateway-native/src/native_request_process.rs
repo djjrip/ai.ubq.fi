@@ -5,7 +5,7 @@ use crate::{
     daemon_config::NativeDaemonConfig,
     live_bridge::socket::{LiveDialContext, NativeLiveConnector},
 };
-use gateway_auth::GatewayError;
+use gateway_core::error::GatewayError;
 use rustix::event::PollFlags;
 use std::{
     io::{self, Read},

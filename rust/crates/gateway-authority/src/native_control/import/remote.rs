@@ -1,21 +1,23 @@
 //! Actual fixed TLS import client. No generic response/carrier/reader input can
 //! mint body, claim, Started, currentness or terminal proofs through this type.
-use super::custody_session::{ImportCustodyStartedRequest, VerifiedCurrentImportStarted};
-use super::effects::{NativeImportBinding, NativeImportClaim, NativeImportMode, NativeImportStart};
-use super::remote_state::RemoteImportState;
-use super::remote_tls::{ImportAuthorityTls, Roots};
-use super::*;
+use super::{
+    custody_session::{ImportCustodyStartedRequest, VerifiedCurrentImportStarted},
+    effects::{NativeImportBinding, NativeImportClaim, NativeImportMode, NativeImportStart},
+    remote_state::RemoteImportState,
+    remote_tls::{ImportAuthorityTls, Roots},
+    *,
+};
 use gateway_auth::{
     crypto::base64url,
     native::*,
     native_auth::NativeTransportIdentity,
     native_import::authority::{
         ImportAuthorityClaimMode, ImportAuthorityCommand as Command,
-        ImportAuthorityReplyData as Reply, ImportAuthorityRequestData as Request,
-        ImportAuthorityResult as ResultData, ImportAuthorityStateData as State,
-        ImportAuthorityTerminalData, ImportCompletionData, ImportCustodyStartedReplyData,
-        ImportCustodyStartedWire, import_authority_reply_max_bytes_for,
-        import_custody_reply_max_bytes,
+        ImportAuthorityRequestData as Request, ImportAuthorityStateData as State,
+        ImportAuthorityTerminalData, ImportCustodyStartedReplyData, ImportCustodyStartedWire,
+        completion::ImportCompletionData,
+        import_authority_reply_max_bytes_for, import_custody_reply_max_bytes,
+        result::{ImportAuthorityReplyData as Reply, ImportAuthorityResult as ResultData},
     },
 };
 use std::{

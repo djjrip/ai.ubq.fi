@@ -1,7 +1,7 @@
 //! Private bounded applier: ordered sealed frames to one actual Store RPC port.
 //! It is not a public route, fixture acceptance, activation or target owner grant.
 #![cfg(all(unix, not(target_arch = "wasm32")))]
-use gateway_core::{GatewayError, query::*, state::*};
+use gateway_core::{error::GatewayError, query::*, state::*};
 use gateway_migration::staged::{
     STAGED_BATCH_MAX_BYTES, StageReceipt, StageRequest, decode_stage_request, execute_staged,
 };

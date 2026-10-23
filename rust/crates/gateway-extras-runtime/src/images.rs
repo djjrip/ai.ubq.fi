@@ -1,9 +1,8 @@
 use crate::{store::*, types::*};
 use futures_util::future::join_all;
-use gateway_core::GatewayError;
-use gateway_core::{source_json::SourceJson, source_serialization as source};
+use gateway_core::{error::GatewayError, source_json::SourceJson, source_serialization as source};
 use gateway_providers::extras;
-use gateway_schema::source_request::source_value::Value as SourceValue;
+use gateway_schema::source_request::value::Value as SourceValue;
 use serde_json::{Value, json};
 use std::{cell::Cell, rc::Rc};
 const INPUT_BYTES: usize = 50 * 1024 * 1024;
@@ -125,7 +124,7 @@ pub(crate) async fn images<H: ExtrasHost>(
             Some("model_unavailable"),
         )));
     };
-    let plan = extras::prepare_parsed_image(&parsed, &model, &request.context.request_id.0);
+    let plan = extras::image::prepare_parsed_image(&parsed, &model, &request.context.request_id.0);
     if plan.count > 1
         && serde_json::to_vec(&plan.responses)
             .map_err(|_| invalid_state())?

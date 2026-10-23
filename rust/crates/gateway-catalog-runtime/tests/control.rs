@@ -3,7 +3,7 @@ mod support;
 
 use support::source_catalog;
 type MemoryStore = Store;
-type TestAuthority = gateway_authority::Authority<Store, Tokens>;
+type TestAuthority = gateway_authority::store::Authority<Store, Tokens>;
 use gateway_authority::{keys, paid_control::*};
 use gateway_catalog_runtime::{
     CatalogRuntime,
@@ -14,7 +14,7 @@ use gateway_catalog_runtime::{
     providers, state,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     provider::PaidProvider,
     query::{QueryPage, QueryRequest, QueryStore},
     source_control::decode_source_control_record,
@@ -766,7 +766,7 @@ fn custody_metadata_contains_only_the_observed_routing_fields() {
 }
 
 struct Tokens(Cell<u64>);
-impl gateway_authority::TokenSource for Tokens {
+impl gateway_authority::store::TokenSource for Tokens {
     fn next_token(&self) -> Result<String, GatewayError> {
         let n = self.0.get() + 1;
         self.0.set(n);
@@ -774,7 +774,7 @@ impl gateway_authority::TokenSource for Tokens {
     }
 }
 struct Clock(i64);
-impl gateway_authority::AuthorityClock for Clock {
+impl gateway_authority::store::AuthorityClock for Clock {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(self.0)
     }
@@ -783,9 +783,9 @@ fn paid_request(
     store: &Store,
     provider: PaidProvider,
     model: &str,
-) -> gateway_authority::paid::PaidRequest {
+) -> gateway_authority::paid_types::PaidRequest {
     use gateway_core::identity::{ApiKeyId, PaidAttemptId, RequestId};
-    gateway_authority::paid::PaidRequest {
+    gateway_authority::paid_types::PaidRequest {
         key_id: ApiKeyId("fixture-key".into()),
         request_id: RequestId("fixture-request".into()),
         attempt_id: PaidAttemptId("fixture-attempt".into()),
@@ -815,7 +815,7 @@ fn context(model: &str) -> PaidRequestContext {
             &json!({"model":model,"input":"controlled fixture","stream":false,"tools":[]}),
         )
         .unwrap(),
-        surface: gateway_providers::ClientSurface::Responses,
+        surface: gateway_providers::types::ClientSurface::Responses,
         synthetic_hop: None,
     }
 }
@@ -823,9 +823,9 @@ fn context(model: &str) -> PaidRequestContext {
 #[test]
 fn actual_publisher_receipt_and_reservation_share_one_authority_and_reject_stale_existing() {
     use gateway_authority::{
-        Authority,
-        paid::{PaidAdmission, PaidAuthorization},
+        paid_types::{PaidAdmission, PaidAuthorization},
         quota::ApiKeyPolicy,
+        store::Authority,
     };
     let store = Store::new();
     store.install(true, false);
@@ -907,7 +907,7 @@ fn actual_publisher_receipt_and_reservation_share_one_authority_and_reject_stale
 
 #[test]
 fn coarse_union_never_authorizes_the_wrong_client_endpoint() {
-    use gateway_authority::Authority;
+    use gateway_authority::store::Authority;
     let store = Store::new();
     store.install(false, true);
     let host = Host::new(&store, false, true);
@@ -932,7 +932,7 @@ fn coarse_union_never_authorizes_the_wrong_client_endpoint() {
 
 #[test]
 fn ordinary_tool_request_cannot_use_a_coarse_non_tool_surplus_permission() {
-    use gateway_authority::Authority;
+    use gateway_authority::store::Authority;
     let store = Store::new();
     store.install(true, false);
     let host = Host::new(&store, true, false);
@@ -962,7 +962,7 @@ fn ordinary_tool_request_cannot_use_a_coarse_non_tool_surplus_permission() {
 
 #[test]
 fn synthetic_override_requires_the_server_owned_hop_not_a_body_shortcut() {
-    use gateway_authority::Authority;
+    use gateway_authority::store::Authority;
     let store = Store::new();
     store.install(true, false);
     store.put(
@@ -1000,7 +1000,7 @@ mod native_configuration {
             NativeNonceAuthority, NativeTransportIdentity,
         },
     };
-    use gateway_native::control_publication::{
+    use gateway_publication::control_publication::{
         ConfiguredPaidInputs, PreparedConfigurationPublication, bootstrap_fixture_owner,
         fixture_owner_statement,
     };

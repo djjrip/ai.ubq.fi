@@ -1,16 +1,16 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
-use gateway_admin_data::profile::{CanonicalDates, SourceDateHost};
 use gateway_admin_data::profile::{
-    from_source_profile as from_profile, to_source_profile as to_profile,
+    CanonicalDates, SourceDateHost,
+    source::{from_source_profile as from_profile, to_source_profile as to_profile},
 };
 use gateway_auth::{crypto::sha256_base64url, store::key};
-use gateway_core::source_json::SourceJson;
-use gateway_core::value::PortableValue;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{ApiKeyId, RequestId},
+    source_json::SourceJson,
     state::*,
+    value::PortableValue,
 };
 use gateway_migration::{
     capture::{PrivateCapture, SourceEntry},
@@ -125,7 +125,7 @@ fn fixture() -> (PrivateCapture, String) {
     )
 }
 struct Tokens(AtomicU64);
-impl gateway_authority::TokenSource for Tokens {
+impl gateway_authority::store::TokenSource for Tokens {
     fn next_token(&self) -> Result<String, GatewayError> {
         Ok(format!(
             "fixture-revision-{}",
@@ -134,7 +134,7 @@ impl gateway_authority::TokenSource for Tokens {
     }
 }
 struct Clock;
-impl gateway_authority::AuthorityClock for Clock {
+impl gateway_authority::store::AuthorityClock for Clock {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(2300)
     }
@@ -153,8 +153,11 @@ fn actual_sqlite_adoption_restart_auth_admission_mutation_and_latest_inverse() {
     let store = SqliteStore::open(&path);
     let policy = run(gateway_auth::api_keys::authenticate(&store, &token, 2300)).unwrap();
     assert_eq!(policy.key_id, "fixture-key");
-    let authority =
-        gateway_authority::Authority::with_clock(store.clone(), Tokens(AtomicU64::new(1)), Clock);
+    let authority = gateway_authority::store::Authority::with_clock(
+        store.clone(),
+        Tokens(AtomicU64::new(1)),
+        Clock,
+    );
     assert!(
         run(authority.reserve_api_key(
             &ApiKeyId("fixture-key".into()),
@@ -423,8 +426,11 @@ fn pending_paid_exposure_and_rollup_marker_survive_restart_and_deferral_inverse(
     .unwrap();
     drop(store);
     let store = SqliteStore::open(&path);
-    let authority =
-        gateway_authority::Authority::with_clock(store.clone(), Tokens(AtomicU64::new(1)), Clock);
+    let authority = gateway_authority::store::Authority::with_clock(
+        store.clone(),
+        Tokens(AtomicU64::new(1)),
+        Clock,
+    );
     let due = run(authority.due_paid(2300, 10)).unwrap();
     assert_eq!(due.len(), 1);
     assert_eq!(due[0].attempt_id.0, "pending-attempt");
@@ -434,7 +440,8 @@ fn pending_paid_exposure_and_rollup_marker_survive_restart_and_deferral_inverse(
     )))
     .unwrap()
     .unwrap();
-    let row: gateway_authority::paid::PaidAttempt = serde_json::from_value(row.value).unwrap();
+    let row: gateway_authority::paid_types::PaidAttempt =
+        serde_json::from_value(row.value).unwrap();
     assert_eq!(row.reservation.request_id.0, "pending-attempt");
     assert_eq!(row.reservation.attempt_id.0, "pending-attempt");
     assert!(row.spend_microcredits.is_none());
@@ -495,9 +502,11 @@ fn captured_uint8_catalog_is_usable_after_sqlite_restart_and_inverts_exactly() {
     let directory = Directory::new();
     let path = directory.file("catalog.sqlite3");
     let catalog = prepare_catalog(
-        "0.163.0",
-        "auth-fixture",
-        "body-fixture",
+        gateway_schema::catalog_cache::CatalogIdentity {
+            client_version: "0.163.0",
+            auth_generation: "auth-fixture",
+            body_generation: "body-fixture",
+        },
         r#"{"models":[{"slug":"gpt-fixture","display_name":"Fixture"}]}"#,
         Some("etag-fixture"),
         Some("application/json"),
@@ -607,7 +616,7 @@ impl gateway_auth::webauthn::WebAuthnCrypto for AdminHost {
         ))
     }
 }
-impl gateway_auth::AuthHost for AdminHost {
+impl gateway_auth::types::AuthHost for AdminHost {
     fn now_ms(&self) -> i64 {
         2300
     }
@@ -640,9 +649,9 @@ fn admin_input(body: Value) -> gateway_admin::operations::AdminInput {
         parameter: None,
         query: Default::default(),
         body: gateway_core::source_json::SourceJson::from_serializable(&body).unwrap(),
-        actor: gateway_auth::AuthPrincipal {
+        actor: gateway_auth::types::AuthPrincipal {
             token: None,
-            method: gateway_auth::AuthMethod::AdminAllowlist,
+            method: gateway_auth::types::AuthMethod::AdminAllowlist,
             is_admin: true,
             is_super_admin: false,
         },
@@ -931,8 +940,11 @@ fn source_kernel_defaults_feed_actual_admission_and_new_org_rows_invert() {
         &prepare(&input, &CanonicalDates).unwrap(),
     ))
     .unwrap();
-    let authority =
-        gateway_authority::Authority::with_clock(store.clone(), Tokens(AtomicU64::new(1)), Clock);
+    let authority = gateway_authority::store::Authority::with_clock(
+        store.clone(),
+        Tokens(AtomicU64::new(1)),
+        Clock,
+    );
     let reservation = run(authority.reserve_kernel(
         "fixture-owner",
         "fixture-repo",

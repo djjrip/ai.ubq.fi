@@ -1,20 +1,24 @@
-use crate::kernel_data::{
-    SourcePolicy, SourceWindow, canonical, data_put, data_read, data_value, decode_policy, expiry,
-    identity_fields, limit, new_window, part, physical_labels, positive, source_truth, summary,
-    summary_document, target, validate_window, window_document,
+use crate::{
+    AdminRuntime,
+    capabilities::RuntimeCapabilities,
+    kernel_data::{
+        SourcePolicy, SourceWindow, canonical, data_put, data_read, data_value, decode_policy,
+        expiry, identity_fields, limit, new_window, part, physical_labels, positive, source_truth,
+        summary, summary_document, target, validate_window, window_document,
+    },
+    parse, store,
 };
-use crate::{AdminRuntime, capabilities::RuntimeCapabilities, parse, store};
 use gateway_admin::{operations::AdminInput, routes::AdminOperation, source_input as body};
 use gateway_auth::{
-    AuthHost, AuthResponse, conflict, invalid,
     store::{check, commit, put},
+    types::{AuthHost, AuthResponse, conflict, invalid},
 };
 use gateway_authority::{
+    kernel::{KernelDefaults, KernelReservation, KernelTerminal},
     keys,
-    quota::{KernelDefaults, KernelReservation, KernelTerminal},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     query::QueryStore,
     source_control::decode_source_control_record,

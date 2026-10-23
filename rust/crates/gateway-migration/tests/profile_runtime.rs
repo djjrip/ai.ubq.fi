@@ -1,12 +1,12 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
-use gateway_admin_data::profile::{CanonicalDates, SourceDateHost, to_source_profile};
+use gateway_admin_data::profile::{CanonicalDates, SourceDateHost, source::to_source_profile};
 use gateway_admin_runtime::capabilities::{
     Context, MigrationImport, MigrationProfile, MigrationRequest,
 };
-use gateway_auth::{AuthResponse, AuthResponseBody};
+use gateway_auth::types::{AuthResponse, AuthResponseBody};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::*,
     value::{PortableValue, ValueEncoding},
 };

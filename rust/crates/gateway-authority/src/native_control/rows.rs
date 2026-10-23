@@ -1,6 +1,6 @@
 use super::NativeRenewalFence;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::RecordKey,
     tuple_key::{ScalarKeyPart, TupleKey},
 };

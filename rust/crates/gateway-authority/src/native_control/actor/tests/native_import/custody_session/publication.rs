@@ -2,10 +2,12 @@
 //! Config DATA here is synthetic; trusted receiver derivation is separately gated.
 use super::*;
 use crate::native_control::import::publication::PreparedNativeImportPublication;
-use gateway_auth::native::NATIVE_PUBLICATION_PATH;
-use gateway_auth::native_import::publication::{
-    ImportAccessDocument, ImportCatalogData, ImportPublicationCommandData,
-    NativeImportPublicationDisposition,
+use gateway_auth::{
+    native::NATIVE_PUBLICATION_PATH,
+    native_import::publication::{
+        NativeImportPublicationDisposition,
+        command::{ImportAccessDocument, ImportCatalogData, ImportPublicationCommandData},
+    },
 };
 use gateway_core::{
     provider::PaidProvider, source_control::encode_source_control_record, source_json::SourceJson,

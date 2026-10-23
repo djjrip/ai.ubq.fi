@@ -1,20 +1,22 @@
 //! Paid ledger v3: exposure, terminal evidence and correlated billing are independent.
-use gateway_core::GatewayError;
-use gateway_core::identity::{ApiKeyId, MicrocreditLimit, PaidAttemptId};
-use gateway_core::lifecycle::{BillingState, DispatchState, PaidTerminalState};
-use gateway_core::provider::PaidProvider;
-use gateway_core::state::AuthorityStore;
-
-use crate::paid_control::PaidRoutingReceipt;
-use crate::quota::ApiKeyPolicy;
-use crate::routing::validate_cohort;
-use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
-    DAY_MS, PAID_RETENTION_MS, add, invalid, keys, nonnegative, positive, quota_error, retention,
+    DAY_MS, PAID_RETENTION_MS, add, invalid, keys, nonnegative,
+    paid_control::PaidRoutingReceipt,
+    paid_types::*,
+    positive,
+    quota::ApiKeyPolicy,
+    quota_error, retention,
+    routing::validate_cohort,
+    store::{Authority, TokenSource, Transaction},
     text, unavailable,
 };
-
-use crate::paid_types::*;
+use gateway_core::{
+    error::GatewayError,
+    identity::{ApiKeyId, MicrocreditLimit, PaidAttemptId},
+    lifecycle::{BillingState, DispatchState, PaidTerminalState},
+    provider::PaidProvider,
+    state::AuthorityStore,
+};
 pub mod source_records;
 pub mod source_usage;
 

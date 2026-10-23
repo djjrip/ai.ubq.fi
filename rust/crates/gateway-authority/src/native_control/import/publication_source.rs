@@ -1,13 +1,13 @@
 //! Fixed source/normalized/catalog mutations for one verified original import.
 use super::*;
-use crate::store::Transaction;
 use crate::{
     keys,
     routing_types::{PoolAccount, SubscriptionPool},
+    store::Transaction,
 };
 use gateway_auth::{
     crypto::Secret,
-    native_import::publication::{ImportCatalogData, ImportPublicationCommandData},
+    native_import::publication::command::{ImportCatalogData, ImportPublicationCommandData},
     provider_credentials::{
         CodexNativeOwner, CodexSourceAccount, MANAGED_NATIVE_SOURCE_VERSION, ManagedNativeSource,
         codex_source_pool_key, parse_codex_source_pool,

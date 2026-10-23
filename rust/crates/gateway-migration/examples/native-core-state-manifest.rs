@@ -33,7 +33,8 @@ struct Receipt {
     credential_opened: bool,
 }
 fn failure(message: &str) -> gateway_migration::error::MigrationError {
-    gateway_core::GatewayError::unavailable(message, "m20_core_state_manifest_invalid").into()
+    gateway_core::error::GatewayError::unavailable(message, "m20_core_state_manifest_invalid")
+        .into()
 }
 fn main() -> Result<(), gateway_migration::error::MigrationError> {
     assert_eq!(std::env::args_os().len(), 1, "Private input is stdin only");

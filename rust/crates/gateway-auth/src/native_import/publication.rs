@@ -4,7 +4,7 @@ use crate::{
     crypto::{Secret, sha256_hex},
     provider_credentials::codex_credential_identity,
 };
-use gateway_core::{GatewayError, source_json::SourceJson};
+use gateway_core::{error::GatewayError, source_json::SourceJson};
 use serde::{Deserialize, Serialize};
 pub mod command;
 pub mod data;

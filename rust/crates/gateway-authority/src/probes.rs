@@ -1,20 +1,19 @@
 //! Bounded routing and scoped overage probe transitions.
-use crate::routing::{class_name, read_view, validate_cohort};
-use crate::routing_types::{
-    AdmittedAccount, CohortProof, ProbeLease, QuotaBlock, ScopedOverageProbe,
+use crate::{
+    PROBE_LEASE_MS, add, invalid, keys, next_generation, nonnegative,
+    routing::{class_name, read_view, validate_cohort},
+    routing_types::{AdmittedAccount, CohortProof, ProbeLease, QuotaBlock, ScopedOverageProbe},
+    store::{Authority, TokenSource},
+    text, unavailable,
 };
-use crate::store::{Authority, TokenSource};
-use crate::{PROBE_LEASE_MS, add, invalid, keys, next_generation, nonnegative, text, unavailable};
-use gateway_core::GatewayError;
-use gateway_core::identity::RoutingAccountHash;
-use gateway_core::state::AuthorityStore;
+use gateway_core::{error::GatewayError, identity::RoutingAccountHash, state::AuthorityStore};
 
 impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     /// Administrative R-only half-open transition, not provider reset proof or an election.
     pub async fn recheck_codex_slot(
         &self,
         actor: &crate::native_control::actor::NativeRenewalActor,
-        config: &gateway_auth::AuthConfig,
+        config: &gateway_auth::types::AuthConfig,
         slot_number: u8,
     ) -> Result<bool, GatewayError> {
         if !(1..=2).contains(&slot_number) {

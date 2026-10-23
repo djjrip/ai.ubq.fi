@@ -4,7 +4,7 @@ use gateway_authority::cache_experiment::{
     run::ReadSample,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_json::SourceJson,
     source_usage::{UsageStatus, extract_source_usage_tokens},

@@ -6,7 +6,6 @@ use crate::{
     owner_control::NativeControlContext,
 };
 use gateway_auth::{
-    AuthConfig, GatewayError,
     native::{
         NATIVE_KEY_HEADER, NATIVE_MAC_HEADER, NATIVE_NONCE_HEADER, NATIVE_TIME_HEADER,
         NATIVE_VERSION_HEADER,
@@ -18,12 +17,16 @@ use gateway_auth::{
         NativeImportAuthHeaders, NativeImportKind, NativeImportMetadata,
     },
     native_replay::StoreNonceAuthority,
+    types::AuthConfig,
 };
 use gateway_authority::{
-    Authority, TokenSource,
-    native_control::{NativeRenewalAuthority, NativeRenewalCancellation, RegisteredRenewalOwner},
+    native_control::{
+        NativeRenewalCancellation,
+        receiver::{NativeRenewalAuthority, RegisteredRenewalOwner},
+    },
+    store::{Authority, TokenSource},
 };
-use gateway_core::state::AuthorityStore;
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use std::{
     io::{Read, Write},
     net::TcpStream,
@@ -214,7 +217,7 @@ pub(crate) fn read_remote_import<C: NativeRenewalCancellation>(
     head: &ImportHead,
     identity: &NativeTransportIdentity,
     nonces: &SqliteNonceStore,
-    authority: &gateway_authority::native_control::import::RemoteImportAuthority<'_, C>,
+    authority: &gateway_authority::native_control::import::remote::RemoteImportAuthority<'_, C>,
     original: &NativeControlContext<'_>,
     registered_target: (&str, &str),
 ) -> Result<RemoteImportDocument, GatewayError> {

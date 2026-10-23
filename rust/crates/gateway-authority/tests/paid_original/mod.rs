@@ -6,7 +6,7 @@ use gateway_authority::{
     paid_types::PaidRequest,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{PrincipalId, RequestContext},
     tuple_key::{ScalarKeyPart, TupleKey},
 };

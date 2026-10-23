@@ -1,15 +1,20 @@
 //! Provider-outcome reconciliation and verified-reset recovery, with no provider I/O.
-use crate::reset::{ResetAuthorization, authorization_fences, check_record};
-use crate::reset_types::{
-    FullPoolResetReconciliation, ResetCandidate, ResetRecord, ResetState, reset_invocation,
+use crate::{
+    PROBE_LEASE_MS, add, invalid, keys, next_generation,
+    reset::{ResetAuthorization, authorization_fences, check_record},
+    reset_types::{
+        FullPoolResetReconciliation, ResetCandidate, ResetRecord, ResetState, reset_invocation,
+    },
+    routing::read_view,
+    routing_types::{AdmittedAccount, ProbeLease},
+    store::{Authority, TokenSource},
+    text, unavailable,
 };
-use crate::routing::read_view;
-use crate::routing_types::{AdmittedAccount, ProbeLease};
-use crate::store::{Authority, TokenSource};
-use crate::{PROBE_LEASE_MS, add, invalid, keys, next_generation, text, unavailable};
-use gateway_core::GatewayError;
-use gateway_core::identity::{ActiveSelection, ActiveTransitionReason};
-use gateway_core::state::AuthorityStore;
+use gateway_core::{
+    error::GatewayError,
+    identity::{ActiveSelection, ActiveTransitionReason},
+    state::AuthorityStore,
+};
 
 impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     /// Source preexistingBankedReset: never request inventory or create a redemption/budget.

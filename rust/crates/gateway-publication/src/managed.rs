@@ -7,7 +7,6 @@ use crate::{
     wire::{PreparedPublicationCommand, PublicationDisposition, invalid},
 };
 use gateway_auth::{
-    GatewayError,
     crypto::{Secret, base64url},
     managed_access::ManagedAccessProjection,
     native::*,
@@ -15,6 +14,7 @@ use gateway_auth::{
     native_credentials::native_refresh_time_ns,
     provider_credentials::{codex_credential_identity, valid_native_generation},
 };
+use gateway_core::error::GatewayError;
 use serde::{Deserialize, Serialize};
 
 pub const MANAGED_PUBLICATION_MAX_BYTES: usize = 65_536;

@@ -1,7 +1,6 @@
 //! Operator selection, whitelist and non-secret per-account model eligibility hints.
-use crate::aliases::SourceStringCollator;
 use crate::{
-    aliases::{LEGACY_SYNTHETIC_MODEL, SYNTHETIC_MODEL},
+    aliases::{LEGACY_SYNTHETIC_MODEL, SYNTHETIC_MODEL, SourceStringCollator},
     util::*,
 };
 use gateway_core::{model::ModelId, source_json::SourceJson};
@@ -171,7 +170,7 @@ impl AccountModelsStore {
         model: &ModelId,
         at_ms: i64,
         collator: &dyn SourceStringCollator,
-    ) -> Result<Self, gateway_core::GatewayError> {
+    ) -> Result<Self, gateway_core::error::GatewayError> {
         use gateway_core::source_serialization as source;
         let mut next = self.clone();
         let entries = next.unsupported.entry(account.into()).or_default();

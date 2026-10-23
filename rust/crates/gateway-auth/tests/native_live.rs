@@ -5,7 +5,7 @@ use gateway_auth::{
     },
     native_live::*,
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::{
     collections::BTreeSet,
     future::Future,

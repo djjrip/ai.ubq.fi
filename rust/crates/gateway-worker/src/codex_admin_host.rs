@@ -1,8 +1,11 @@
 //! Named administrative Codex operations, always authenticated from the original request.
 use gateway_admin_runtime::capabilities::{CodexRequest, Context};
-use gateway_auth::{AuthConfig, AuthRequest, AuthResponse, AuthService};
+use gateway_auth::{
+    resolve::AuthService,
+    types::{AuthConfig, AuthRequest, AuthResponse},
+};
 use gateway_authority::native_control::actor::NativeRenewalActor;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 
 pub(crate) mod automatic;
 mod manual;
@@ -40,7 +43,7 @@ pub async fn execute(
             "codex_native_import_unavailable",
         )),
         CodexRequest::Recheck { slot } => {
-            let authority = gateway_authority::Authority::with_clock(
+            let authority = gateway_authority::store::Authority::with_clock(
                 store.clone(),
                 crate::host::PlatformTokens,
                 crate::host::PlatformClock,

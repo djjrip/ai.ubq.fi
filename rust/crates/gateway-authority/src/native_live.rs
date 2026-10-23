@@ -1,19 +1,21 @@
 //! Same-authority live custody. No admission, quota proof, refresh or paid authorization.
-use crate::keys;
-use crate::native_control::actor::{self, NativeActorScope, NativeRenewalActor, StoredNativeActor};
-use crate::paid_control::PaidControlOwner;
-use crate::routing_types::SubscriptionPool;
-use crate::store::{Authority, TokenSource, Transaction};
+use crate::{
+    keys,
+    native_control::actor::{self, NativeActorScope, NativeRenewalActor, StoredNativeActor},
+    paid_control::PaidControlOwner,
+    routing_types::SubscriptionPool,
+    store::{Authority, TokenSource, Transaction},
+};
 use gateway_auth::{
-    AuthConfig,
     native_auth::NativeTransportIdentity,
     native_live::AuthenticatedNativeLive,
     provider_credentials::{
         codex_access_expiry_ms, codex_source_pool_key, parse_codex_source_pool,
     },
+    types::AuthConfig,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::{AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation},
     tuple_key::{ScalarKeyPart, TupleKey},
 };

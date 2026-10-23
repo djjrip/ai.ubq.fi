@@ -3,7 +3,6 @@
 //! the original actor/action. This client cannot mint a local action or claim.
 use crate::{owner_control::NativeControlContext, private_https::PrivateHttps};
 use gateway_auth::{
-    GatewayError,
     crypto::base64url,
     native::*,
     native_auth::NativeTransportIdentity,
@@ -16,6 +15,7 @@ use gateway_authority::native_control::{
     NATIVE_RENEWAL_FENCE_VERSION, NativeRenewalMode,
     wire::{NativeRenewalAuthorityRequest as Request, NativeRenewalAuthorityResponse as Response},
 };
+use gateway_core::error::GatewayError;
 use std::{net::TcpStream, time::Instant};
 
 pub struct NativeAuthorityHttp {

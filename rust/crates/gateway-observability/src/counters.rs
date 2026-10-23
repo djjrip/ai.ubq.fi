@@ -1,7 +1,7 @@
 //! KV U64 values retain their explicit portable-value encoding.
 use crate::{store, types::ObservabilityHost};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     state::{AuthorityStore, RecordKey, RecordMutation, RevisionCheck, StoredRecord},
     value::PortableValue,
 };

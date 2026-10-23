@@ -1,8 +1,10 @@
 //! Private offline operator data, never an HTTP/admin capability. The host must
 //! hold a NEW empty target unpublished and quiescent until seal and reconciliation.
 use crate::{engine::PreparedAdoption, *};
-use gateway_authority::initial_control_owner::{InitialAdoptionAccountFacts, InitialAdoptionFacts};
-use gateway_authority::paid_control::PaidControlOwner;
+use gateway_authority::{
+    initial_control_owner::{InitialAdoptionAccountFacts, InitialAdoptionFacts},
+    paid_control::PaidControlOwner,
+};
 use gateway_core::{
     query::{QueryRequest, QuerySelector, QueryStore},
     state::{AtomicTransition, AuthorityStore, CommitOutcome, RecordMutation, RevisionCheck},
@@ -790,7 +792,8 @@ async fn sealed_owner_facts<S: QueryStore>(
     }
     let pool = gateway_auth::provider_credentials::parse_codex_source_pool(source.json_value()?)?
         .ok_or_else(owner_refused)?;
-    let routing: gateway_authority::routing::SubscriptionPool = decode(normalized.json_value()?)?;
+    let routing: gateway_authority::routing_types::SubscriptionPool =
+        decode(normalized.json_value()?)?;
     if routing.v != 1
         || routing.pool_versionstamp.0 != source.revision
         || routing.accounts.len() != pool.accounts.len()

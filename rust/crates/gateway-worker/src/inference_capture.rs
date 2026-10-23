@@ -1,7 +1,14 @@
 //! Passive request-owned replay evidence. It never authorizes dispatch or settlement.
+use crate::{
+    authority::RemoteAuthorityStore,
+    host::PlatformHost,
+    observability_host::{self, CaptureInput},
+    storage::now_ms,
+    transport::outbound::Cancellation,
+};
 use futures_util::Stream;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     lifecycle::{BodyOutcome, ReaderTermination, SemanticTerminal, TransportObservation},
     model::ModelId,
@@ -23,14 +30,6 @@ use std::{
     task::{Context, Poll},
 };
 use worker::{Request, Response, ResponseBody};
-
-use crate::{
-    authority::RemoteAuthorityStore,
-    host::PlatformHost,
-    observability_host::{self, CaptureInput},
-    storage::now_ms,
-    transport::outbound::Cancellation,
-};
 
 pub struct Capture {
     runtime: observability_host::Runtime,
@@ -180,7 +179,7 @@ impl Capture {
         &self,
         observation: TransportObservation,
         usage: Option<&serde_json::Value>,
-        paid: Option<&gateway_authority::paid::PaidAttempt>,
+        paid: Option<&gateway_authority::paid_types::PaidAttempt>,
     ) {
         let Some(request) = self.terminal_request.borrow().clone() else {
             return;
@@ -413,7 +412,7 @@ impl Capture {
         &self,
         observation: TransportObservation,
         usage: Option<&serde_json::Value>,
-        paid: Option<&gateway_authority::paid::PaidAttempt>,
+        paid: Option<&gateway_authority::paid_types::PaidAttempt>,
     ) {
         if self.finished.replace(true) {
             return;

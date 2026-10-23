@@ -1,13 +1,14 @@
 //! Buffered response validation and translation. Transport success is not semantic completion.
-use crate::source as s;
 use crate::{
-    tools,
+    source as s, tools,
     types::*,
     usage,
     writer::{ResponseWriter, envelope, finish_disposition},
 };
-use gateway_core::source_json::SourceJson;
-use gateway_core::{GatewayError, lifecycle::SemanticTerminal, provider::UpstreamProvider};
+use gateway_core::{
+    error::GatewayError, lifecycle::SemanticTerminal, provider::UpstreamProvider,
+    source_json::SourceJson,
+};
 use serde_json::{Value, json};
 pub fn normalize_chat_completion(
     value: &Value,

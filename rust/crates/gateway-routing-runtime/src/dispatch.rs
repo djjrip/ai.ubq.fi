@@ -5,9 +5,12 @@ use crate::{
     settlement,
     types::*,
 };
-use gateway_authority::{AuthorityClock, TokenSource, quota::KernelTerminal};
+use gateway_authority::{
+    kernel::KernelTerminal,
+    store::{AuthorityClock, TokenSource},
+};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     lifecycle::{PaidTerminalState, SemanticTerminal, TransportObservation},
     provider::UpstreamProvider,
     query::QueryStore,
@@ -76,14 +79,14 @@ impl<
                     .into());
                 }
             };
-            let input = gateway_authority::paid::PaidRequest {
+            let input = gateway_authority::paid_types::PaidRequest {
                 key_id: reservation.key_id.clone(),
                 request_id: reservation.request_id.clone(),
                 attempt_id: reservation.attempt_id.clone(),
                 provider: reservation.provider,
                 model: record.model.clone(),
                 route: self.input.context.route.clone(),
-                path: if self.input.surface == gateway_providers::ClientSurface::Chat {
+                path: if self.input.surface == gateway_providers::types::ClientSurface::Chat {
                     "/v1/chat/completions"
                 } else {
                     "/v1/responses"
@@ -109,7 +112,7 @@ impl<
                 .await?;
             Self::check_paid_credential(&record.fence, &receipt)?;
             let authorization = if synthetic {
-                gateway_authority::paid::PaidAuthorization::DirectPaidModel
+                gateway_authority::paid_types::PaidAuthorization::DirectPaidModel
             } else {
                 self.paid_authorization(&row).await?
             };
@@ -118,7 +121,7 @@ impl<
                 .reserve_paid(&input, &authorization, &receipt, self.now()?)
                 .await?
             {
-                gateway_authority::paid::PaidAdmission::Existing(current)
+                gateway_authority::paid_types::PaidAdmission::Existing(current)
                     if current == *reservation => {}
                 _ => {
                     return Err(journal::unavailable(
@@ -546,7 +549,7 @@ fn paid_terminal(terminal: SemanticTerminal) -> PaidTerminalState {
         SemanticTerminal::Failed | SemanticTerminal::Error => PaidTerminalState::Failed,
     }
 }
-fn lithos_wait_ms(headers: &gateway_providers::Headers, now: i64) -> Option<i64> {
+fn lithos_wait_ms(headers: &gateway_providers::types::Headers, now: i64) -> Option<i64> {
     let wait = gateway_providers::lithos::rate_limit_wait(headers, now as f64, |raw| {
         chrono::DateTime::parse_from_rfc2822(raw)
             .ok()

@@ -5,12 +5,13 @@ mod platform;
 
 use crate::{authority::RemoteAuthorityStore, host::PlatformHost};
 use gateway_admin_runtime::claude_generation::StateGeneration;
-use gateway_auth::{AuthMethod, AuthPrincipal};
+use gateway_auth::types::{AuthMethod, AuthPrincipal};
 use gateway_claude_runtime::{
-    ClaudePoolSession, OutcomeDecision, PoolConfig, PoolSelection, SelectedAccount, SelectionInput,
+    host::{OutcomeDecision, PoolConfig, PoolSelection, SelectedAccount, SelectionInput},
+    pool::ClaudePoolSession,
 };
 use gateway_core::{
-    GatewayError, claude::ClaudeErrorEvidence, model::ModelId, source_json::SourceJson,
+    claude::ClaudeErrorEvidence, error::GatewayError, model::ModelId, source_json::SourceJson,
 };
 use gateway_providers::replay::{ReplayContext, ReplayStore, ReplayTransport};
 use gateway_routing_runtime::types::{
@@ -53,7 +54,7 @@ pub struct Binding {
 /// Private, non-Clone and non-Deserialize; a foreign request cannot finish it.
 pub struct Head {
     owner: Rc<()>,
-    accepted: gateway_claude_runtime::AcceptedHead,
+    accepted: gateway_claude_runtime::host::AcceptedHead,
 }
 
 impl Binding {
@@ -219,7 +220,7 @@ impl Binding {
         &self,
         fence: &CredentialFence,
         model: &ModelId,
-        body: &gateway_providers::PreparedClaudeBody,
+        body: &gateway_providers::types::PreparedClaudeBody,
     ) -> Result<
         crate::transport::outbound::ConstructedRequest,
         gateway_routing_runtime::types::RoutingError,
@@ -269,7 +270,7 @@ impl Binding {
                 &self.store,
                 &self.host,
                 &selected,
-                gateway_claude_runtime::ResponseObservation {
+                gateway_claude_runtime::host::ResponseObservation {
                     status: response.status,
                     headers: response.headers,
                     provider_request_id: response.provider_request_id,
@@ -352,11 +353,11 @@ fn credential(selected: &SelectedAccount) -> PublishedCredential {
     }
     PublishedCredential::Claude {
         fence: credential_fence(selected),
-        body_options: gateway_providers::ClaudeBodyOptions {
+        body_options: gateway_providers::types::ClaudeBodyOptions {
             native_reasoning_efforts: options.native_reasoning_efforts,
             supports_disabled_thinking: options.supports_disabled_thinking,
             restored_native_messages: options.restored_native_messages,
-            ..gateway_providers::ClaudeBodyOptions::new(kind)
+            ..gateway_providers::types::ClaudeBodyOptions::new(kind)
         },
     }
 }

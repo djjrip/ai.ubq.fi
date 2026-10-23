@@ -1,7 +1,7 @@
 //! Finite, already-authorized administrator catalog operations; no HTTP or credential ownership.
 use crate::{CatalogRuntime, host::*, state};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     query::QueryStore,
     source_control::encode_source_control_record,
     source_json::SourceJson,
@@ -9,16 +9,15 @@ use gateway_core::{
     state::{AtomicTransition, CommitOutcome, RecordMutation},
 };
 use gateway_schema::{
-    catalog::{
-        ProviderCatalog, build_catalog_snapshot, public_catalog as public_catalog_projection,
-    },
+    catalog::ProviderCatalog,
     catalog_store,
+    catalog_views::{build_catalog_snapshot, public_catalog as public_catalog_projection},
     runtime_config::{
         build_runtime_config, default_model, default_reasoning_effort, normalize_runtime_config,
     },
     selection::{ModelWhitelist, normalize_whitelist_ids},
     snapshot::{SnapshotOverrides, normalize_snapshot},
-    source_request::SourceRequestError,
+    source_request::error::SourceRequestError,
     util,
 };
 use serde::Serialize;

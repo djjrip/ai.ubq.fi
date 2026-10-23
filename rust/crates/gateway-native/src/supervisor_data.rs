@@ -7,7 +7,7 @@ use crate::{
     transport::{SupervisorMethod, SupervisorTransport},
     unix::UnixSupervisor,
 };
-use gateway_core::{GatewayError, redaction::redact};
+use gateway_core::{error::GatewayError, redaction::redact};
 use serde_json::{Value, json};
 use std::{
     collections::{BTreeMap, BTreeSet},

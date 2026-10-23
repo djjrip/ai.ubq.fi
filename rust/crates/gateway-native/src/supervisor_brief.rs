@@ -7,7 +7,7 @@ use crate::{
     unix::UnixSupervisor,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     redaction::{redact, redact_parts},
 };
 use serde::{Deserialize, Serialize};

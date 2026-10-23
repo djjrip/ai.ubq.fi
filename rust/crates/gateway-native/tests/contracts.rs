@@ -1,10 +1,11 @@
-use std::collections::BTreeSet;
-
-use gateway_auth::crypto::{Secret, base64url};
-use gateway_auth::native_credentials::{
-    NativeCredentials, native_refresh_time_ns, parse_native_document, verify_bootstrap,
-    verify_daemon_account, verify_generation,
+use gateway_auth::{
+    crypto::{Secret, base64url},
+    native_credentials::{
+        NativeCredentials, native_refresh_time_ns, parse_native_document, verify_bootstrap,
+        verify_daemon_account, verify_generation,
+    },
 };
+use gateway_core::error::GatewayError;
 use gateway_native::{
     supervisor::{
         InventoryScope, KnownThread, SourceId, SupervisorState, classify_state, extract_follow,
@@ -13,6 +14,7 @@ use gateway_native::{
     transport::{RenewalStep, SupervisorMethod, SupervisorTransport},
 };
 use serde_json::json;
+use std::collections::BTreeSet;
 
 fn token(expiry: i64, user: &str, account: &str) -> String {
     format!("e30.{}.fixture",base64url(json!({"exp":expiry,"email":"fixture@example.invalid","https://api.openai.com/auth":{"chatgpt_user_id":user,"chatgpt_account_id":account}}).to_string().as_bytes()))
@@ -255,7 +257,7 @@ fn capped_follow_entries_remain_eligible_until_their_revision_is_emitted() {
 
 #[cfg(unix)]
 struct FollowFixture {
-    replies: std::collections::VecDeque<Result<serde_json::Value, gateway_auth::GatewayError>>,
+    replies: std::collections::VecDeque<Result<serde_json::Value, GatewayError>>,
     closed: bool,
 }
 #[cfg(unix)]
@@ -264,11 +266,11 @@ impl SupervisorTransport for FollowFixture {
         &mut self,
         method: SupervisorMethod,
         _: serde_json::Value,
-    ) -> Result<serde_json::Value, gateway_auth::GatewayError> {
+    ) -> Result<serde_json::Value, GatewayError> {
         assert_eq!(method, SupervisorMethod::ThreadTurnsList);
         self.replies.pop_front().unwrap()
     }
-    async fn close(&mut self) -> Result<(), gateway_auth::GatewayError> {
+    async fn close(&mut self) -> Result<(), GatewayError> {
         self.closed = true;
         Ok(())
     }
@@ -329,7 +331,7 @@ fn failed_full_follow_read_keeps_the_cursor_of_the_last_recorded_summary_item() 
     let mut transport = FollowFixture {
         replies: std::collections::VecDeque::from([
             Ok(summary),
-            Err(gateway_auth::GatewayError::unavailable(
+            Err(GatewayError::unavailable(
                 "Fixture full view unavailable",
                 "fixture_unavailable",
             )),

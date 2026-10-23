@@ -1,11 +1,10 @@
 //! Profile NDJSON conversion; never loads a VM-specific value codec or executes JavaScript.
 pub mod source;
 
-use crate::migration::NormalizedEntry;
-use crate::{error, json_number};
+use crate::{error, json_number, migration::NormalizedEntry};
 use chrono::{DateTime, NaiveDate};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     tuple_key::{BigIntKey, KeyPart, TupleKey},
     value::PortableValue,
 };

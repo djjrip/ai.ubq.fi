@@ -1,17 +1,15 @@
 use crate::{
     ObservabilityRuntime,
-    replay_values::SourceObject,
-    types::{HealthProvider, HealthTarget, ObservabilityHost},
-};
-use crate::{
     completion::Completion,
     health::{aggregate_states, binding_current, unknown_health},
     host_types::*,
+    replay_values::SourceObject,
     store,
+    types::{HealthProvider, HealthTarget, ObservabilityHost},
 };
 use gateway_admin_runtime::capabilities::Context;
-use gateway_auth::AuthResponse;
-use gateway_core::{GatewayError, query::QueryStore, source_json::SourceJson};
+use gateway_auth::types::AuthResponse;
+use gateway_core::{error::GatewayError, query::QueryStore, source_json::SourceJson};
 use serde_json::{Value, json};
 use std::{cell::RefCell, rc::Rc};
 #[derive(Clone)]

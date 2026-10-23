@@ -1,5 +1,6 @@
 use gateway_admin_data::migration::{ObservedRow, audit};
 use gateway_core::{
+    error::GatewayError,
     js_string::JsString16,
     source_control::{
         decode_source_control_record, encode_source_control_record, source_json_tree,
@@ -162,8 +163,8 @@ struct Replay<'a>(&'a [ObservedRow]);
 impl audit::AuditInventory for Replay<'_> {
     fn visit(
         &self,
-        callback: &mut dyn FnMut(&ObservedRow) -> Result<(), gateway_core::GatewayError>,
-    ) -> Result<(), gateway_core::GatewayError> {
+        callback: &mut dyn FnMut(&ObservedRow) -> Result<(), GatewayError>,
+    ) -> Result<(), GatewayError> {
         for row in self.0 {
             let decoded = row.clone();
             callback(&decoded)?;
@@ -176,7 +177,7 @@ fn inspect_paid(
     known: &BTreeSet<String>,
     unlimited: &BTreeSet<String>,
     now: i64,
-) -> Result<audit::Audit, gateway_core::GatewayError> {
+) -> Result<audit::Audit, GatewayError> {
     let result = audit::paid::inspect_paid(rows, known, unlimited, now);
     let replay = audit::paid::inspect_paid_inventory(&Replay(rows), known, unlimited, now);
     assert_eq!(format!("{result:?}"), format!("{replay:?}"));

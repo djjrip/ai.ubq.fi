@@ -1,4 +1,6 @@
-use gateway_core::{GatewayError, js_string::JsString16, model::ModelId, source_json::SourceJson};
+use gateway_core::{
+    error::GatewayError, js_string::JsString16, model::ModelId, source_json::SourceJson,
+};
 use gateway_schema::{
     aliases::*,
     catalog::{CatalogInput, ProviderCatalog},

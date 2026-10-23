@@ -4,7 +4,7 @@ use gateway_auth::{
     passkeys::{AssertionVerification, PasskeyCredential, RegistrationVerification},
     webauthn::*,
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use p256::ecdsa::{
     Signature, SigningKey, VerifyingKey,
     signature::{Signer, Verifier},

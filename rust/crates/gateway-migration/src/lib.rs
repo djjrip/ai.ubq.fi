@@ -35,9 +35,9 @@ mod rollup_source;
 mod source_metadata;
 pub mod staged;
 
-use gateway_core::source_json::SourceJson;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
+    source_json::SourceJson,
     state::{RecordKey, StoredRecord},
     tuple_key::TupleKey,
 };

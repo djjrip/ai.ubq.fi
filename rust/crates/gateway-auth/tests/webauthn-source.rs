@@ -6,7 +6,7 @@ use gateway_auth::{
     passkeys::{AssertionVerification, PasskeyCredential, RegistrationVerification},
     webauthn::*,
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use serde_json::Value;
 use std::{
     future::Future,

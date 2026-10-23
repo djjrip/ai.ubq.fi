@@ -1,17 +1,18 @@
 //! Recoverable request intent only. Counters, pool state and billing remain m03-owned.
 use crate::types::{CredentialFence, RevisionCheckWire};
-use gateway_authority::TokenSource;
 use gateway_authority::{
-    paid::{PaidCorrelation, PaidReservation, PaidUsage},
-    quota::{ApiReservation, KernelReservation},
+    kernel::KernelReservation,
+    paid_types::{PaidCorrelation, PaidReservation, PaidUsage},
+    quota::ApiReservation,
+    store::TokenSource,
 };
-use gateway_core::local_work::{LocalWorkRecord, journal_local_work};
-use gateway_core::provider::UpstreamProvider;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{PaidAttemptId, RequestContext},
     lifecycle::TransportObservation,
+    local_work::{LocalWorkRecord, journal_local_work},
     model::ModelId,
+    provider::UpstreamProvider,
     source_control::{decode_source_control_record, encode_source_control_record},
     source_json::SourceJson,
     source_serialization as source,

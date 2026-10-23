@@ -1,13 +1,12 @@
 //! Banked-reset owner fencing and spend-once boundaries. No provider call occurs here.
-use gateway_core::GatewayError;
-use gateway_core::state::AuthorityStore;
-use sha2::{Digest, Sha256};
-
-use crate::routing::{class_name, read_view, validate_cohort};
-use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
-    DAY_MS, PROBE_LEASE_MS, add, invalid, keys, next_generation, nonnegative, text, unavailable,
+    DAY_MS, PROBE_LEASE_MS, add, invalid, keys, next_generation, nonnegative,
+    routing::{class_name, read_view, validate_cohort},
+    store::{Authority, TokenSource, Transaction},
+    text, unavailable,
 };
+use gateway_core::{error::GatewayError, state::AuthorityStore};
+use sha2::{Digest, Sha256};
 
 pub(crate) fn hash(value: &str) -> String {
     const HEX: &[u8; 16] = b"0123456789abcdef";

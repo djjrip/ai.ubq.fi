@@ -3,9 +3,9 @@ use gateway_admin_runtime::{
     brief,
     capabilities::{Context, ErrorDiagnostics, PricingSnapshot, SupervisorBriefTarget},
 };
-use gateway_auth::{AuthResponse, native::NativeReadRequest};
+use gateway_auth::{native::NativeReadRequest, types::AuthResponse};
 use gateway_catalog_runtime::admin::AdminCatalogOperation;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use serde_json::Value;
 use std::collections::BTreeMap;
 use worker::Method;
@@ -165,7 +165,9 @@ fn unavailable(message: &str) -> GatewayError {
 // Only AdminCatalogOperation::Catalog reaches this helper. Its exact two errors
 // are admin.rs213/216 map_err(lift), lift73 = SourceRequestError::from_gateway.
 // Clone therefore preserves the actual original error body/status, not a fallback diagnostic.
-fn catalogue_error(error: gateway_schema::source_request::SourceRequestError) -> GatewayError {
+fn catalogue_error(
+    error: gateway_schema::source_request::error::SourceRequestError,
+) -> GatewayError {
     error.diagnostic().clone()
 }
 
@@ -173,12 +175,12 @@ fn catalogue_error(error: gateway_schema::source_request::SourceRequestError) ->
 mod catalogue_tests {
     #[test]
     fn catalogue_lift_preserves_the_exact_original_gateway_error() {
-        let original =
-            gateway_core::GatewayError::new(409, "original catalog error", Some("catalog_fixture"))
-                .with_type("server_error")
-                .with_param(None);
-        let source =
-            gateway_schema::source_request::SourceRequestError::from_gateway(original.clone());
+        let original = GatewayError::new(409, "original catalog error", Some("catalog_fixture"))
+            .with_type("server_error")
+            .with_param(None);
+        let source = gateway_schema::source_request::error::SourceRequestError::from_gateway(
+            original.clone(),
+        );
         let expected = source.body().as_bytes().to_vec();
         let actual = super::catalogue_error(source);
         assert_eq!(actual, original);

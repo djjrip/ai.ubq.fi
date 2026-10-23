@@ -3,7 +3,7 @@ use gateway_auth::{
     native_auth::*,
     native_import::*,
 };
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::{
     collections::BTreeSet,
     future::Future,

@@ -1,14 +1,19 @@
 //! Original-request identity, rechecked from fixed source rows. Never a native operation grant.
-use crate::keys;
-use crate::store::{Authority, TokenSource, Transaction};
+use crate::{
+    keys,
+    store::{Authority, TokenSource, Transaction},
+};
 use gateway_auth::{
-    AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthService, api_keys,
+    api_keys,
     crypto::{decode_base64url, sha256_hex},
     passkeys::{self, PasskeySession, PasskeyUser},
-    session_index, upstream,
+    resolve::AuthService,
+    session_index,
+    types::{AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest},
+    upstream,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::RequestContext,
     state::{AuthorityStore, RecordKey, RevisionCheck},
 };

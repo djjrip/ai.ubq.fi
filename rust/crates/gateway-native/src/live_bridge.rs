@@ -4,8 +4,9 @@ pub mod authority;
 mod queue;
 pub mod socket;
 use authority::NativeLiveAuthority;
-use gateway_auth::{GatewayError, crypto::base64url, native_live::AuthenticatedNativeLive};
-use gateway_authority::native_live::NativeLiveRetirement;
+use gateway_auth::{crypto::base64url, native_live::AuthenticatedNativeLive};
+use gateway_authority::native_live::wire::NativeLiveRetirement;
+use gateway_core::error::GatewayError;
 use queue::{PendingSocket, PreopenQueue, blocked, websocket_config};
 use socket::{LiveDialContext, NativeLiveConnector};
 use std::{

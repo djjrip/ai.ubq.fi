@@ -4,7 +4,7 @@ use crate::{
     types::CredentialFence,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::MAX_SAFE_INTEGER,
     model::ModelId,
     provider::{PaidProvider, UpstreamProvider},
@@ -405,7 +405,7 @@ pub fn validate_journal_row(key: &RecordKey, record: &StoredRecord) -> Result<()
 #[cfg(test)]
 mod tests {
     use super::*;
-    use gateway_authority::TokenSource;
+    use gateway_authority::store::TokenSource;
     use gateway_core::{
         identity::{PrincipalId, RequestContext, RequestId},
         local_work::{

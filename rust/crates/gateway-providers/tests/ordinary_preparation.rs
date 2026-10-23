@@ -7,7 +7,8 @@ use gateway_providers::{
     types::{AuthMaterial, ClientSurface, OrdinaryPreparationContext, PrepareOptions},
 };
 use gateway_schema::{
-    catalog::RequestModelMetadata, reasoning::ModelReasoning, source_request::SourceRequestError,
+    catalog::RequestModelMetadata, reasoning::ModelReasoning,
+    source_request::error::SourceRequestError,
 };
 use serde_json::{Value, json};
 fn parse(raw: &str) -> SourceJson {

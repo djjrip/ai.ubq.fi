@@ -1,26 +1,25 @@
 //! Routing credentials use the owner-derived current source and routing fences.
+use crate::{authority::RemoteAuthorityStore, host::PlatformHost, storage::now_ms};
 use gateway_auth::{
-    AuthPrincipal,
     crypto::Secret,
     provider_credentials::{codex_source_pool_key, read_codex_source_pool},
+    types::AuthPrincipal,
 };
 use gateway_authority::{
-    paid::{PaidReservation, PaidUsage},
-    routing::CohortProof,
+    paid_types::{PaidReservation, PaidUsage},
+    routing_types::CohortProof,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     provider::{PaidProvider, UpstreamProvider},
     state::{AuthorityStore, RecordKey},
 };
-use gateway_providers::{AuthMaterial, PrepareOptions};
+use gateway_providers::types::{AuthMaterial, PrepareOptions};
 use gateway_routing_runtime::types::{
     ClaudeSelection, CodexRecovery, CredentialFence, CredentialRequest, PublishedCredential,
     RefreshOutcome, RoutingHost, direct_credential,
 };
 use worker::Env;
-
-use crate::{authority::RemoteAuthorityStore, host::PlatformHost, storage::now_ms};
 
 #[derive(Clone)]
 pub struct Host {
@@ -276,7 +275,7 @@ impl RoutingHost for Host {
             )
             .await
         };
-        let authority = gateway_authority::Authority::with_clock(
+        let authority = gateway_authority::store::Authority::with_clock(
             self.store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,
@@ -298,7 +297,9 @@ impl RoutingHost for Host {
         )
         .await?;
         let current_proof = match selection {
-            Some(gateway_authority::routing::RouteSelection::QuotaBlocked { proof, .. }) => proof,
+            Some(gateway_authority::routing_types::RouteSelection::QuotaBlocked {
+                proof, ..
+            }) => proof,
             Some(_) => return Ok(CodexRecovery::Reselect),
             None => proof.clone(),
         };
@@ -481,7 +482,7 @@ fn unavailable(message: &str) -> GatewayError {
 // Never call this from paid_credential: receipt/currentness rechecks are read-only.
 async fn prepare_credential_catalog<
     S: gateway_core::query::QueryStore,
-    H: gateway_catalog_runtime::CatalogHost,
+    H: gateway_catalog_runtime::host::CatalogHost,
 >(
     provider: UpstreamProvider,
     store: &S,

@@ -1,22 +1,26 @@
 //! Explicit authenticated manual reset. Shares the existing redemption/day records.
 //! Provider usage/inventory/consume I/O belongs to the fixed admin host, outside transactions.
-use crate::keys;
-use crate::native_control::actor::{self, NativeActorScope, NativeRenewalActor, StoredNativeActor};
-use crate::reset_types::{
-    AccountDayBudget, ResetClaim, ResetConfig, ResetInvocation, ResetMode, ResetRecord, ResetState,
+use crate::{
+    capacity_rules, keys,
+    native_control::actor::{self, NativeActorScope, NativeRenewalActor, StoredNativeActor},
+    reset,
+    reset_types::{
+        self, AccountDayBudget, ResetClaim, ResetConfig, ResetInvocation, ResetMode, ResetRecord,
+        ResetState,
+    },
+    routing::{self, RoutingView},
+    routing_rules,
+    routing_types::{CapacityObservation, CapacityState},
+    store::{Authority, TokenSource, Transaction},
 };
-use crate::routing::{self, RoutingView};
-use crate::routing_types::{CapacityObservation, CapacityState};
-use crate::store::{Authority, TokenSource, Transaction};
-use crate::{capacity_rules, reset, reset_types, routing_rules};
 use gateway_auth::{
-    AuthConfig,
     provider_credentials::{
         codex_access_expiry_ms, codex_source_pool_key, parse_codex_source_pool,
     },
+    types::AuthConfig,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{AccountBinding, ActiveSelection, ActiveTransitionReason, MAX_SAFE_INTEGER},
     state::{AuthorityStore, RecordKey},
     tuple_key::{ScalarKeyPart, TupleKey},

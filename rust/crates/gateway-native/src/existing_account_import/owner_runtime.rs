@@ -1,15 +1,18 @@
 //! Owned-process custody only. Dirty state never becomes another import start permit.
 use super::exclusive_owner::{ExclusiveManagedOwner, Facts, PinnedExecutable, fail};
 use crate::native_import::NativeImportContext;
-use gateway_authority::native_control::import::{
-    AuthenticatedNativeImport, NativeImportBinding, NativeImportStart,
-};
 use gateway_authority::{
-    TokenSource,
-    native_control::{NativeRenewalAuthority, NativeRenewalCancellation},
+    native_control::{
+        NativeRenewalCancellation,
+        import::{
+            AuthenticatedNativeImport,
+            effects::{NativeImportBinding, NativeImportStart},
+        },
+        receiver::NativeRenewalAuthority,
+    },
+    store::TokenSource,
 };
-use gateway_core::GatewayError;
-use gateway_core::state::AuthorityStore;
+use gateway_core::{error::GatewayError, state::AuthorityStore};
 use rustix::fs::{AtFlags, FlockOperation, Mode, OFlags, flock, fsync, openat, renameat, statat};
 use serde::{Deserialize, Serialize};
 #[cfg(all(test, target_os = "macos"))]

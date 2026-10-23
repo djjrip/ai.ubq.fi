@@ -6,7 +6,7 @@ use gateway_auth::{
     native_auth::{NativeAuthHeaders, NativeNonceAuthority, NativeTransportIdentity},
     native_live::{NATIVE_LIVE_ACTION_HEADER, NATIVE_LIVE_AUTHORITY_PATH, NativeLiveAuthenticator},
 };
-use gateway_authority::native_live::{
+use gateway_authority::native_live::wire::{
     NativeLiveAccess, NativeLiveAuthorityRequest, NativeLiveAuthorityResponse, NativeLiveFence,
 };
 use rustls::{ServerConfig, ServerConnection, StreamOwned, pki_types::*};

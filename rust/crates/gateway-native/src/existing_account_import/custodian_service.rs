@@ -3,7 +3,7 @@ use super::{actor_channel::OwnedImportChildChannel, custodian_runtime::Custodian
 use crate::import_custody_protocol::unavailable;
 use gateway_auth::native_auth::NativeTransportIdentity;
 use gateway_authority::native_control::NativeRenewalCancellation;
-use gateway_core::GatewayError;
+use gateway_core::error::GatewayError;
 use std::{
     net::TcpStream,
     sync::{Arc, Mutex},

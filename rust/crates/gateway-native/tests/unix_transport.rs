@@ -251,7 +251,7 @@ fn expired_renewal_deadline_refuses_before_opening_registered_socket() {
 
 fn renewal_fixture(
     persist_generation: bool,
-) -> Result<NativeGeneration, gateway_core::GatewayError> {
+) -> Result<NativeGeneration, gateway_core::error::GatewayError> {
     renewal_with_guard(persist_generation, GuardPolicy::Allow)
 }
 
@@ -270,14 +270,14 @@ struct FixtureGuard {
     policy: GuardPolicy,
 }
 impl gateway_native::owner_control::NativeRenewalGuard for FixtureGuard {
-    fn now_ms(&self) -> Result<i64, gateway_core::GatewayError> {
+    fn now_ms(&self) -> Result<i64, gateway_core::error::GatewayError> {
         Ok(1_000_000)
     }
-    async fn ensure_current(&self) -> Result<(), gateway_core::GatewayError> {
+    async fn ensure_current(&self) -> Result<(), gateway_core::error::GatewayError> {
         if self.policy == GuardPolicy::RevokeAfterIdentity
             && self.observed.lock().unwrap().len() >= 3
         {
-            return Err(gateway_core::GatewayError::new(
+            return Err(gateway_core::error::GatewayError::new(
                 409,
                 "Synthetic current authority changed",
                 Some("native_owner_changed"),
@@ -285,9 +285,9 @@ impl gateway_native::owner_control::NativeRenewalGuard for FixtureGuard {
         }
         Ok(())
     }
-    async fn start_refresh(&self) -> Result<(), gateway_core::GatewayError> {
+    async fn start_refresh(&self) -> Result<(), gateway_core::error::GatewayError> {
         if self.policy == GuardPolicy::RefuseStart {
-            return Err(gateway_core::GatewayError::unavailable(
+            return Err(gateway_core::error::GatewayError::unavailable(
                 "Synthetic original operation is already started",
                 "native_control_outcome_unknown",
             ));
@@ -299,7 +299,7 @@ impl gateway_native::owner_control::NativeRenewalGuard for FixtureGuard {
 fn renewal_with_guard(
     persist_generation: bool,
     policy: GuardPolicy,
-) -> Result<NativeGeneration, gateway_core::GatewayError> {
+) -> Result<NativeGeneration, gateway_core::error::GatewayError> {
     run(async {
         let home = FixtureHome::new();
         let old = document("fixture-refresh-a", "2026-10-18T12:00:00.000000001Z");

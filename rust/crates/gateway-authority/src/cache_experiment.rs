@@ -74,7 +74,7 @@ pub(crate) async fn validate_refresh_context<
     tx: &mut crate::store::Transaction<'_, S, I>,
     context: &RefreshContext,
     now: i64,
-) -> Result<(), gateway_core::GatewayError> {
+) -> Result<(), gateway_core::error::GatewayError> {
     use model::{failed, sample_signal};
     context.target.validate()?;
     if context.v != 1

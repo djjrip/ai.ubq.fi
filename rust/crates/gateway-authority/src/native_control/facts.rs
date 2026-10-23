@@ -3,12 +3,12 @@ use super::{
     actor::StoredNativeActor as Actor,
     rows::{fail, session_key},
 };
-use crate::store::{TokenSource, Transaction};
 use crate::{
     keys,
     paid_control::{PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner},
     quota::{ApiKeyPolicy, ApiReservation, ApiUsageRequest, ApiUsageState},
     routing_types::{AdmittedAccount, SubscriptionPool},
+    store::{TokenSource, Transaction},
 };
 use gateway_auth::{
     crypto::sha256_hex,
@@ -17,7 +17,7 @@ use gateway_auth::{
     },
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::RequestContext,
     local_work::journal_local_work,
     model::ModelId,
@@ -99,7 +99,7 @@ pub(super) async fn read_control<S: AuthorityStore, I: TokenSource>(
     request_id: &str,
     expected_attempt: Option<&str>,
     identity: &gateway_auth::native_auth::NativeTransportIdentity,
-    current_config: &gateway_auth::AuthConfig,
+    current_config: &gateway_auth::types::AuthConfig,
 ) -> Result<ControlFacts, GatewayError> {
     let owner_id = identity.owner_id();
     let owner_epoch = identity.owner_epoch();
@@ -245,7 +245,7 @@ pub(super) async fn read<S: AuthorityStore, I: TokenSource>(
     request_id: &str,
     expected_attempt: Option<&str>,
     identity: &gateway_auth::native_auth::NativeTransportIdentity,
-    current_config: &gateway_auth::AuthConfig,
+    current_config: &gateway_auth::types::AuthConfig,
     registered: &super::receiver::RegisteredRenewalOwner,
 ) -> Result<Facts, GatewayError> {
     let control = read_control(

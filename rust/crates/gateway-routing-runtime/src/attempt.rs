@@ -6,17 +6,17 @@ use crate::{
     types::*,
 };
 use gateway_authority::{
-    AuthorityClock, TokenSource,
-    paid::{PaidAdmission, PaidAuthorization, PaidRequest},
-    routing::RouteSelection,
+    paid_types::{PaidAdmission, PaidAuthorization, PaidRequest},
+    routing_types::RouteSelection,
+    store::{AuthorityClock, TokenSource},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::PaidAttemptId,
     provider::{PaidProvider, UpstreamProvider},
     query::QueryStore,
 };
-use gateway_providers::ClientSurface;
+use gateway_providers::types::ClientSurface;
 
 impl<
     S: QueryStore + Clone,
@@ -107,7 +107,7 @@ impl<
                                     "Internal Server Error",
                                     None,
                                 )),
-                                headers: gateway_providers::Headers::from([(
+                                headers: gateway_providers::types::Headers::from([(
                                     "Content-Type".into(),
                                     "text/plain; charset=utf-8".into(),
                                 )]),
@@ -210,14 +210,16 @@ impl<
                                 );
                                 gateway_core::js_string::JsString16::from_units(units)
                             });
-                            return Err(gateway_schema::source_request::SourceRequestError::new(
-                                404,
-                                detail,
-                                "invalid_request_error",
-                                Some("model_not_found"),
-                                None,
-                            )
-                            .into());
+                            return Err(
+                                gateway_schema::source_request::error::SourceRequestError::new(
+                                    404,
+                                    detail,
+                                    "invalid_request_error",
+                                    Some("model_not_found"),
+                                    None,
+                                )
+                                .into(),
+                            );
                         }
                         RouteSelection::RoutingUnavailable => {
                             return Err(journal::unavailable(

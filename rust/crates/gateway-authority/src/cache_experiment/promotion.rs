@@ -6,7 +6,9 @@ use super::{
 };
 use crate::store::{Authority, TokenSource};
 use gateway_auth::provider_credentials::codex_source_pool_key;
-use gateway_core::{GatewayError, model::ModelId, source_json::SourceJson, state::AuthorityStore};
+use gateway_core::{
+    error::GatewayError, model::ModelId, source_json::SourceJson, state::AuthorityStore,
+};
 use gateway_schema::{
     runtime_config::{
         build_runtime_config, default_model, default_reasoning_effort, normalize_runtime_config,

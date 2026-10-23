@@ -8,16 +8,17 @@ use gateway_auth::{
     native_replay::StoreNonceAuthority,
 };
 use gateway_authority::{
-    Authority, TokenSource, keys,
-    paid::PaidRequest,
+    keys,
     paid_control::{PaidRequestContext, PaidRoutingProjection, paid_projection_source_keys},
+    paid_types::PaidRequest,
+    store::{Authority, TokenSource},
 };
-use gateway_catalog_runtime::{
+use gateway_catalog_runtime::host::{
     CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CredentialPublication,
     ProviderBinding,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{ApiKeyId, PaidAttemptId, RequestId},
     provider::{PaidProvider, UpstreamProvider},
     query::{QueryPage, QueryRequest, QueryStore},
@@ -240,7 +241,7 @@ impl CatalogHost for Host {
     }
 }
 struct Clock;
-impl gateway_authority::AuthorityClock for Clock {
+impl gateway_authority::store::AuthorityClock for Clock {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(NOW)
     }
@@ -268,7 +269,7 @@ fn request() -> (PaidRequest, PaidRequestContext) {
         PaidRequestContext {
             original_model: "gpt-known".into(),
             body: SourceJson::parse(r#"{"model":"gpt-known","input":"test"}"#).unwrap(),
-            surface: gateway_providers::ClientSurface::Responses,
+            surface: gateway_providers::types::ClientSurface::Responses,
             synthetic_hop: None,
         },
     )

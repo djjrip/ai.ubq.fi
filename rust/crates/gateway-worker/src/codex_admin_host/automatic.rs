@@ -10,19 +10,20 @@ use crate::{
     transport::outbound::{PinnedDestination, send_http},
 };
 use gateway_auth::{
-    AuthConfig, AuthMethod, AuthRequest, AuthService,
     provider_credentials::{CodexSourceAccount, read_codex_source_pool},
+    resolve::AuthService,
+    types::{AuthConfig, AuthMethod, AuthRequest},
 };
 use gateway_authority::{
-    Authority,
-    full_pool_reset::{
+    full_pool_reset::types::{
         AutomaticResetPermit, FullPoolEvaluation, FullPoolPreparation, SourceResetInventory,
     },
-    reset::{FullPoolResetReconciliation, ResetClaim, ResetState},
-    routing::{AdmittedAccount, CohortProof},
+    reset_types::{FullPoolResetReconciliation, ResetClaim, ResetState},
+    routing_types::{AdmittedAccount, CohortProof},
+    store::Authority,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{AccountBinding, RequestContext},
 };
 use gateway_routing_runtime::types::CodexRecovery;

@@ -1,10 +1,10 @@
 //! First-class image, Voyage and System One protocol adapters; persistence remains external.
 use crate::{source_tools::ToolMap, types::*};
 use gateway_core::{
-    GatewayError, js_string::JsString16, model::ModelId, provider::UpstreamProvider,
+    error::GatewayError, js_string::JsString16, model::ModelId, provider::UpstreamProvider,
     source_json::SourceJson, source_serialization as source,
 };
-use gateway_schema::source_request::{SourceRequestError, source_value::Value};
+use gateway_schema::source_request::{error::SourceRequestError, value::Value};
 use image::{ImagePlan, ParsedImageRequest};
 use serde::{Deserialize, Serialize};
 use serde_json::Value as ScalarValue;

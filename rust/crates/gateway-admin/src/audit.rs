@@ -1,6 +1,10 @@
-use gateway_auth::{AuthHost, AuthMethod, AuthPrincipal, crypto::uuid_from_random, store};
+use gateway_auth::{
+    crypto::uuid_from_random,
+    store,
+    types::{AuthHost, AuthMethod, AuthPrincipal},
+};
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_json::SourceJson,
     state::{RecordKey, RecordMutation, StoredRecord},

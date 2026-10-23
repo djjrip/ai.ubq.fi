@@ -1,7 +1,9 @@
 //! Finite private initial-owner consumer. Physical custody is a local attestation,
 //! never reconstructed from captured records or reread by this portable module.
-use crate::engine::{AdoptionReceipt, PreparedAdoption};
-use crate::*;
+use crate::{
+    engine::{AdoptionReceipt, PreparedAdoption},
+    *,
+};
 use gateway_authority::initial_control_owner::{
     InitialAdoptionAccountFacts, InitialAdoptionFacts, InitialControlOwnerReceipt,
     PreparedInitialControlOwner,
@@ -62,7 +64,8 @@ fn actual_facts(prepared: &PreparedAdoption) -> Result<InitialAdoptionFacts, Gat
     let (source, normalized) = pool_records(prepared)?;
     let pool = gateway_auth::provider_credentials::parse_codex_source_pool(source.json_value()?)?
         .ok_or_else(refused)?;
-    let routing: gateway_authority::routing::SubscriptionPool = decode(normalized.json_value()?)?;
+    let routing: gateway_authority::routing_types::SubscriptionPool =
+        decode(normalized.json_value()?)?;
     if routing.v != 1
         || routing.pool_versionstamp.0 != source.revision
         || routing.accounts.len() != pool.accounts.len()

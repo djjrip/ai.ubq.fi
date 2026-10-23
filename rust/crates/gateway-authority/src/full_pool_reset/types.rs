@@ -3,7 +3,7 @@ use crate::{
     routing_types::CohortProof,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{AccountBinding, RequestContext},
     js_string::JsString16,
 };

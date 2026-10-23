@@ -7,7 +7,7 @@ use crate::{
     supervisor::SourceId,
     supervisor_data::{SupervisorData, SupervisorSourceConfig},
 };
-use gateway_auth::GatewayError;
+use gateway_core::error::GatewayError;
 use std::path::PathBuf;
 pub(crate) mod live_bootstrap;
 pub(crate) fn source_policy(
@@ -31,20 +31,20 @@ pub(crate) fn source_policy(
                 continue;
             }
             let canonical_home = std::fs::canonicalize(home).map_err(|_| {
-                gateway_auth::GatewayError::unavailable(
+                GatewayError::unavailable(
                     "Configured source home is unavailable",
                     "native_source_unavailable",
                 )
             })?;
             list_directories.push(canonical_home.clone());
             for entry in std::fs::read_dir(home).map_err(|_| {
-                gateway_auth::GatewayError::unavailable(
+                GatewayError::unavailable(
                     "Configured source directory is unavailable",
                     "native_source_unavailable",
                 )
             })? {
                 let entry = entry.map_err(|_| {
-                    gateway_auth::GatewayError::unavailable(
+                    GatewayError::unavailable(
                         "Configured source entry is unavailable",
                         "native_source_unavailable",
                     )
@@ -60,13 +60,13 @@ pub(crate) fn source_policy(
                         })
                 {
                     let canonical = std::fs::canonicalize(entry.path()).map_err(|_| {
-                        gateway_auth::GatewayError::unavailable(
+                        GatewayError::unavailable(
                             "Configured source path is unavailable",
                             "native_source_unavailable",
                         )
                     })?;
                     if !canonical.starts_with(&canonical_home) {
-                        return Err(gateway_auth::GatewayError::unavailable(
+                        return Err(GatewayError::unavailable(
                             "Configured source path escapes its home",
                             "native_source_unavailable",
                         ));

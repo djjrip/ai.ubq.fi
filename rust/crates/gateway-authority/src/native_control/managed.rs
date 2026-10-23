@@ -6,10 +6,10 @@ use super::{
         self, ActionRow, GenerationEffect, OperationRow, Phase, TerminalPublication, conflict, fail,
     },
 };
-use crate::store::{TokenSource, Transaction};
 use crate::{
     keys,
     routing_types::{PoolAccount, SubscriptionPool},
+    store::{TokenSource, Transaction},
     text,
 };
 use gateway_auth::{
@@ -24,7 +24,7 @@ use gateway_auth::{
     },
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::PoolVersionstamp,
     state::{AtomicTransition, AuthorityStore, CommitOutcome, RecordMutation, StoredRecord},
 };

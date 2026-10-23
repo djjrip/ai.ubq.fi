@@ -1,10 +1,3 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::BTreeMap,
-    future::Future,
-    task::{Context, Poll, Waker},
-};
-
 use gateway_admin::{
     audit, kernel_auth,
     keys::*,
@@ -12,8 +5,22 @@ use gateway_admin::{
     routes::{AdminOperation, match_route},
     service::{self, AdminService},
 };
-use gateway_auth::{crypto::Secret, upstream::*, *};
-use gateway_core::{source_json::SourceJson, state::*};
+use gateway_auth::{
+    crypto::Secret,
+    types::{
+        AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthResponse,
+        AuthResponseBody, conflict, invalid,
+    },
+    upstream::*,
+    *,
+};
+use gateway_core::{error::GatewayError, source_json::SourceJson, state::*};
+use std::{
+    cell::{Cell, RefCell},
+    collections::BTreeMap,
+    future::Future,
+    task::{Context, Poll, Waker},
+};
 
 fn source(value: &Value) -> SourceJson {
     SourceJson::from_serializable(value).unwrap()
@@ -120,7 +127,7 @@ impl AuthHost for Host {
         ))
     }
 }
-impl gateway_authority::TokenSource for &Host {
+impl gateway_authority::store::TokenSource for &Host {
     fn next_token(&self) -> Result<String, GatewayError> {
         gateway_auth::crypto::uuid_from_random(&self.random_bytes(16)?)
     }
@@ -643,7 +650,9 @@ impl AdminHost for ClaimedDeletion<'_> {
             })
             .await?;
         if result != CommitOutcome::Committed {
-            return Err(gateway_auth::conflict("Fixture cleanup ownership changed"));
+            return Err(gateway_auth::types::conflict(
+                "Fixture cleanup ownership changed",
+            ));
         }
         Ok(())
     }
@@ -848,7 +857,7 @@ struct PaidRaceStore<'a> {
 }
 
 struct PaidFixtureClock;
-impl gateway_authority::AuthorityClock for PaidFixtureClock {
+impl gateway_authority::store::AuthorityClock for PaidFixtureClock {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(1_000_000)
     }
@@ -889,7 +898,7 @@ async fn paid_fixture_owner_proof(
 
 async fn prepare_paid_fixture_custody(store: &Store, host: &Host) {
     use gateway_auth::native_auth::{NativeCapability, NativeTransportIdentity};
-    use gateway_authority::{keys, paid::PaidRoutingPolicy, paid_control::*};
+    use gateway_authority::{keys, paid_control::*, paid_types::PaidRoutingPolicy};
     use gateway_core::provider::PaidProvider;
     use gateway_publication::control_publication::{
         ConfiguredPaidInputs, PreparedConfigurationPublication, bootstrap_fixture_owner,
@@ -1040,8 +1049,8 @@ impl AuthorityStore for PaidRaceStore<'_> {
 fn claimed_deletion_uses_new_guard_revision_and_fences_actual_inflight_paid_admission() {
     run(async {
         use gateway_authority::{
-            paid::{PaidAuthorization, PaidRequest},
             paid_control::PaidRequestContext,
+            paid_types::{PaidAuthorization, PaidRequest},
         };
         use gateway_core::{
             identity::{ApiKeyId, PaidAttemptId, RequestId},
@@ -1073,7 +1082,8 @@ fn claimed_deletion_uses_new_guard_revision_and_fences_actual_inflight_paid_admi
             key_id: id.clone(),
             armed: Cell::new(true),
         };
-        let authority = gateway_authority::Authority::with_clock(raced, &host, PaidFixtureClock);
+        let authority =
+            gateway_authority::store::Authority::with_clock(raced, &host, PaidFixtureClock);
         let request = PaidRequest {
             key_id: ApiKeyId(id.clone()),
             request_id: RequestId("racing-request".into()),
@@ -1092,7 +1102,7 @@ fn claimed_deletion_uses_new_guard_revision_and_fences_actual_inflight_paid_admi
                 &PaidRequestContext {
                     original_model: request.model.clone(),
                     body: source(&json!({"model":request.model,"stream":false})),
-                    surface: gateway_providers::ClientSurface::Responses,
+                    surface: gateway_providers::types::ClientSurface::Responses,
                     synthetic_hop: None,
                 },
                 1_000_000,

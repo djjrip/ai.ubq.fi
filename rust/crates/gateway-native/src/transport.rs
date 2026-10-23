@@ -1,12 +1,10 @@
-use std::future::Future;
-
-use gateway_core::GatewayError;
-use serde_json::{Value, json};
-
 use gateway_auth::native_credentials::{
     NativeCredentials, NativeGeneration, NativeOwnerId, OwnerFence, generation_failed,
     owner_unavailable, verify_daemon_account, verify_generation,
 };
+use gateway_core::error::GatewayError;
+use serde_json::{Value, json};
+use std::future::Future;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum SupervisorMethod {

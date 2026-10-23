@@ -7,11 +7,12 @@ pub mod state;
 mod versioned;
 
 use gateway_core::{
-    GatewayError, query::QueryStore, source_json::SourceJson, source_serialization as source,
+    error::GatewayError, query::QueryStore, source_json::SourceJson, source_serialization as source,
 };
 use gateway_schema::{catalog::ProviderCatalog, catalog_cache::CatalogResponse};
-use host::unavailable;
-use host::{CatalogFetch, CatalogHost, CatalogProvider, CredentialPublication, ProviderBinding};
+use host::{
+    CatalogFetch, CatalogHost, CatalogProvider, CredentialPublication, ProviderBinding, unavailable,
+};
 use std::{
     cell::RefCell,
     collections::{BTreeMap, BTreeSet},

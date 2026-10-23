@@ -1,6 +1,7 @@
 //! Lazy policy view over the existing SourceJson parser, never a scalar transcript mirror.
 use gateway_core::{
-    GatewayError, js_string::JsString16, source_json::SourceJson, source_serialization as source,
+    error::GatewayError, js_string::JsString16, source_json::SourceJson,
+    source_serialization as source,
 };
 use serde::{Serialize, Serializer};
 use std::{

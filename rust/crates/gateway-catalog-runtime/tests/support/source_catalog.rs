@@ -1,5 +1,5 @@
 // Test-support copy: integration and cfg(test) modules cannot import another crate's tests tree.
-use gateway_core::{GatewayError, js_string::JsString16, source_json::SourceJson};
+use gateway_core::{error::GatewayError, js_string::JsString16, source_json::SourceJson};
 use gateway_schema::aliases::SourceStringCollator;
 use serde::{Deserialize, Serialize};
 

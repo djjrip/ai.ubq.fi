@@ -7,7 +7,7 @@ use gateway_authority::{
     routing_types::RouteSelection,
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     identity::{PrincipalId, RequestContext, RequestId},
     js_string::JsString16,
     provider::CodexQuotaClass,

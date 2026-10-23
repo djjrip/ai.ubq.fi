@@ -1,7 +1,10 @@
-use gateway_auth::AuthMethod;
+use gateway_auth::types::AuthMethod;
 use gateway_authority::{
-    Authority, AuthorityClock, REQUEST_LEASE_MS, keys,
-    quota::{ApiReservation, KernelPolicy, KernelReservation},
+    REQUEST_LEASE_MS,
+    kernel::{KernelPolicy, KernelReservation},
+    keys,
+    quota::ApiReservation,
+    store::{Authority, AuthorityClock},
 };
 use gateway_core::{
     lifecycle::{DeliveryOutcome, SemanticTerminal, TransportObservation},
@@ -129,7 +132,7 @@ fn live_session_refuses_a_released_actual_kernel_despite_an_unchanged_journal() 
     run(
         Authority::with_clock(store.clone(), store.clone(), store.clone()).settle_kernel(
             &kernel,
-            gateway_authority::quota::KernelTerminal::Released,
+            gateway_authority::kernel::KernelTerminal::Released,
             "fixture",
             NOW,
         ),

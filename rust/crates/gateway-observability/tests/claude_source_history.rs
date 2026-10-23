@@ -3,7 +3,7 @@
 mod support;
 use gateway_admin_runtime::capabilities::Context;
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     js_string::JsString16,
     source_control::{decode_source_control_record, encode_source_control_record},
     source_json::SourceJson,
@@ -81,7 +81,7 @@ fn replace(value: &SourceJson, name: &str, replacement: SourceJson) -> SourceJso
 fn rows(value: &SourceJson) -> Vec<SourceJson> {
     member(value, "points").array_items().unwrap()
 }
-fn response(value: gateway_auth::AuthResponse) -> SourceJson {
+fn response(value: gateway_auth::types::AuthResponse) -> SourceJson {
     assert_eq!(value.status, 200);
     assert_eq!(value.headers["cache-control"], "no-store");
     SourceJson::parse_bytes(&value.body.to_bytes().unwrap()).unwrap()

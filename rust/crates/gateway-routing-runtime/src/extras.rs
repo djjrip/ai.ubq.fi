@@ -6,10 +6,14 @@ use crate::{
     types::*,
 };
 use futures_util::lock::Mutex;
-use gateway_authority::{Authority, AuthorityClock, TokenSource, quota::KernelTerminal};
+use gateway_authority::{
+    kernel::KernelTerminal,
+    store::{Authority, AuthorityClock, TokenSource},
+};
 use gateway_core::{
-    GatewayError, lifecycle::TransportObservation, model::ModelId, provider::UpstreamProvider,
-    query::QueryStore, source_json::SourceJson, source_serialization as source,
+    error::GatewayError, lifecycle::TransportObservation, model::ModelId,
+    provider::UpstreamProvider, query::QueryStore, source_json::SourceJson,
+    source_serialization as source,
 };
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
@@ -95,7 +99,7 @@ pub struct DispatchTicket {
 #[derive(Clone, Debug)]
 pub struct ImageChildAttempt {
     scope: ChildScope,
-    pub request: gateway_providers::PreparedRequest,
+    pub request: gateway_providers::types::PreparedRequest,
     pub credential: CredentialFence,
 }
 impl ImageChildAttempt {
@@ -189,8 +193,10 @@ impl<
                 .select_account(&model, crate::policy::class(&model), self.clock.now_ms()?)
                 .await?;
             let mut account = match selection {
-                gateway_authority::routing::RouteSelection::Eligible(account) => account,
-                gateway_authority::routing::RouteSelection::QuotaBlocked { proof, .. } => {
+                gateway_authority::routing_types::RouteSelection::Eligible(account) => account,
+                gateway_authority::routing_types::RouteSelection::QuotaBlocked {
+                    proof, ..
+                } => {
                     let recovery = if proof.full_cohort_exhausted() {
                         self.host.recover_codex(&proof, &model).await?
                     } else {
@@ -219,7 +225,7 @@ impl<
                         .into()),
                     }
                 }
-                gateway_authority::routing::RouteSelection::CredentialsInvalid { .. } => {
+                gateway_authority::routing_types::RouteSelection::CredentialsInvalid { .. } => {
                     return Err(GatewayError::new(
                         401,
                         "Codex subscription credentials are unavailable.",
@@ -227,7 +233,7 @@ impl<
                     )
                     .into());
                 }
-                gateway_authority::routing::RouteSelection::ModelUnavailable { .. } => {
+                gateway_authority::routing_types::RouteSelection::ModelUnavailable { .. } => {
                     return Err(GatewayError::new(
                         404,
                         "The image child model is unavailable.",
@@ -268,7 +274,7 @@ impl<
                 .await?;
             let mut input = self.input.clone();
             input.raw = body.clone();
-            input.surface = gateway_providers::ClientSurface::Responses;
+            input.surface = gateway_providers::types::ClientSurface::Responses;
             let request = crate::wire::prepare(
                 &input,
                 &child.nonce,

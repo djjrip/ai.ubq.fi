@@ -2,7 +2,10 @@
 //! Source-shaped stopped input exercises M20's real projection/reader/inverse.
 //! This does not replace the separately required actual M19 writer fixture.
 mod support;
-use gateway_admin_data::profile::{CanonicalDates, from_source_profile, to_source_profile};
+use gateway_admin_data::profile::{
+    CanonicalDates,
+    source::{from_source_profile, to_source_profile},
+};
 use gateway_core::{
     js_string::JsString16,
     model::ModelId,
@@ -89,7 +92,9 @@ fn latest_paid_projection_preserves_current_model_effort_and_source_only_fields(
     let original = run(gateway_core::state::AuthorityStore::read(&store, &key))
         .unwrap()
         .unwrap();
-    let mut current = gateway_authority::paid::decode_paid_attempt_record(&key, &original).unwrap();
+    let mut current =
+        gateway_authority::paid::source_records::decode_paid_attempt_record(&key, &original)
+            .unwrap();
     assert_eq!(current.model.as_js_string().as_units(), &[0xd800]);
     assert_eq!(current.reasoning.as_ref().unwrap().as_units(), &[0xdc00]);
     // Controlled post-capture state mutation, not a claim of an M19 writer run.

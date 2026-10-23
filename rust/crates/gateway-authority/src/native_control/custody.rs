@@ -4,7 +4,7 @@ use super::{
     rows::{self, ActionRow, GenerationEffect, OperationRow, Phase, TerminalPublication, fail},
 };
 use gateway_core::{
-    GatewayError,
+    error::GatewayError,
     source_control::decode_source_control_record,
     source_serialization as source,
     state::{RecordKey, StoredRecord},

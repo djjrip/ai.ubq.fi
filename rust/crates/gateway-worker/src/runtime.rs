@@ -1,10 +1,19 @@
 //! Public routing. Private authority protocol paths are never forwarded here.
-use std::rc::Rc;
-
-use gateway_admin::AdminService;
-use gateway_auth::{AuthPrincipal, AuthRequest, AuthResponse, AuthService};
+use crate::{
+    authority::RemoteAuthorityStore,
+    catalog::CatalogState,
+    host::{PlatformHost, auth_config},
+    inference,
+    storage::now_ms,
+    transport::{HeaderLimits, body, bounded_headers, outbound::Cancellation},
+};
+use gateway_admin::service::AdminService;
+use gateway_auth::{
+    resolve::AuthService,
+    types::{AuthPrincipal, AuthRequest, AuthResponse},
+};
 use gateway_core::{
-    GatewayError, identity::RequestId, source_json::SourceJson, state::AuthorityStore,
+    error::GatewayError, identity::RequestId, source_json::SourceJson, state::AuthorityStore,
 };
 use gateway_live_runtime::{
     mapping::LiveRuntime,
@@ -15,16 +24,8 @@ use gateway_schema::{
     catalog_cache::{CacheState, CatalogResponse, LoadedCatalog},
     catalog_store,
 };
+use std::rc::Rc;
 use worker::{Context, Env, Method, Request, Response};
-
-use crate::{
-    authority::RemoteAuthorityStore,
-    catalog::CatalogState,
-    host::{PlatformHost, auth_config},
-    inference,
-    storage::now_ms,
-    transport::{HeaderLimits, body, bounded_headers, outbound::Cancellation},
-};
 
 pub async fn route(
     mut request: Request,
@@ -92,7 +93,7 @@ pub async fn route(
         // Source authenticates an administrative route before its handler can
         // read a body. Resolve the route first so unmatched or wrong-method
         // paths, including the source paid-fallbacks 405, stay body-free.
-        let admin_route = gateway_admin::match_route(request.method().as_ref(), &path);
+        let admin_route = gateway_admin::routes::match_route(request.method().as_ref(), &path);
         if admin_route.is_some() && !matches!(request.method(), Method::Get | Method::Head) {
             auth.authenticate_admin(&auth_request).await?;
             auth_request.body = body::inference_bytes(&mut request).await?;
@@ -106,7 +107,7 @@ pub async fn route(
                 gateway_authority::native_control::actor::principal_id(&principal),
             ),
             key_id: match &principal.method {
-                gateway_auth::AuthMethod::KvApiKey { key_id, .. } => {
+                gateway_auth::types::AuthMethod::KvApiKey { key_id, .. } => {
                     Some(gateway_core::identity::ApiKeyId(key_id.clone()))
                 }
                 _ => None,
@@ -114,7 +115,7 @@ pub async fn route(
             route: path.clone(),
             started_at_ms,
         };
-        let authority = gateway_authority::Authority::with_clock(
+        let authority = gateway_authority::store::Authority::with_clock(
             store.clone(),
             crate::host::PlatformTokens,
             crate::host::PlatformClock,
@@ -211,7 +212,7 @@ pub async fn route(
         None
     };
     if let Some(route) = live_route(&auth_request.method, &path) {
-        let principal = principal.ok_or_else(gateway_auth::unauthorized)?;
+        let principal = principal.ok_or_else(gateway_auth::types::unauthorized)?;
         let live = crate::live_host::WorkerLiveHost::bind(
             host.clone(),
             context.clone(),
@@ -302,23 +303,25 @@ pub async fn route(
             return catalog_response(response).map(Into::into);
         }
         let state = CatalogState::load(&store, &env, &host, context.clone()).await?;
-        return json_response(catalog::ordinary_models(&state.input)).map(Into::into);
+        return json_response(gateway_schema::catalog_views::ordinary_models(&state.input))
+            .map(Into::into);
     }
     if path == "/uos/models/capabilities" && request.method() == Method::Get {
         let state = CatalogState::load(&store, &env, &host, context.clone()).await?;
-        return json_response(catalog::capabilities(&state.input)).map(Into::into);
+        return json_response(gateway_schema::catalog_views::capabilities(&state.input))
+            .map(Into::into);
     }
     if path == "/uos/agent-messages" {
         return crate::agent_messages::handle(
             request,
-            &principal.ok_or_else(gateway_auth::unauthorized)?,
+            &principal.ok_or_else(gateway_auth::types::unauthorized)?,
             &store,
         )
         .await
         .map(Into::into);
     }
     if let Some(route) = crate::extras::route(&path, request.method())? {
-        let principal = principal.ok_or_else(gateway_auth::unauthorized)?;
+        let principal = principal.ok_or_else(gateway_auth::types::unauthorized)?;
         let permit = crate::admission::acquire(
             &principal,
             &request_id.0,
@@ -348,7 +351,7 @@ pub async fn route(
                 Some("method_not_allowed"),
             ));
         }
-        let principal = principal.ok_or_else(gateway_auth::unauthorized)?;
+        let principal = principal.ok_or_else(gateway_auth::types::unauthorized)?;
         let permit = crate::admission::acquire(
             &principal,
             &request_id.0,
@@ -474,7 +477,7 @@ fn decorate_api_policy(
     response: &mut Response,
     principal: &AuthPrincipal,
 ) -> Result<(), GatewayError> {
-    if let gateway_auth::AuthMethod::KvApiKey { policy, .. } = &principal.method
+    if let gateway_auth::types::AuthMethod::KvApiKey { policy, .. } = &principal.method
         && policy.usage_limit_requests != -1
     {
         response

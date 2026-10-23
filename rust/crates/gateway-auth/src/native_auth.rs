@@ -6,10 +6,10 @@ use hmac::{Hmac, Mac};
 use sha2::Sha256;
 
 use crate::{
-    GatewayError,
     crypto::{base64url, decode_base64url, sha256_hex},
     native::*,
 };
+use gateway_core::GatewayError;
 
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum NativeCapability {

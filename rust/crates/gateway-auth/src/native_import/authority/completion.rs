@@ -1,6 +1,6 @@
 //! Safe actor response DATA; all strings retain their source domains.
 use super::{invalid, nullable};
-use crate::GatewayError;
+use gateway_core::GatewayError;
 use gateway_core::js_string::JsString16;
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]

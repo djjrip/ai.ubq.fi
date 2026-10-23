@@ -6,7 +6,8 @@ use std::{
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::{GatewayError, crypto::Secret};
+use crate::crypto::Secret;
+use gateway_core::GatewayError;
 
 pub const CANONICAL_ORIGIN: &str = "https://ai.ubq.fi";
 pub const CANDIDATE_ORIGIN: &str = "https://rust-candidate.ai.ubq.fi";

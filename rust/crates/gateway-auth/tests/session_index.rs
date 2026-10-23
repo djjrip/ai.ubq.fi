@@ -1,8 +1,10 @@
-use auth::{AuthConfig, AuthHost, AuthService, session_index::*};
-use gateway_auth as auth;
-use serde_json::json;
-#[path = "session_index_cases/support.rs"]
 mod support;
+use gateway_auth::{
+    resolve::AuthService,
+    session_index::*,
+    types::{AuthConfig, AuthHost},
+};
+use serde_json::json;
 use support::*;
 
 #[test]
@@ -14,7 +16,7 @@ fn digest_and_fixed_key_do_not_contain_bearers_or_alias_noncanonical_digests() {
         value,
         "802402ebdf1f920d74e324319356b4bc68ce160f64f4a694cf924e360330c173"
     );
-    assert_ne!(value, auth::crypto::sha256_hex(token.as_bytes()));
+    assert_ne!(value, gateway_auth::crypto::sha256_hex(token.as_bytes()));
     assert_ne!(value, digest(&format!(" {token}")));
     assert_ne!(value, digest(&format!("{token} ")));
     let key = index_key(&value).unwrap();
@@ -35,7 +37,7 @@ fn controlled_constructor_preserves_source_revision_and_minimum_absolute_expiry_
         assert_eq!(row.revision, "source-rev");
         let encoded = serde_json::to_string(&row).unwrap();
         assert!(!encoded.contains(&value.token));
-        assert!(!encoded.contains(&auth::passkeys::key("sessions", &value.token).0));
+        assert!(!encoded.contains(&gateway_auth::passkeys::key("sessions", &value.token).0));
         let key = index_key(&digest(&value.token)).unwrap();
         store.rows.borrow_mut().insert(key.0, row);
         let snapshot = read_current(&store, &digest(&value.token), 299)

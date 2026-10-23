@@ -5,7 +5,7 @@ use gateway_core::state::{
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::Value;
 
-use crate::GatewayError;
+use gateway_core::GatewayError;
 
 /// All call sites construct first-party arrays of strings and finite JSON numbers.
 /// Identity/ordering belong exclusively to the shared source-compatible tuple codec.

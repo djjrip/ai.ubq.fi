@@ -1,15 +1,18 @@
-use gateway_core::state::{AuthorityStore, RecordKey, RecordMutation};
+use gateway_core::{
+    GatewayError,
+    state::{AuthorityStore, RecordKey, RecordMutation},
+};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use crate::{
-    AuthConfig, AuthHost, AuthRequest, AuthResponse, GatewayError, RELAY_COOKIE, conflict, invalid,
-    unauthorized,
-};
-use crate::{
     crypto::{base64url, decode_base64url, sha256_hex, uuid_from_random},
     origin::{passkey_meta, request_audience, trusted_relay_origin},
     store,
+    types::{
+        AuthConfig, AuthHost, AuthRequest, AuthResponse, RELAY_COOKIE, conflict, invalid,
+        unauthorized,
+    },
 };
 
 pub const CHALLENGE_TTL_MS: i64 = 300_000;
@@ -742,7 +745,5 @@ pub fn client_data(response: &Value) -> Result<Value, GatewayError> {
     let bytes = decode_base64url(encoded).map_err(|_| invalid("Invalid passkey response"))?;
     serde_json::from_slice(&bytes).map_err(|_| invalid("Invalid passkey response"))
 }
-
 #[cfg(test)]
-#[path = "../tests/session_index_cases/mod.rs"]
 mod session_index_cases;

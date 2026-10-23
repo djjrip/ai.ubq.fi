@@ -6,13 +6,15 @@ use std::{
 };
 
 use gateway_auth::{
+    api_keys,
     crypto::{Secret, base64url},
     origin::*,
     passkeys::*,
+    resolve::AuthService,
+    types::*,
     upstream::*,
-    *,
 };
-use gateway_core::state::*;
+use gateway_core::{GatewayError, state::*};
 use serde_json::json;
 
 #[test]

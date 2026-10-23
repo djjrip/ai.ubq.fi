@@ -1,19 +1,13 @@
 //! Exact shared import publication DATA and its operation-specific reply bound.
 //! No body/start/currentness/durability capability is constructed in this crate.
 use crate::{
-    GatewayError,
     crypto::{Secret, sha256_hex},
     provider_credentials::codex_credential_identity,
 };
-use gateway_core::source_json::SourceJson;
+use gateway_core::{GatewayError, source_json::SourceJson};
 use serde::{Deserialize, Serialize};
-mod command;
-pub use command::{
-    ACCESS_MAX_BYTES, ImportAccessDocument, ImportCatalogData, ImportPublicationCommandData,
-    SNAPSHOT_MAX_BYTES, import_publication_max_bytes,
-};
-mod data;
-pub use data::{ImportCatalogDisposition, ImportPublicationDataV1};
+pub mod command;
+pub mod data;
 fn unavailable() -> GatewayError {
     GatewayError::unavailable(
         "Native import preparation is unavailable, changed, expired, or unsupported.",
@@ -74,12 +68,12 @@ pub struct NativeImportPublication {
     pub operation_id: String,
     pub action_ref: String,
     pub disposition: NativeImportPublicationDisposition,
-    pub publication: ImportPublicationDataV1,
+    pub publication: data::ImportPublicationDataV1,
 }
 impl NativeImportPublication {
     pub fn validate_for(
         &self,
-        request: &ImportPublicationCommandData,
+        request: &command::ImportPublicationCommandData,
         actual_request_bytes: &[u8],
     ) -> Result<(), GatewayError> {
         request.validate()?;
@@ -111,7 +105,7 @@ impl NativeImportPublication {
         }
         if matches!(
             p.catalog_disposition,
-            ImportCatalogDisposition::Normalized { .. }
+            data::ImportCatalogDisposition::Normalized { .. }
         ) {
             if [
                 &p.catalog_revision,
@@ -133,7 +127,7 @@ impl NativeImportPublication {
         if body.len() > import_publication_reply_max_bytes() {
             return Err(unavailable());
         }
-        let request = ImportPublicationCommandData::parse(request_bytes)?;
+        let request = command::ImportPublicationCommandData::parse(request_bytes)?;
         let response: Self = serde_json::from_slice(body).map_err(|_| unavailable())?;
         response.validate_for(&request, request_bytes)?;
         Ok(response)
@@ -149,7 +143,7 @@ pub fn import_publication_reply_max_bytes() -> usize {
         operation_id: reference.clone(),
         action_ref: hash.clone(),
         disposition: NativeImportPublicationDisposition::AlreadyCurrent,
-        publication: ImportPublicationDataV1 {
+        publication: data::ImportPublicationDataV1 {
             v: 1,
             operation_id: reference.clone(),
             claim_ref: reference.clone(),
@@ -182,12 +176,12 @@ pub fn import_publication_reply_max_bytes() -> usize {
             }),
             publication_request_digest: hash.clone(),
             catalog_disposition: if normalized {
-                ImportCatalogDisposition::Normalized {
-                    client_version: "0".repeat(SNAPSHOT_MAX_BYTES - 6) + ".0.0",
+                data::ImportCatalogDisposition::Normalized {
+                    client_version: "0".repeat(command::SNAPSHOT_MAX_BYTES - 6) + ".0.0",
                     upstream_status: 299,
                 }
             } else {
-                ImportCatalogDisposition::AuthenticatedLimited {
+                data::ImportCatalogDisposition::AuthenticatedLimited {
                     upstream_status: 429,
                 }
             },
@@ -219,7 +213,7 @@ pub(crate) fn new_reply_limit(
     if operation.as_deref() != Some("codex_auth_import_publish") {
         return Ok(None);
     }
-    ImportPublicationCommandData::parse(request)?;
+    command::ImportPublicationCommandData::parse(request)?;
     if status != 200 {
         return if status >= 400 {
             Ok(None)
@@ -230,7 +224,3 @@ pub(crate) fn new_reply_limit(
     NativeImportPublication::parse_for(response, request)?;
     Ok(Some(import_publication_reply_max_bytes()))
 }
-
-#[cfg(test)]
-#[path = "publication/tests.rs"]
-mod tests;

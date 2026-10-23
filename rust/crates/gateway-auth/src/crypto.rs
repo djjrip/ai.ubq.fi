@@ -1,7 +1,7 @@
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use sha2::{Digest, Sha256};
 
-use crate::GatewayError;
+use gateway_core::GatewayError;
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Secret(pub(crate) String);

@@ -1,8 +1,11 @@
-use super::PasskeyService;
-use crate as auth;
-mod support;
-use auth::{AuthConfig, AuthHost, AuthService, session_index};
+use crate::{
+    passkeys::PasskeyService,
+    resolve::AuthService,
+    session_index,
+    types::{AuthConfig, AuthHost},
+};
 use gateway_core::state::*;
+mod support;
 use support::*;
 
 #[test]
@@ -33,7 +36,7 @@ fn actual_session_creation_and_logout_publish_and_delete_one_atomic_pair() {
             .unwrap()
             .unwrap();
         let source = store
-            .read(&auth::passkeys::key("sessions", &first.token))
+            .read(&crate::passkeys::key("sessions", &first.token))
             .await
             .unwrap()
             .unwrap();
@@ -61,7 +64,7 @@ fn actual_session_creation_and_logout_publish_and_delete_one_atomic_pair() {
         );
         assert!(
             store
-                .read(&auth::passkeys::key("sessions", &first.token))
+                .read(&crate::passkeys::key("sessions", &first.token))
                 .await
                 .unwrap()
                 .is_none()
@@ -149,7 +152,7 @@ fn logout_cannot_report_success_on_conflict_or_unknown_write() {
             }
             assert!(service.logout(&request(&value.token), None).await.is_err());
             let source = store
-                .read(&auth::passkeys::key("sessions", &value.token))
+                .read(&crate::passkeys::key("sessions", &value.token))
                 .await
                 .unwrap();
             let index = session_index::read_current(
@@ -189,7 +192,7 @@ fn expiry_cleanup_deletes_both_and_source_ttl_bounds_the_metadata_lifetime() {
         );
         assert!(
             store
-                .read(&auth::passkeys::key("sessions", &value.token))
+                .read(&crate::passkeys::key("sessions", &value.token))
                 .await
                 .unwrap()
                 .is_none()
@@ -246,7 +249,7 @@ fn replacement_and_current_user_revision_fence_prepared_actions() {
             .await
             .unwrap()
             .unwrap();
-        let user_key = auth::passkeys::key("users", "fixture-user");
+        let user_key = crate::passkeys::key("users", "fixture-user");
         user(&store, false, "policy-2");
         let auth = AuthService::new(&store, &host, &config);
         assert_eq!(
@@ -273,7 +276,7 @@ fn replacement_and_current_user_revision_fence_prepared_actions() {
             store.commit(stale_user).await.unwrap(),
             CommitOutcome::Conflict
         );
-        let source_key = auth::passkeys::key("sessions", &value.token);
+        let source_key = crate::passkeys::key("sessions", &value.token);
         let replacement_revision = "replacement-session-revision";
         let replacement = AtomicTransition {
             checks: vec![

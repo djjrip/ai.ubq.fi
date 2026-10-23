@@ -1,5 +1,12 @@
-use super::*;
-use crate::native_auth::{NativeCapability, NativeTransportIdentity};
+use gateway_auth::{
+    crypto::{Secret, base64url, sha256_hex},
+    native_auth::{NativeCapability, NativeTransportIdentity},
+    native_import::publication::{
+        self, NativeImportPublication, NativeImportPublicationDisposition, command::*, data::*,
+    },
+    provider_credentials::codex_credential_identity,
+};
+use gateway_core::source_json::SourceJson;
 use std::collections::BTreeSet;
 fn request(normalized: bool) -> ImportPublicationCommandData {
     let id = codex_credential_identity(
@@ -95,11 +102,11 @@ fn exact_limited_maximum_can_be_authenticated_but_one_more_byte_cannot() {
     let body = request.bytes().unwrap();
     let reply = reply(&request, &body);
     let bytes = serde_json::to_vec(&reply).unwrap();
-    let cap = import_publication_reply_max_bytes();
+    let cap = publication::import_publication_reply_max_bytes();
     assert_eq!(bytes.len(), cap);
     assert!(cap > 65_536);
     println!("derived-import-publication-reply-max-bytes={cap}");
-    let nonce = crate::crypto::base64url(&[7; 32]);
+    let nonce = base64url(&[7; 32]);
     let id = identity();
     let mac = id
         .sign_publication_response(&nonce, &body, 200, &bytes)
@@ -133,8 +140,8 @@ fn normalized_max_version_and_lone_utf16_command_retain_exact_shared_domain() {
     );
     let reply = reply(&request, &body);
     let bytes = serde_json::to_vec(&reply).unwrap();
-    assert!(bytes.len() <= import_publication_reply_max_bytes());
-    let nonce = crate::crypto::base64url(&[8; 32]);
+    assert!(bytes.len() <= publication::import_publication_reply_max_bytes());
+    let nonce = base64url(&[8; 32]);
     identity()
         .sign_publication_response(&nonce, &body, 200, &bytes)
         .unwrap();
@@ -146,6 +153,8 @@ fn normalized_max_version_and_lone_utf16_command_retain_exact_shared_domain() {
 }
 #[test]
 fn wrong_terminal_pair_request_digest_or_required_nullable_cannot_get_large_bound() {
+    let nonce = base64url(&[5; 32]);
+    let id = identity();
     let request = request(false);
     let body = request.bytes().unwrap();
     let good = reply(&request, &body);
@@ -167,7 +176,13 @@ fn wrong_terminal_pair_request_digest_or_required_nullable_cannot_get_large_boun
             altered["publication"][field] = serde_json::json!("f".repeat(64));
         }
         assert!(
-            new_reply_limit(&body, 200, &serde_json::to_vec(&altered).unwrap()).is_err(),
+            id.sign_publication_response(
+                &nonce,
+                &body,
+                200,
+                &serde_json::to_vec(&altered).unwrap()
+            )
+            .is_err(),
             "{field}"
         );
     }
@@ -176,17 +191,31 @@ fn wrong_terminal_pair_request_digest_or_required_nullable_cannot_get_large_boun
         .as_object_mut()
         .unwrap()
         .remove("runtime_revision");
-    assert!(new_reply_limit(&body, 200, &serde_json::to_vec(&missing).unwrap()).is_err());
+    assert!(
+        id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&missing).unwrap())
+            .is_err()
+    );
     let mut extra = serde_json::to_value(&good).unwrap();
     extra["public_generation"] = serde_json::json!(true);
-    assert!(new_reply_limit(&body, 200, &serde_json::to_vec(&extra).unwrap()).is_err());
+    assert!(
+        id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&extra).unwrap())
+            .is_err()
+    );
     let mut wrong_body = body.clone();
     wrong_body.push(b' ');
-    assert!(new_reply_limit(&wrong_body, 200, &serde_json::to_vec(&good).unwrap()).is_err());
+    assert!(
+        id.sign_publication_response(
+            &nonce,
+            &wrong_body,
+            200,
+            &serde_json::to_vec(&good).unwrap()
+        )
+        .is_err()
+    );
 }
 #[test]
 fn old_publication_and_every_error_reply_keep_exact_old_cap() {
-    let nonce = crate::crypto::base64url(&[4; 32]);
+    let nonce = base64url(&[4; 32]);
     let id = identity();
     let old = b"{}";
     let exact = vec![b'x'; 65_536];

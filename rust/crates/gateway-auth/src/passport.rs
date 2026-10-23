@@ -14,11 +14,11 @@ use sha2::Sha256;
 use url::Url;
 
 use crate::{
-    AuthConfig, AuthHost, AuthRequest, AuthResponse, AuthResponseBody, GatewayError,
     crypto::{Secret, base64url, decode_base64url},
-    unauthorized,
+    types::{AuthConfig, AuthHost, AuthRequest, AuthResponse, AuthResponseBody, unauthorized},
     upstream::AuthUpstreamRequest,
 };
+use gateway_core::GatewayError;
 
 pub const PASSPORT_ISSUER: &str = "https://passport.ubq.fi";
 pub const PASSPORT_AUTHORIZE_URL: &str = "https://passport.ubq.fi/authorize";

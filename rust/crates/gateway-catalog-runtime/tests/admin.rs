@@ -1,15 +1,14 @@
+use gateway_admin_test_support::ranked_collator::FixtureCollator;
 use gateway_catalog_runtime::{
     CatalogRuntime,
-    admin::{self, *},
-    control,
+    admin::{AdminCatalogHost, AdminCatalogOperation, AdminCatalogResponse},
     host::{
-        self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CodexAccount,
+        CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CodexAccount,
         CredentialPublication, ProviderBinding,
     },
     state,
 };
 use gateway_core::error::GatewayError;
-use gateway_core::js_string::JsString16;
 use gateway_core::query::{QueryEntry, QueryPage, QueryRequest, QueryStore};
 use gateway_core::source_json::SourceJson;
 use gateway_core::state::{
@@ -28,7 +27,6 @@ use gateway_schema::{
 use serde_json::{Value, json};
 use std::{
     cell::{Cell, RefCell},
-    cmp::Ordering,
     collections::{BTreeMap, VecDeque},
     future::{Future, poll_fn},
     rc::Rc,
@@ -78,27 +76,6 @@ fn scalar_response(response: AdminCatalogResponse) -> ScalarResponse {
     ScalarResponse {
         body: scalar(&response.body),
         headers: response.headers,
-    }
-}
-struct FixtureCollator {
-    order: Vec<String>,
-    failed: bool,
-}
-impl SourceStringCollator for FixtureCollator {
-    fn compare(&self, left: &JsString16, right: &JsString16) -> Result<Ordering, GatewayError> {
-        if self.failed {
-            return Err(GatewayError::unavailable(
-                "Locale comparator unavailable",
-                "fixture_collation",
-            ));
-        }
-        let rank = |value: &JsString16| {
-            self.order
-                .iter()
-                .position(|id| value.as_units().iter().copied().eq(id.encode_utf16()))
-                .expect("locale case absent from source oracle")
-        };
-        Ok(rank(left).cmp(&rank(right)))
     }
 }
 fn run<T>(future: impl Future<Output = T>) -> T {

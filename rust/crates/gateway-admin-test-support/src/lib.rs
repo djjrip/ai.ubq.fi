@@ -1,1 +1,4 @@
-//! Internal fixture registration stub; populated in its assigned lane before acceptance.
+//! Dev-only fixtures retaining the original admin transport, clock and rank contracts.
+pub mod ranked_collator;
+pub mod runtime_host;
+pub mod source_store;

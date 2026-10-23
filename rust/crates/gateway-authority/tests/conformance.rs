@@ -1,3 +1,4 @@
+use gateway_routing_runtime_test_support::authority as support;
 mod capacity_cases;
 mod claude_cases;
 mod full_pool_reset;
@@ -7,7 +8,6 @@ mod paid_retention_f13;
 mod reset_spend;
 mod routing_source_cases;
 mod source_model_cases;
-mod support;
 use gateway_authority::{
     DAY_MS, PAID_RETENTION_MS, QUOTA_RETENTION_MS,
     kernel::{KernelPolicy, KernelTerminal, KernelWindow},
@@ -28,8 +28,11 @@ use gateway_core::identity::{ApiKeyId, PaidAttemptId, PoolVersionstamp, RequestI
 use gateway_core::lifecycle::{BillingState, PaidTerminalState};
 use gateway_core::provider::{CodexQuotaClass, PaidProvider, UpstreamProvider};
 use gateway_core::state::AuthorityStore;
+use gateway_routing_runtime_test_support::authority::{
+    MemoryStore, NOW, TestAuthority, Tokens, admin_hash, admitted, authority, block, policy, pool,
+    routing_hash, run, seed_pool, source_account,
+};
 use std::sync::atomic::Ordering;
-use support::*;
 
 fn id(value: &str) -> RequestId {
     RequestId(value.to_owned())

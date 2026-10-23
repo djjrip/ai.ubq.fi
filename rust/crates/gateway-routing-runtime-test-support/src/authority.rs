@@ -24,6 +24,14 @@ use std::{
     task::{Context, Poll, Waker},
 };
 
+#[track_caller]
+fn fixture_result<T, E: std::fmt::Debug>(result: Result<T, E>) -> T {
+    match result {
+        Ok(value) => value,
+        Err(error) => panic!("called `Result::unwrap()` on an `Err` value: {error:?}"),
+    }
+}
+
 pub const NOW: i64 = 1_792_329_600_000;
 
 #[derive(Clone)]
@@ -51,38 +59,39 @@ impl Default for MemoryStore {
 
 impl MemoryStore {
     pub fn seed_with_revision<T: Serialize>(&self, key: RecordKey, value: &T, revision: &str) {
-        self.rows.lock().unwrap().insert(
+        fixture_result(self.rows.lock()).insert(
             key.0,
-            StoredRecord::json(revision, serde_json::to_value(value).unwrap(), None),
+            StoredRecord::json(revision, fixture_result(serde_json::to_value(value)), None),
         );
     }
     pub fn seed<T: Serialize>(&self, key: RecordKey, value: &T) {
-        self.rows.lock().unwrap().insert(
+        fixture_result(self.rows.lock()).insert(
             key.0,
             StoredRecord::json(
                 format!("seed-{}", self.sequence.fetch_add(1, Ordering::SeqCst)),
-                serde_json::to_value(value).unwrap(),
+                fixture_result(serde_json::to_value(value)),
                 None,
             ),
         );
     }
     pub fn row(&self, key: &RecordKey) -> Option<StoredRecord> {
-        self.rows.lock().unwrap().get(&key.0).cloned()
+        fixture_result(self.rows.lock()).get(&key.0).cloned()
     }
     pub fn seed_record(&self, key: RecordKey, record: StoredRecord) {
-        self.rows.lock().unwrap().insert(key.0, record);
+        fixture_result(self.rows.lock()).insert(key.0, record);
     }
     pub fn clock(&self, now: i64) {
         self.now.store(now, Ordering::SeqCst);
     }
     pub fn race<T: Serialize>(&self, key: RecordKey, value: &T) {
-        *self.race.lock().unwrap() = Some((key, serde_json::to_value(value).unwrap()));
+        *fixture_result(self.race.lock()) =
+            Some((key, fixture_result(serde_json::to_value(value))));
     }
     pub fn is_empty(&self) -> bool {
-        self.rows.lock().unwrap().is_empty()
+        fixture_result(self.rows.lock()).is_empty()
     }
     pub fn jump_on_read(&self, key: RecordKey, now: i64) {
-        *self.jump.lock().unwrap() = Some((key, now));
+        *fixture_result(self.jump.lock()) = Some((key, now));
     }
 }
 
@@ -97,7 +106,7 @@ impl AuthorityStore for MemoryStore {
         &self,
         key: &RecordKey,
     ) -> impl Future<Output = Result<Option<StoredRecord>, GatewayError>> {
-        let mut jump = self.jump.lock().unwrap();
+        let mut jump = fixture_result(self.jump.lock());
         if jump.as_ref().is_some_and(|(target, _)| target == key)
             && let Some((_, now)) = jump.take()
         {
@@ -105,7 +114,7 @@ impl AuthorityStore for MemoryStore {
         }
         drop(jump);
         let key_valid = TupleKey::from_record_key(key).and_then(|key| key.validate_stored_key());
-        let row = self.rows.lock().unwrap().get(&key.0).cloned();
+        let row = fixture_result(self.rows.lock()).get(&key.0).cloned();
         let now = self.now.load(Ordering::SeqCst);
         async move {
             key_valid?;
@@ -125,9 +134,9 @@ impl AuthorityStore for MemoryStore {
         {
             return Ok(CommitOutcome::Conflict);
         }
-        let mut rows = self.rows.lock().unwrap();
+        let mut rows = fixture_result(self.rows.lock());
         let now = self.now.load(Ordering::SeqCst);
-        if let Some((key, value)) = self.race.lock().unwrap().take() {
+        if let Some((key, value)) = fixture_result(self.race.lock()).take() {
             rows.insert(
                 key.0,
                 StoredRecord::json(
@@ -277,7 +286,9 @@ pub fn seed_pool(store: &MemoryStore, pool: &SubscriptionPool) {
                     identity.routing_account_hash == configured.account_id_hash
                         && identity.credential_version == configured.credential_version
                 })
-                .expect("fixture normalized pool must match actual fixture source credentials")
+                .unwrap_or_else(|| {
+                    panic!("fixture normalized pool must match actual fixture source credentials")
+                })
                 .clone()
         })
         .collect();
@@ -312,8 +323,11 @@ pub fn policy() -> ApiKeyPolicy {
     }
 }
 pub fn admitted(authority: &TestAuthority) -> AdmittedAccount {
-    match run(authority.select_account(&"gpt-test".into(), CodexQuotaClass::Standard, NOW)).unwrap()
-    {
+    match fixture_result(run(authority.select_account(
+        &"gpt-test".into(),
+        CodexQuotaClass::Standard,
+        NOW,
+    ))) {
         RouteSelection::Eligible(account) => account,
         _ => panic!("expected eligible account"),
     }

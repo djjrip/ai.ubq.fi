@@ -1,16 +1,14 @@
 mod original_request_fixture;
-mod support;
 
-use support::source_catalog;
+use gateway_routing_runtime_test_support::source_catalog;
 type MemoryStore = Store;
 type TestAuthority = gateway_authority::store::Authority<Store, Tokens>;
 use gateway_authority::{keys, paid_control::*};
 use gateway_catalog_runtime::CatalogRuntime;
 use gateway_catalog_runtime::host::{
-    self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CredentialPublication,
+    CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CredentialPublication,
     ProviderBinding,
 };
-use gateway_catalog_runtime::providers;
 use gateway_catalog_runtime::state;
 use gateway_core::error::GatewayError;
 use gateway_core::provider::PaidProvider;

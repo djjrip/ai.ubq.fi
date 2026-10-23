@@ -60,7 +60,7 @@ fn named_paid_source_audit_retains_utf16_model_effort_and_exact_counter_inventor
         (r#""\ud83d\ude00""#, r#""\\ud800""#),
     ] {
         let document = request(model, effort);
-        assert!(audit::valid_source_paid_request(&document));
+        assert!(audit::paid::valid_source_paid_request(&document));
         let rows = inventory(&document);
         let original = rows
             .iter()
@@ -111,7 +111,7 @@ fn source_paid_audit_keeps_pending_aggregate_and_malformed_control_refusals() {
         ("123", r#""none""#),
     ] {
         let malformed = request(model, effort);
-        assert!(!audit::valid_source_paid_request(&malformed));
+        assert!(!audit::paid::valid_source_paid_request(&malformed));
         assert!(inspect(&inventory(&malformed)).errors.iter().any(|error| {
             error
                 .try_utf8()
@@ -125,7 +125,7 @@ fn source_paid_audit_keeps_pending_aggregate_and_malformed_control_refusals() {
             .copied()
             .ne("reasoning".encode_utf16())
     });
-    assert!(!audit::valid_source_paid_request(
+    assert!(!audit::paid::valid_source_paid_request(
         &source::object_keys(missing).unwrap()
     ));
 }
@@ -177,8 +177,8 @@ fn inspect_paid(
     unlimited: &BTreeSet<String>,
     now: i64,
 ) -> Result<audit::Audit, gateway_core::GatewayError> {
-    let result = audit::inspect_paid(rows, known, unlimited, now);
-    let replay = audit::inspect_paid_inventory(&Replay(rows), known, unlimited, now);
+    let result = audit::paid::inspect_paid(rows, known, unlimited, now);
+    let replay = audit::paid::inspect_paid_inventory(&Replay(rows), known, unlimited, now);
     assert_eq!(format!("{result:?}"), format!("{replay:?}"));
     result
 }

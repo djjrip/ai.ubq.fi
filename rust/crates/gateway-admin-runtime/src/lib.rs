@@ -17,7 +17,7 @@ use capabilities::*;
 use gateway_admin::{
     AdminHost, AdminInput, AdminOperation, PaidKeyFields, source_input as source_body,
 };
-use gateway_auth::{AuthHost, AuthResponse, invalid};
+use gateway_auth::{AuthHost, AuthResponse, invalid, native::NativeReadRequest};
 use gateway_core::{GatewayError, query::QueryStore, state::RevisionCheck};
 use serde_json::{Value, json};
 
@@ -398,7 +398,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminHost for AdminRunt
                     .await
             }
             SupervisorSessions => {
-                self.native_response(NativeRequest::SupervisorSessions, context)
+                self.native_response(NativeReadRequest::SupervisorSessions, context)
                     .await
             }
             SupervisorOutput | SupervisorBrief => {
@@ -465,7 +465,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminHost for AdminRunt
                         .chars()
                         .take(240)
                         .collect();
-                    NativeRequest::SupervisorOutput {
+                    NativeReadRequest::SupervisorOutput {
                         source_id,
                         thread_id,
                         cursor: (!cursor.is_empty()).then_some(cursor),
@@ -592,7 +592,7 @@ impl<S: QueryStore, H: AuthHost, C: RuntimeCapabilities> AdminRuntime<'_, S, H, 
     }
     async fn native_response(
         &self,
-        request: NativeRequest,
+        request: NativeReadRequest,
         context: Context,
     ) -> Result<AuthResponse, GatewayError> {
         use gateway_auth::native::{NATIVE_WIRE_VERSION, NativeRpcEnvelope, NativeRpcResponse};

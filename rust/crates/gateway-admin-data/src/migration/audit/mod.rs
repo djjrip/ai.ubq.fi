@@ -1,15 +1,9 @@
 //! Audits complete supplied source-schema inventories; does not adopt them as authority state.
-mod keys;
-mod paid;
+pub mod keys;
+pub mod paid;
 mod source_fields;
-mod source_model;
-pub use source_model::{inspect_model_inventory, inspect_model_snapshot};
-mod usage;
-pub use keys::{AuditedKeyPair, inspect_key_pairs, valid_key_policy, valid_source_key_policy};
-pub use paid::{inspect_paid, inspect_paid_inventory, valid_source_paid_request};
-pub use usage::{
-    inspect_api_inventory, inspect_api_usage, inspect_kernel, inspect_kernel_inventory,
-};
+pub mod source_model;
+pub mod usage;
 
 use super::{ObservedRow, starts};
 use crate::{integer, number, text};
@@ -267,7 +261,7 @@ pub fn inspect_source_rows(
             "Migration validation requires complete source inventories.",
         ));
     }
-    let (pairs, mut audit) = inspect_key_pairs(rows)?;
+    let (pairs, mut audit) = keys::inspect_key_pairs(rows)?;
     let known: std::collections::BTreeSet<String> =
         pairs.iter().map(|pair| pair.key_id.clone()).collect();
     let unlimited: std::collections::BTreeSet<String> = pairs
@@ -275,11 +269,13 @@ pub fn inspect_source_rows(
         .filter(|pair| pair.unlimited_paid)
         .map(|pair| pair.key_id.clone())
         .collect();
-    audit.merge(inspect_api_usage(rows, &known)?);
-    audit.merge(inspect_kernel(rows)?);
-    audit.merge(inspect_paid(rows, &known, &unlimited, now)?);
+    audit.merge(usage::inspect_api_usage(rows, &known)?);
+    audit.merge(usage::inspect_kernel(rows)?);
+    audit.merge(paid::inspect_paid(rows, &known, &unlimited, now)?);
     audit.merge(inspect_reset_usage(rows)?);
-    audit.errors.extend(inspect_model_snapshot(rows)?);
+    audit
+        .errors
+        .extend(source_model::inspect_model_snapshot(rows)?);
     let repo = rows
         .iter()
         .filter(|r| under(&r.parts, &["ubq_ai", "kernel_auth", "limits"]))

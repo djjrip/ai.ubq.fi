@@ -101,7 +101,7 @@ fn named_key_pair_audit_preserves_complete_utf16_policy_and_finite_facts() {
 fn source_key_audit_keeps_malformed_pair_counter_and_model_rejections() {
     for models in [r#"[0]"#, r#"[null]"#, r#"[""]"#, r#"["\u00a0\t"]"#, "null"] {
         let (id, hash) = policies(models);
-        assert!(!audit::valid_source_key_policy(&id, true), "{models}");
+        assert!(!audit::keys::valid_source_key_policy(&id, true), "{models}");
         let (pairs, findings) = inspect_key_pairs(&rows(&id, &hash)).unwrap();
         assert!(pairs.is_empty());
         assert!(findings.errors.iter().any(|error| {
@@ -186,8 +186,8 @@ fn scalar_key_policy_stays_json_and_legacy_wrapper_matches_source_validation() {
     let rows = rows(&scalar, &hash);
     assert_eq!(rows[0].record.value_encoding, ValueEncoding::Json);
     assert_eq!(rows[0].record.value, scalar.deserialize::<Value>().unwrap());
-    assert!(audit::valid_key_policy(&rows[0].record.value, true));
-    assert!(audit::valid_source_key_policy(&scalar, true));
+    assert!(audit::keys::valid_key_policy(&rows[0].record.value, true));
+    assert!(audit::keys::valid_source_key_policy(&scalar, true));
     assert!(inspect_key_pairs(&rows).unwrap().1.errors.is_empty());
 }
 
@@ -207,8 +207,8 @@ impl audit::AuditInventory for Replay<'_> {
 }
 fn inspect_key_pairs(
     rows: &[ObservedRow],
-) -> Result<(Vec<audit::AuditedKeyPair>, audit::Audit), gateway_core::GatewayError> {
-    let result = audit::inspect_key_pairs(rows);
+) -> Result<(Vec<audit::keys::AuditedKeyPair>, audit::Audit), gateway_core::GatewayError> {
+    let result = audit::keys::inspect_key_pairs(rows);
     let replay = audit::inspect_inventory(&Replay(rows), 1000);
     match (&result, replay) {
         (Ok((_, expected)), Ok(actual)) => {

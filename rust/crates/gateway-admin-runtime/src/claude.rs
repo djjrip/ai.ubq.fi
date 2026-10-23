@@ -1,4 +1,6 @@
 //! Source Claude roster and current-generation fences. Secret-bearing records never form admin JSON.
+pub mod source_secret;
+
 use crate::store;
 use gateway_auth::{
     AuthHost,
@@ -16,9 +18,8 @@ use gateway_core::{
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{collections::BTreeSet, sync::Arc};
-#[path = "claude_source_secret.rs"]
-mod source_secret;
-pub use source_secret::ClaudeSourceSecret;
+
+use source_secret::ClaudeSourceSecret;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -743,5 +744,4 @@ pub async fn remove_account<S: AuthorityStore, H: AuthHost>(
 }
 
 #[cfg(test)]
-#[path = "claude_source_tests.rs"]
 mod source_tests;

@@ -393,8 +393,9 @@ pub fn claude_source(body: &SourceJson) -> Result<ClaudeSubmission, GatewayError
         return Err(invalid("create_new cannot target an existing account"));
     }
     Ok(ClaudeSubmission {
-        credential: credential
-            .map(|text| std::sync::Arc::new(crate::claude::ClaudeSourceSecret::from_source(text))),
+        credential: credential.map(|text| {
+            std::sync::Arc::new(crate::claude::source_secret::ClaudeSourceSecret::from_source(text))
+        }),
         label,
         workspace_id,
         account_id,

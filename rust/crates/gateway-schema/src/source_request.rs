@@ -1,29 +1,24 @@
 //! Ordinary-request data views; no provider dispatch or authority is implemented here.
-mod cache_capability;
+macro_rules! json {
+    ({$($key:literal:$value:expr),*$(,)?})=>{$crate::source_request::value::Value::object(vec![$((gateway_core::js_string::JsString16::from_utf8($key),$crate::source_request::value::Value::from_serializable(&$value).expect("Source normalization fields serialize"))),*])};
+    ($value:expr)=>{$crate::source_request::value::Value::from_serializable(&$value).expect("Source normalization value serializes")};
+}
+pub mod cache_capability;
 pub(crate) mod cache_metadata;
 mod chat_engine;
 mod content_engine;
 mod controls;
-mod error;
-mod fields;
-mod normalized;
-mod ordinary;
-mod reasoning;
-mod value;
-/// Data-only views over the existing lazy source facade; never dispatch or admission.
-pub mod source_value {
-    pub use super::value::{Text, Value};
-}
-pub use cache_capability::validate_known_unsupported_prompt_cache;
-pub use error::SourceRequestError;
-pub use fields::{
-    parse_chat_stream_options, parse_max_completion_tokens, validate_cache_control,
-    validate_prompt_cache_controls, validate_request_fields,
+pub mod error;
+pub mod fields;
+pub mod normalized;
+pub mod ordinary;
+pub mod reasoning;
+pub mod value;
+use self::{
+    error::SourceRequestError, fields::validate_request_fields, ordinary::OrdinarySourceRequest,
+    reasoning::parse_reasoning,
 };
 use gateway_core::{js_string::JsString16, source_json::SourceJson};
-pub use normalized::*;
-pub use ordinary::OrdinarySourceRequest;
-pub use reasoning::{parse_effort, parse_reasoning};
 
 pub const MAX_ACCEPTED_JSON_BODY_BYTES: usize = 32 * 1024 * 1024;
 

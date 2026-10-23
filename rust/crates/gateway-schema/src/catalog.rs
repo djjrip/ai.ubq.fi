@@ -1,11 +1,7 @@
 //! Catalog assembly consumes observations; network, authentication and refresh are adapter-owned.
-pub use crate::catalog_views::{
-    build_catalog_snapshot, capabilities, ordinary_models, public_catalog,
-};
-pub use crate::native_catalog::{native_catalog, native_catalog_fallback};
 use crate::{
     aliases::*, metadata::*, model_control as c, reasoning::ModelReasoning, selection::*,
-    snapshot::ModelSnapshot, source_request::SourceRequestError,
+    snapshot::ModelSnapshot, source_request::error::SourceRequestError,
 };
 use gateway_core::{
     js_string::JsString16, model::ModelId, source_json::SourceJson, source_serialization as source,

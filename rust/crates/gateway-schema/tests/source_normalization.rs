@@ -4,7 +4,15 @@ use gateway_core::{
 };
 use gateway_schema::{
     request::{RequestExtensions, RequestSurface},
-    source_request::{self, SourceRequestDocument, SourceRequestError},
+    source_request::{
+        SourceRequestDocument,
+        error::SourceRequestError,
+        fields::validate_prompt_cache_controls,
+        normalized::{
+            normalize_chat_message, normalize_function_output, normalize_response_content,
+            normalize_response_message,
+        },
+    },
 };
 use serde::{Deserialize, Serialize};
 fn raw(text: &str) -> SourceJson {
@@ -42,10 +50,10 @@ fn source_normalization_matches_pinned_bun_utf16_oracles() {
     for case in fixture.cases {
         let value = raw(&case.input);
         let result = match case.op.as_str() {
-            "content" => source_request::normalize_response_content(&value, "input[0]", "user"),
-            "message" => source_request::normalize_response_message(&value, "input[0]"),
-            "function" => source_request::normalize_function_output(&value, "input[0]"),
-            "chat" => source_request::normalize_chat_message(&value, 0).map(|message| {
+            "content" => normalize_response_content(&value, "input[0]", "user"),
+            "message" => normalize_response_message(&value, "input[0]"),
+            "function" => normalize_function_output(&value, "input[0]"),
+            "chat" => normalize_chat_message(&value, 0).map(|message| {
                 #[derive(Serialize)]
                 struct Chat {
                     instruction: Option<JsString16>,
@@ -60,7 +68,7 @@ fn source_normalization_matches_pinned_bun_utf16_oracles() {
                 })
                 .unwrap()
             }),
-            "cache" => source_request::validate_prompt_cache_controls(&value).map(|()| raw("null")),
+            "cache" => validate_prompt_cache_controls(&value).map(|()| raw("null")),
             other => panic!("unknown oracle operation {other}"),
         };
         let actual = match result {

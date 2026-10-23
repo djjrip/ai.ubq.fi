@@ -73,7 +73,7 @@ impl AuthorityStore for Store {
     }
 }
 fn prepared(generation: &str, body_generation: &str, now: i64) -> PreparedCatalog {
-    prepare_catalog("0.163.0",generation,body_generation,r#"{ "future": 1, "models": [{"slug":"a","context_window":272000,"max_context_window":872000}] }"#,Some("upstream-tag"),Some("application/json"),now,&BTreeMap::new()).unwrap()
+    prepare_catalog(CatalogIdentity { client_version: "0.163.0", auth_generation: generation, body_generation },r#"{ "future": 1, "models": [{"slug":"a","context_window":272000,"max_context_window":872000}] }"#,Some("upstream-tag"),Some("application/json"),now,&BTreeMap::new()).unwrap()
 }
 #[test]
 fn actual_gzip_round_trip_retains_source_and_served_integrity() {
@@ -86,9 +86,11 @@ fn actual_gzip_round_trip_retains_source_and_served_integrity() {
         },
     );
     let prepared = prepare_catalog(
-        "0.163.0",
-        "auth",
-        "body",
+        CatalogIdentity {
+            client_version: "0.163.0",
+            auth_generation: "auth",
+            body_generation: "body",
+        },
         r#"{ "models": [{"slug":"a","context_window":272000}] }"#,
         Some("upstream"),
         None,

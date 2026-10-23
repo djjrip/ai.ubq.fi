@@ -4,7 +4,11 @@ use gateway_core::{
 };
 use gateway_schema::{
     prompt_cache,
-    source_request::{self, SourceRequestError},
+    source_request::{
+        cache_capability::validate_known_unsupported_prompt_cache,
+        error::SourceRequestError,
+        normalized::{normalize_chat_messages, normalize_responses_input},
+    },
 };
 use serde_json::{Value, json};
 fn raw(value: &str) -> SourceJson {
@@ -33,16 +37,14 @@ fn check(
     key: &str,
 ) -> Result<(), SourceRequestError> {
     let cap = cap.map(|value| SourceJson::from_serializable(value).unwrap());
-    source_request::validate_known_unsupported_prompt_cache(model, cap.as_ref(), body, input, key)
+    validate_known_unsupported_prompt_cache(model, cap.as_ref(), body, input, key)
 }
 #[test]
 fn false_capability_preserves_lone_model_and_original_payload() {
     let model = JsString16::from_units(vec![0xd800]);
     let body = raw(r#"{"input":"\udfff","prompt_cache_key":"cache\ud800"}"#);
     let before = body.clone();
-    let input =
-        source_request::normalize_responses_input(Some(&body.object_entries().unwrap()[0].1))
-            .unwrap();
+    let input = normalize_responses_input(Some(&body.object_entries().unwrap()[0].1)).unwrap();
     let error = check(&model, Some(&Value::Bool(false)), &body, &input, "input").unwrap_err();
     assert_eq!(param(&error), "prompt_cache_key");
     assert_eq!(body, before);
@@ -108,8 +110,7 @@ fn normalized_breakpoint_detection_keeps_original_response_and_chat_paths() {
     let body = raw(
         r#"{"input":["prefix",{"type":"input_text","text":"\ud800","prompt_cache_breakpoint":{"mode":"explicit"}}]}"#,
     );
-    let input =
-        source_request::normalize_responses_input(source::member(&body, "input").as_ref()).unwrap();
+    let input = normalize_responses_input(source::member(&body, "input").as_ref()).unwrap();
     assert_eq!(
         param(&check(&model, Some(&cap), &body, &input, "input").unwrap_err()),
         "input[1].prompt_cache_breakpoint"
@@ -119,9 +120,7 @@ fn normalized_breakpoint_detection_keeps_original_response_and_chat_paths() {
     let body = raw(
         r#"{"messages":[{"role":"developer","content":[{"type":"text","text":"\udfff","prompt_cache_breakpoint":{"mode":"explicit"}}]}]}"#,
     );
-    let input =
-        source_request::normalize_chat_messages(&source::member(&body, "messages").unwrap())
-            .unwrap();
+    let input = normalize_chat_messages(&source::member(&body, "messages").unwrap()).unwrap();
     assert_eq!(
         param(&check(&model, Some(&cap), &body, &input.input, "messages").unwrap_err()),
         "messages[0].content[0].prompt_cache_breakpoint"
@@ -136,8 +135,7 @@ fn block_type_and_function_output_paths_use_the_same_source_policy() {
     let body = raw(
         r#"{"input":[{"type":"function_call_output","call_id":"\ud800","output":[{"type":"input_text","text":"\udfff","prompt_cache_breakpoint":{"mode":"explicit"}}]}]}"#,
     );
-    let input =
-        source_request::normalize_responses_input(source::member(&body, "input").as_ref()).unwrap();
+    let input = normalize_responses_input(source::member(&body, "input").as_ref()).unwrap();
     assert_eq!(
         param(&check(&model, Some(&cap), &body, &input, "input").unwrap_err()),
         "input[0].output[0].prompt_cache_breakpoint"
@@ -177,7 +175,7 @@ fn opaque_other_provider_does_not_hide_current_provider_capabilities() {
             .as_units(),
         &[0xd800]
     );
-    let error = source_request::validate_known_unsupported_prompt_cache(
+    let error = validate_known_unsupported_prompt_cache(
         &JsString16::from_utf8("model"),
         Some(&cap),
         &raw(r#"{"prompt_cache_key":"key"}"#),

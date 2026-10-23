@@ -7,6 +7,11 @@ use std::{
 
 pub struct Directory(PathBuf);
 static NEXT_DIRECTORY: AtomicU64 = AtomicU64::new(1);
+impl Default for Directory {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 impl Directory {
     pub fn new() -> Self {
         let suffix = std::time::SystemTime::now()

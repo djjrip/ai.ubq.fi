@@ -1,1 +1,3 @@
-//! Internal fixture registration stub; populated in its assigned lane before acceptance.
+pub mod fixture;
+#[cfg(not(target_arch = "wasm32"))]
+pub mod sqlite_store;

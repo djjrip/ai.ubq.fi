@@ -3,7 +3,6 @@ mod copied_store_inverse {
     pub mod driver;
     pub mod store;
 }
-mod support;
 
 use copied_store_inverse::store::ReadonlyStore;
 use gateway_auth::crypto::base64url;
@@ -24,6 +23,8 @@ use gateway_migration::{
     native_capture::{NativeCapture, NativeEntry, NativeRevision, NativeValue, prepare_native},
     native_operator::{NativeCustodyRegistration, prepare_local_bootstrap},
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use rusqlite::{Connection, params};
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
@@ -31,10 +32,6 @@ use std::{
     fs,
     os::unix::fs::{MetadataExt, PermissionsExt},
     path::{Path, PathBuf},
-};
-use support::{
-    fixture::{Directory, run},
-    sqlite_store::SqliteStore,
 };
 
 const NOW: i64 = 2400;

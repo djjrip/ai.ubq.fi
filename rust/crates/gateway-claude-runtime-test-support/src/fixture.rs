@@ -8,13 +8,12 @@ use gateway_auth::upstream::{AuthUpstreamRequest, AuthUpstreamResponse};
 use gateway_auth::webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto};
 use gateway_catalog_runtime::host::ProviderBinding;
 use gateway_claude_runtime::host::{
-    self, AcceptedObservation, ClaudePoolHost, HealthObservation, OutcomeDecision, PoolConfig,
+    AcceptedObservation, ClaudePoolHost, HealthObservation, OutcomeDecision, PoolConfig,
     PoolSelection, ResponseObservation, SelectedAccount, SelectionInput, WorkspaceResponse,
 };
 use gateway_claude_runtime::persistence::quota_key;
 use gateway_claude_runtime::pool::ClaudePoolSession;
 use gateway_claude_runtime::quota;
-use gateway_claude_runtime::response;
 use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
 use gateway_core::error::GatewayError;
 use gateway_core::js_string::JsString16;
@@ -55,6 +54,11 @@ pub struct Store {
     pub before_commit: Rc<RefCell<Option<Action>>>,
     pub after_read: Rc<RefCell<Option<(RecordKey, Action)>>>,
     pub commits: Rc<Cell<usize>>,
+}
+impl Default for Store {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 impl Store {
     pub fn new() -> Self {
@@ -426,5 +430,8 @@ pub fn apply(
     run(session.after_outcome(store, host, head, error_evidence(None, false))).unwrap()
 }
 pub fn error_evidence(prefix: Option<Vec<u16>>, complete: bool) -> ErrorEvidence {
-    ErrorEvidence::from_prefix(prefix, complete).unwrap()
+    match ErrorEvidence::from_prefix(prefix, complete) {
+        Ok(evidence) => evidence,
+        Err(error) => panic!("called `Result::unwrap()` on an `Err` value: {error:?}"),
+    }
 }

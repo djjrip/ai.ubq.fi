@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_admin_data::profile::{
     CanonicalDates, SourceDateHost,
     source::{from_source_profile_with_host, to_source_profile},
@@ -14,8 +13,9 @@ use gateway_migration::{
     engine::{adopt_empty, prepare},
     inverse::export_latest,
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
-use support::{fixture::*, sqlite_store::*};
 struct OracleDate;
 impl SourceDateHost for OracleDate {
     fn date_value(&self, input: Option<&Value>) -> Result<Option<i64>, GatewayError> {

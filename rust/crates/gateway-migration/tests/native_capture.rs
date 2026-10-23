@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_auth::store::key;
 use gateway_core::{query::*, source_graph::GraphNode, state::*, tuple_key::TupleKey};
 use gateway_migration::native_capture::NativeRevision;
@@ -10,8 +9,9 @@ use gateway_migration::{
     native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native},
     native_inverse::{export_native_latest, export_native_rollback_bundle},
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::json;
-use support::{fixture::*, sqlite_store::*};
 
 fn fixture() -> NativeCapture {
     serde_json::from_str(include_str!("fixtures/native-source.json")).unwrap()

@@ -1,5 +1,4 @@
 #![cfg(all(not(target_arch = "wasm32"), unix))]
-mod support;
 use gateway_auth::{
     crypto::{Secret, base64url},
     managed_access::ManagedAccessProjection,
@@ -23,13 +22,14 @@ use gateway_migration::{
         export_native_with_custody, sanitize_native_capture,
     },
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use gateway_native::{
     transport::NativeOwnerTransport,
     unix::{NativeOwnerLocation, UnixOwnerTransport},
 };
 use serde_json::{Value, json};
 use std::{cell::RefCell, collections::BTreeMap, path::PathBuf};
-use support::{fixture::*, sqlite_store::*};
 
 fn graph(value: &Value) -> SourceGraph {
     fn atom(value: &Value, nodes: &mut Vec<GraphNode>) -> GraphAtom {

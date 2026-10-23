@@ -6,8 +6,8 @@ use gateway_core::{
     source_json::SourceJson,
     source_serialization as source,
 };
+use gateway_routing_runtime_test_support::authority as support;
 use serde::Deserialize;
-pub mod support;
 
 #[derive(Deserialize)]
 struct Fixture {

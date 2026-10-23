@@ -1,9 +1,6 @@
-mod support;
-
 use gateway_catalog_runtime::CatalogRuntime;
-use gateway_catalog_runtime::admin;
 use gateway_catalog_runtime::host::{
-    self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogMaintenance, CatalogObservation,
+    CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogMaintenance, CatalogObservation,
     CatalogProvider, CodexAccount, CredentialPublication, ProviderBinding,
 };
 use gateway_catalog_runtime::providers;
@@ -16,6 +13,7 @@ use gateway_core::state::{
     StoredRecord,
 };
 use gateway_core::tuple_key::TupleKey;
+use gateway_routing_runtime_test_support::source_catalog::{self, Collator};
 use gateway_schema::catalog_cache::{self, CatalogResponse};
 use gateway_schema::catalog_store;
 use serde_json::{Value, json};
@@ -27,7 +25,6 @@ use std::{
     sync::Arc,
     task::{Context, Poll, Waker},
 };
-use support::source_catalog::{self, Collator};
 fn loader_fixture() -> Collator {
     Collator::from_catalog_json(include_str!("fixtures/catalog-loader-sort-v1.json"))
 }

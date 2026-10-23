@@ -1,6 +1,5 @@
 //! Controlled finite host callbacks validate durable orchestration, not live provider acceptance.
-pub mod support;
-use gateway_auth::crypto::Secret;
+pub use gateway_auth::crypto::Secret;
 use gateway_auth::provider_credentials::{codex_source_pool_key, parse_codex_source_pool};
 use gateway_authority::cache_experiment::{
     RefreshPermit,
@@ -12,9 +11,9 @@ use gateway_authority::routing_types::{PoolAccount, SubscriptionPool};
 use gateway_core::error::GatewayError;
 use gateway_core::identity::PoolVersionstamp;
 use gateway_core::tuple_key::{ScalarKeyPart::String as Text, TupleKey};
+use gateway_routing_runtime_test_support::authority::{MemoryStore, TestAuthority, authority, run};
 use serde_json::{Value, json};
 use std::cell::{Cell, RefCell};
-use support::{MemoryStore, TestAuthority, authority, run};
 fn key(parts: &[&str]) -> gateway_core::state::RecordKey {
     TupleKey::from_scalar_parts(&parts.iter().map(|s| Text(s)).collect::<Vec<_>>()).to_record_key()
 }

@@ -1,15 +1,13 @@
 use gateway_admin::operations::{AdminHost, AdminInput};
 use gateway_admin::routes::AdminOperation;
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::*};
+use gateway_admin_test_support::runtime_host::Host;
 use gateway_auth::{
     native::NativeReadRequest,
     types::{
         AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthResponse,
-        AuthResponseBody, unauthorized,
+        AuthResponseBody,
     },
-    upstream::*,
-    webauthn::*,
-    *,
 };
 use gateway_core::{
     error::GatewayError, js_string::JsString16, model::ModelId, query::*,
@@ -126,63 +124,6 @@ impl QueryStore for Store {
             entries,
             next_cursor,
         })
-    }
-}
-struct Host {
-    now: Cell<i64>,
-    serial: Cell<u64>,
-}
-impl Default for Host {
-    fn default() -> Self {
-        Self {
-            now: Cell::new(1_000_000),
-            serial: Cell::new(0),
-        }
-    }
-}
-impl WebAuthnCrypto for Host {
-    async fn validate_key(&self, _: &CosePublicKey) -> Result<(), GatewayError> {
-        Err(GatewayError::unavailable(
-            "No cryptographic fixture",
-            "fixture_missing",
-        ))
-    }
-    async fn verify_signature(&self, _: SignatureInput) -> Result<bool, GatewayError> {
-        Err(GatewayError::unavailable(
-            "No cryptographic fixture",
-            "fixture_missing",
-        ))
-    }
-}
-impl AuthHost for Host {
-    fn now_ms(&self) -> i64 {
-        self.now.get()
-    }
-    fn random_bytes(&self, len: usize) -> Result<Vec<u8>, GatewayError> {
-        let n = self.serial.get() + 1;
-        self.serial.set(n);
-        Ok((0..len).map(|i| (n + i as u64) as u8).collect())
-    }
-    async fn fetch_auth(
-        &self,
-        _: AuthUpstreamRequest,
-    ) -> Result<AuthUpstreamResponse, GatewayError> {
-        Err(GatewayError::unavailable(
-            "Network denied",
-            "fixture_network_denied",
-        ))
-    }
-    async fn kernel_principal(
-        &self,
-        _: &str,
-        _: &str,
-        _: &str,
-        _: &str,
-    ) -> Result<String, GatewayError> {
-        Err(GatewayError::unavailable(
-            "No kernel fixture",
-            "fixture_missing",
-        ))
     }
 }
 struct Capabilities;

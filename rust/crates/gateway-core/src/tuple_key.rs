@@ -3,7 +3,7 @@
 
 use serde_json::Value;
 
-use crate::{GatewayError, state::RecordKey};
+use crate::{error::GatewayError, state::RecordKey};
 
 const KEY_PREFIX: &str = "tuple-v1:";
 const SIGN_BIT: u64 = 1 << 63;

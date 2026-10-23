@@ -3,7 +3,7 @@
 use serde::Serialize;
 use serde_json::{Map, Value};
 
-use crate::{GatewayError, source_json::SourceJson};
+use crate::{error::GatewayError, source_json::SourceJson};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]
@@ -160,5 +160,4 @@ fn source_number(value: &SourceJson) -> Value {
         .map_or(Value::Null, Value::Number)
 }
 #[cfg(test)]
-#[path = "source_usage_tests.rs"]
 mod tests;

@@ -1,7 +1,5 @@
-use gateway_admin::{
-    operations::{AdminHost, AdminInput},
-    routes::AdminOperation,
-};
+use gateway_admin::operations::{AdminHost, AdminInput};
+use gateway_admin::routes::AdminOperation;
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::*};
 use gateway_auth::{
     native::NativeReadRequest,

@@ -5,17 +5,13 @@ use crate::{
     settlement,
     types::*,
 };
-use gateway_authority::{
-    paid_types::{PaidAdmission, PaidAuthorization, PaidRequest},
-    routing_types::RouteSelection,
-    store::{AuthorityClock, TokenSource},
-};
-use gateway_core::{
-    error::GatewayError,
-    identity::PaidAttemptId,
-    provider::{PaidProvider, UpstreamProvider},
-    query::QueryStore,
-};
+use gateway_authority::paid_types::{PaidAdmission, PaidAuthorization, PaidRequest};
+use gateway_authority::routing_types::RouteSelection;
+use gateway_authority::store::{AuthorityClock, TokenSource};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::PaidAttemptId;
+use gateway_core::provider::{PaidProvider, UpstreamProvider};
+use gateway_core::query::QueryStore;
 use gateway_providers::types::ClientSurface;
 
 impl<

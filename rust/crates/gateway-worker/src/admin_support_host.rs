@@ -173,6 +173,8 @@ fn catalogue_error(
 
 #[cfg(test)]
 mod catalogue_tests {
+    use gateway_core::error::GatewayError;
+
     #[test]
     fn catalogue_lift_preserves_the_exact_original_gateway_error() {
         let original = GatewayError::new(409, "original catalog error", Some("catalog_fixture"))

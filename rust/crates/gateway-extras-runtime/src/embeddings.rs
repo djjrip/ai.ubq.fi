@@ -9,10 +9,8 @@ use gateway_core::{
     error::GatewayError, js_string::JsString16, lifecycle::SemanticTerminal, query::QueryStore,
     source_json::SourceJson,
 };
-use gateway_providers::{
-    extras::{self, EmbeddingsProfile},
-    types::PrepareOptions,
-};
+use gateway_providers::extras::{self, EmbeddingsProfile};
+use gateway_providers::types::PrepareOptions;
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
 pub(crate) fn configured_error() -> GatewayError {

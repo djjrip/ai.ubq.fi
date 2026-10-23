@@ -3,28 +3,23 @@ use gateway_admin_runtime::{
     claude::{self, AccountBinding, AccountStore, Credential, CredentialKind},
     claude_access,
 };
-use gateway_auth::{
-    types::AuthHost,
-    upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
-    webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
-};
+use gateway_auth::types::AuthHost;
+use gateway_auth::upstream::{AuthUpstreamRequest, AuthUpstreamResponse};
+use gateway_auth::webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto};
 use gateway_catalog_runtime::host::ProviderBinding;
-use gateway_claude_runtime::{
-    host::{
-        self, AcceptedObservation, ClaudePoolHost, HealthObservation, OutcomeDecision, PoolConfig,
-        PoolSelection, ResponseObservation, SelectedAccount, SelectionInput, WorkspaceResponse,
-    },
-    persistence::quota_key,
-    pool::ClaudePoolSession,
-    quota, response,
+use gateway_claude_runtime::host::{
+    self, AcceptedObservation, ClaudePoolHost, HealthObservation, OutcomeDecision, PoolConfig,
+    PoolSelection, ResponseObservation, SelectedAccount, SelectionInput, WorkspaceResponse,
 };
-use gateway_core::{
-    claude::ClaudeErrorEvidence as ErrorEvidence,
-    error::GatewayError,
-    js_string::JsString16,
-    state::{
-        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RevisionCheck, StoredRecord,
-    },
+use gateway_claude_runtime::persistence::quota_key;
+use gateway_claude_runtime::pool::ClaudePoolSession;
+use gateway_claude_runtime::quota;
+use gateway_claude_runtime::response;
+use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
+use gateway_core::error::GatewayError;
+use gateway_core::js_string::JsString16;
+use gateway_core::state::{
+    AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RevisionCheck, StoredRecord,
 };
 use gateway_providers::types::Headers;
 use gateway_schema::catalog::ProviderCatalog;

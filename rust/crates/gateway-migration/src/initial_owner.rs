@@ -8,10 +8,8 @@ use gateway_authority::initial_control_owner::{
     InitialAdoptionAccountFacts, InitialAdoptionFacts, InitialControlOwnerReceipt,
     PreparedInitialControlOwner,
 };
-use gateway_core::{
-    query::{QueryRequest, QueryStore},
-    state::{AtomicTransition, AuthorityStore, CommitOutcome},
-};
+use gateway_core::query::{QueryRequest, QueryStore};
+use gateway_core::state::{AtomicTransition, AuthorityStore, CommitOutcome};
 use std::cell::Cell;
 
 #[derive(Debug, Serialize)]

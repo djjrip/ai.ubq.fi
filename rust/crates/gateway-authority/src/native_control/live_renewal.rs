@@ -14,18 +14,14 @@ use crate::{
     routing_types::SubscriptionPool,
     store::{TokenSource, Transaction},
 };
-use gateway_auth::{
-    crypto::sha256_hex,
-    provider_credentials::{
-        codex_access_expiry_ms, codex_source_pool_key, parse_codex_source_pool,
-    },
+use gateway_auth::crypto::sha256_hex;
+use gateway_auth::provider_credentials::{
+    codex_access_expiry_ms, codex_source_pool_key, parse_codex_source_pool,
 };
-use gateway_core::{
-    error::GatewayError,
-    identity::ActiveSelection,
-    state::AuthorityStore,
-    tuple_key::{ScalarKeyPart, TupleKey},
-};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::ActiveSelection;
+use gateway_core::state::AuthorityStore;
+use gateway_core::tuple_key::{ScalarKeyPart, TupleKey};
 use serde_json::Value;
 
 struct Control {

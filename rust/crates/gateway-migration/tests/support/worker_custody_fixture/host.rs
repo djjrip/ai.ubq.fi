@@ -7,15 +7,11 @@ use gateway_auth::{
 use gateway_core::{
     error::GatewayError, identity::MAX_SAFE_INTEGER, state::StoredRecord, tuple_key::TupleKey,
 };
-use gateway_migration::{
-    native_capture::{NativeCapture, NativeValue},
-    native_custody::{NativeCustody, OwnedNativeSnapshot},
-    native_operator::{ConfiguredNativeCustody, NativeCustodyRegistration},
-};
-use gateway_native::{
-    transport::NativeOwnerTransport,
-    unix::{NativeOwnerLocation, UnixOwnerTransport},
-};
+use gateway_migration::native_capture::{NativeCapture, NativeValue};
+use gateway_migration::native_custody::{NativeCustody, OwnedNativeSnapshot};
+use gateway_migration::native_operator::{ConfiguredNativeCustody, NativeCustodyRegistration};
+use gateway_native::transport::NativeOwnerTransport;
+use gateway_native::unix::{NativeOwnerLocation, UnixOwnerTransport};
 use std::{collections::BTreeMap, path::PathBuf};
 
 pub struct Host {

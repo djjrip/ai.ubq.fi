@@ -6,14 +6,12 @@ use gateway_authority::{
     reset_types::{ResetConfig, ResetMode, reset_invocation},
     routing_types::RouteSelection,
 };
-use gateway_core::{
-    error::GatewayError,
-    identity::{PrincipalId, RequestContext, RequestId},
-    js_string::JsString16,
-    provider::CodexQuotaClass,
-    source_json::SourceJson,
-    state::{RecordKey, StoredRecord},
-};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::{PrincipalId, RequestContext, RequestId};
+use gateway_core::js_string::JsString16;
+use gateway_core::provider::CodexQuotaClass;
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{RecordKey, StoredRecord};
 use serde_json::{Value, json};
 use std::cmp::Ordering;
 

@@ -5,23 +5,20 @@ use support::source_catalog;
 type MemoryStore = Store;
 type TestAuthority = gateway_authority::store::Authority<Store, Tokens>;
 use gateway_authority::{keys, paid_control::*};
-use gateway_catalog_runtime::{
-    CatalogRuntime,
-    host::{
-        self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider,
-        CredentialPublication, ProviderBinding,
-    },
-    providers, state,
+use gateway_catalog_runtime::CatalogRuntime;
+use gateway_catalog_runtime::host::{
+    self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider, CredentialPublication,
+    ProviderBinding,
 };
-use gateway_core::{
-    error::GatewayError,
-    provider::PaidProvider,
-    query::{QueryPage, QueryRequest, QueryStore},
-    source_control::decode_source_control_record,
-    source_json::SourceJson,
-    state::{
-        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
-    },
+use gateway_catalog_runtime::providers;
+use gateway_catalog_runtime::state;
+use gateway_core::error::GatewayError;
+use gateway_core::provider::PaidProvider;
+use gateway_core::query::{QueryPage, QueryRequest, QueryStore};
+use gateway_core::source_control::decode_source_control_record;
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{
+    AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
 };
 use gateway_schema::{
     catalog_store, runtime_config::build_runtime_config, snapshot::ModelSnapshot,

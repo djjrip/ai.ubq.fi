@@ -7,12 +7,10 @@ use gateway_authority::{
     reset_types::{AccountDayBudget, ResetClaim, ResetConfig, ResetMode, ResetRecord, ResetState},
     routing_types::{CohortProof, RouteSelection},
 };
-use gateway_core::{
-    error::GatewayError,
-    identity::{PrincipalId, RequestContext, RequestId},
-    js_string::JsString16,
-    provider::CodexQuotaClass,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::{PrincipalId, RequestContext, RequestId};
+use gateway_core::js_string::JsString16;
+use gateway_core::provider::CodexQuotaClass;
 use serde_json::json;
 use std::cmp::Ordering;
 

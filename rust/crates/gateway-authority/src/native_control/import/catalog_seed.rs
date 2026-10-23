@@ -1,17 +1,13 @@
 //! One optional original-import cache adapter; never a new effect/start lifetime.
 use super::*;
-use gateway_auth::{
-    native_auth::AuthenticatedNativeOwner,
-    native_import::{
-        catalog_seed::{
-            ImportCatalogSeedReplyData as Reply, ImportCatalogSeedRequestData as Request,
-        },
-        publication::data::ImportCatalogDisposition,
-    },
+use gateway_auth::native_auth::AuthenticatedNativeOwner;
+use gateway_auth::native_import::{
+    catalog_seed::{ImportCatalogSeedReplyData as Reply, ImportCatalogSeedRequestData as Request},
+    publication::data::ImportCatalogDisposition,
 };
-use gateway_core::{
-    query::QueryStore,
-    state::{AtomicTransition, CommitOutcome, RecordKey, RevisionCheck, StoredRecord},
+use gateway_core::query::QueryStore;
+use gateway_core::state::{
+    AtomicTransition, CommitOutcome, RecordKey, RevisionCheck, StoredRecord,
 };
 use gateway_schema::{catalog_cache, catalog_store};
 use std::collections::BTreeMap;

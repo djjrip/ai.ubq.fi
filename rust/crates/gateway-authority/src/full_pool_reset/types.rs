@@ -2,11 +2,9 @@ use crate::{
     reset_types::{ResetCandidate, ResetConfig},
     routing_types::CohortProof,
 };
-use gateway_core::{
-    error::GatewayError,
-    identity::{AccountBinding, RequestContext},
-    js_string::JsString16,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::{AccountBinding, RequestContext};
+use gateway_core::js_string::JsString16;
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 

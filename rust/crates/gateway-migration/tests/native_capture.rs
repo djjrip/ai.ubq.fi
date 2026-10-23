@@ -2,6 +2,7 @@
 mod support;
 use gateway_auth::store::key;
 use gateway_core::{query::*, source_graph::GraphNode, state::*, tuple_key::TupleKey};
+use gateway_migration::native_capture::NativeRevision;
 use gateway_migration::{
     engine::adopt_empty,
     graph_transport,

@@ -6,24 +6,20 @@ use crate::{
     types::{RecoveredSession, RevisionCheckWire, RoutingHost, RoutingResult},
 };
 use gateway_auth::{crypto::sha256_hex, types::AuthPrincipal};
-use gateway_authority::{
-    kernel::{KernelReservation, KernelTerminal},
-    keys,
-    quota::{ApiReservation, ApiUsageRequest, ApiUsageState},
-    store::{Authority, AuthorityClock, TokenSource},
+use gateway_authority::kernel::{KernelReservation, KernelTerminal};
+use gateway_authority::keys;
+use gateway_authority::quota::{ApiReservation, ApiUsageRequest, ApiUsageState};
+use gateway_authority::store::{Authority, AuthorityClock, TokenSource};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::{MAX_SAFE_INTEGER, RequestContext};
+use gateway_core::lifecycle::TransportObservation;
+use gateway_core::local_work::{
+    LocalSemanticOutcome, LocalTerminalObservation, LocalWorkKind, LocalWorkPhase, LocalWorkRecord,
+    SOURCE_REQUEST_BINDING_DOMAIN, SOURCE_REQUEST_BINDING_VERSION,
 };
-use gateway_core::{
-    error::GatewayError,
-    identity::{MAX_SAFE_INTEGER, RequestContext},
-    lifecycle::TransportObservation,
-    local_work::{
-        LocalSemanticOutcome, LocalTerminalObservation, LocalWorkKind, LocalWorkPhase,
-        LocalWorkRecord, SOURCE_REQUEST_BINDING_DOMAIN, SOURCE_REQUEST_BINDING_VERSION,
-    },
-    query::QueryStore,
-    source_json::SourceJson,
-    state::{AuthorityStore, StoredRecord},
-};
+use gateway_core::query::QueryStore;
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{AuthorityStore, StoredRecord};
 use gateway_schema::{catalog::CatalogInput, source_request::SourceRequestDocument};
 
 pub mod completion;

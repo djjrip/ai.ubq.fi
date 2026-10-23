@@ -1,6 +1,6 @@
 # Rust quality cleanup contract
 
-Version: 1e, 2026-10-23. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
+Version: 2, 2026-10-23. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
 
 ## Outcome and invariants
 
@@ -41,6 +41,14 @@ New test-target baseline entries may adopt only measured debt already present at
 The controller explicitly transferred sole canonical mutation authority to m08 after cleanup integration. M08 may merge a future exact ready tip only after a separate controller acceptance message, retains every accepted worker ancestry, and returns the final clean source commit before m10 starts frozen-candidate validation. M08 owns only the approved three helper dependency edges in the root lockfile before parser integration; no dependency version upgrade is authorized.
 
 Version 1e additionally authorizes the direct `gateway-admin-data.workspace = true` normal dependency in `gateway-worker/Cargo.toml` and its matching root Cargo.lock edge. The Worker implements `gateway_admin_data::profile::SourceDateHost` from its defining crate after the migration forwarding alias is removed. No package version or workspace member changes are authorized by this extension; the parser lockfile owner receives the exact edge before integration.
+
+## Version 2 fixture boundary
+
+The controller approved four cohesive dev-only helper packages for admin, Claude runtime, Extras runtime and migration fixtures, plus exact public authority and catalog fixture reuse in existing `gateway-routing-runtime-test-support`. Their exact lanes, owners and base commits are recorded by the controller after the canonical checkpoint, before any helper writes begin. The single integration writer retains root manifest, lockfile and classifier coordination; helper workers own only their explicitly assigned source surfaces.
+
+Move actual shared fixture implementations while preserving every test case name, golden input, opaque capability and production proof boundary. Preserve existing helper item/function tokens on relocation and use explicit defining-module imports that keep current local binding names. A real dev-only fixture API may expose data fields or a trivial public wrapper over an unchanged private implementation; no production visibility or compatibility facade is authorized. No re-export, path attribute, include macro, source suppression, baseline increase or staged fingerprint waiver is authorized.
+
+Keep the ranked catalog `FixtureCollator` in the new admin helper to retain headroom in the existing routing helper. The admin and Extras helpers remain portable. The Claude and migration helpers retain their existing pinned native SQLite dependency contracts and join `RUST_NATIVE_ONLY_PACKAGES`; only the corresponding classifier entry and its focused tests change. New helper normal dependencies and parent dev-dependency edges must use existing selected versions and features. No application runtime dependency or version upgrade is authorized by these extractions.
 
 ## Execution and acceptance
 

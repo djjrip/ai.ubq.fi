@@ -5,11 +5,9 @@ use crate::{
     *,
 };
 use gateway_admin_data::profile::{encode_base64, source::to_source_profile as to_profile};
-use gateway_core::{
-    query::{QueryRequest, QuerySelector, QueryStore},
-    tuple_key::DecodedKeyPart,
-    value::PortableValue,
-};
+use gateway_core::query::{QueryRequest, QuerySelector, QueryStore};
+use gateway_core::tuple_key::DecodedKeyPart;
+use gateway_core::value::PortableValue;
 use serde_json::json;
 use std::collections::{BTreeMap, BTreeSet};
 mod native_import_custody;

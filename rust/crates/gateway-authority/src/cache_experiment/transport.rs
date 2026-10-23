@@ -13,11 +13,9 @@ use gateway_auth::{
     crypto::Secret,
     provider_credentials::{CodexSourcePool, codex_source_pool_key, parse_codex_source_pool},
 };
-use gateway_core::{
-    error::GatewayError,
-    identity::{AccountBinding, PoolVersionstamp},
-    state::AuthorityStore,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::{AccountBinding, PoolVersionstamp};
+use gateway_core::state::AuthorityStore;
 use serde_json::Value;
 
 pub(super) struct Session {

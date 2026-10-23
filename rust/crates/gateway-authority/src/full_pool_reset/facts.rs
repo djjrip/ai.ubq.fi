@@ -7,11 +7,9 @@ use crate::{
     store::{Authority, TokenSource, Transaction},
 };
 use gateway_auth::provider_credentials::{codex_source_pool_key, parse_codex_source_pool};
-use gateway_core::{
-    error::GatewayError,
-    identity::{MAX_SAFE_INTEGER, RequestContext},
-    state::AuthorityStore,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::identity::{MAX_SAFE_INTEGER, RequestContext};
+use gateway_core::state::AuthorityStore;
 use serde_json::{Value, json};
 
 fn marker_key() -> gateway_core::state::RecordKey {

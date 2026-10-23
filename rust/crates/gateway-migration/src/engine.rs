@@ -1,9 +1,7 @@
 use crate::{capture::PrivateCapture, error::MigrationError, *};
 use gateway_admin_data::profile::SourceDateHost;
-use gateway_core::{
-    query::{QueryRequest, QuerySelector, QueryStore},
-    state::{AtomicTransition, CommitOutcome, RecordMutation, RevisionCheck},
-};
+use gateway_core::query::{QueryRequest, QuerySelector, QueryStore};
+use gateway_core::state::{AtomicTransition, CommitOutcome, RecordMutation, RevisionCheck};
 use serde_json::json;
 use std::collections::BTreeMap;
 

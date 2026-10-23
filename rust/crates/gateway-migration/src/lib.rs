@@ -35,12 +35,10 @@ mod rollup_source;
 mod source_metadata;
 pub mod staged;
 
-use gateway_core::{
-    error::GatewayError,
-    source_json::SourceJson,
-    state::{RecordKey, StoredRecord},
-    tuple_key::TupleKey,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{RecordKey, StoredRecord};
+use gateway_core::tuple_key::TupleKey;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 

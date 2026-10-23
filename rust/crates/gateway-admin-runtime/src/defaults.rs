@@ -5,28 +5,22 @@ use crate::{
     parse, store,
 };
 use gateway_admin::{operations::AdminInput, routes::AdminOperation, source_input as source_body};
-use gateway_auth::{
-    store::{check, commit, put},
-    types::{AuthHost, AuthResponse, conflict, invalid},
-};
+use gateway_auth::store::{check, commit, put};
+use gateway_auth::types::{AuthHost, AuthResponse, conflict, invalid};
 use gateway_authority::{kernel::KernelDefaults, keys};
-use gateway_core::{
-    error::GatewayError,
-    js_string::JsString16,
-    model::ModelId,
-    query::QueryStore,
-    source_control::{decode_source_control_record, encode_source_control_record},
-    source_json::SourceJson,
-    state::{RecordMutation, StoredRecord},
+use gateway_core::error::GatewayError;
+use gateway_core::js_string::JsString16;
+use gateway_core::model::ModelId;
+use gateway_core::query::QueryStore;
+use gateway_core::source_control::{decode_source_control_record, encode_source_control_record};
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{RecordMutation, StoredRecord};
+use gateway_schema::catalog_store::runtime_config_key;
+use gateway_schema::reasoning::ModelReasoning;
+use gateway_schema::runtime_config::{
+    build_runtime_config, default_model, default_reasoning_effort, normalize_runtime_config,
 };
-use gateway_schema::{
-    catalog_store::runtime_config_key,
-    reasoning::ModelReasoning,
-    runtime_config::{
-        build_runtime_config, default_model, default_reasoning_effort, normalize_runtime_config,
-    },
-    snapshot::ModelSnapshot,
-};
+use gateway_schema::snapshot::ModelSnapshot;
 use serde_json::json;
 
 fn response(model: &ModelId, effort: &JsString16, defaults: &KernelDefaults) -> SourceJson {

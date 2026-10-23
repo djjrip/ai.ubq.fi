@@ -7,11 +7,9 @@ use gateway_authority::{
     paid_control::*,
     paid_types::{PaidAdmission, PaidAuthorization, PaidRequest, PaidRoutingPolicy},
 };
-use gateway_core::{
-    identity::{ApiKeyId, PaidAttemptId, RequestId},
-    provider::{PaidProvider, UpstreamProvider},
-    state::{AuthorityStore, RecordKey},
-};
+use gateway_core::identity::{ApiKeyId, PaidAttemptId, RequestId};
+use gateway_core::provider::{PaidProvider, UpstreamProvider};
+use gateway_core::state::{AuthorityStore, RecordKey};
 use gateway_providers::types::ClientSurface;
 use serde_json::{Value, json};
 use support::*;

@@ -12,13 +12,11 @@ use gateway_core::{
     state::*,
     value::PortableValue,
 };
-use gateway_migration::{
-    capture::{PrivateCapture, SourceEntry},
-    engine::{adopt_empty, prepare},
-    error::MigrationError,
-    inverse::{ArtifactContext, export_latest, export_rollback_bundle},
-    projection::known_source_family,
-};
+use gateway_migration::capture::{PrivateCapture, SourceEntry};
+use gateway_migration::engine::{adopt_empty, prepare};
+use gateway_migration::error::MigrationError;
+use gateway_migration::inverse::{ArtifactContext, export_latest, export_rollback_bundle};
+use gateway_migration::projection::known_source_family;
 use serde_json::{Value, json};
 use std::sync::atomic::{AtomicU64, Ordering};
 use support::{fixture::*, sqlite_store::*};

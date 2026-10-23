@@ -8,16 +8,14 @@ use gateway_catalog_runtime::{
     },
     state,
 };
-use gateway_core::{
-    error::GatewayError,
-    js_string::JsString16,
-    query::{QueryEntry, QueryPage, QueryRequest, QueryStore},
-    source_json::SourceJson,
-    state::{
-        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
-    },
-    tuple_key::TupleKey,
+use gateway_core::error::GatewayError;
+use gateway_core::js_string::JsString16;
+use gateway_core::query::{QueryEntry, QueryPage, QueryRequest, QueryStore};
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{
+    AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
 };
+use gateway_core::tuple_key::TupleKey;
 use gateway_schema::{
     aliases::SourceStringCollator,
     catalog_store,

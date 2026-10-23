@@ -9,11 +9,9 @@ use gateway_authority::{
     routing_types::*,
     store::{Authority, AuthorityClock},
 };
-use gateway_core::{
-    error::GatewayError,
-    state::{
-        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
-    },
+use gateway_core::error::GatewayError;
+use gateway_core::state::{
+    AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, StoredRecord,
 };
 use serde_json::{Value, json};
 use std::sync::{

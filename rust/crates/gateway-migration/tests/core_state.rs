@@ -9,7 +9,6 @@ use gateway_migration::{
     native_custody::{NativeCustody, OwnedNativeSnapshot},
     native_inverse::export_native_latest,
     native_stage::Captured,
-    staged,
 };
 use serde_json::{Value, json};
 use support::{fixture::*, sqlite_store::*};

@@ -1,11 +1,9 @@
 //! Source key families encoded by the single shared tuple codec; no JSON identity fallback.
-use gateway_core::{
-    error::GatewayError,
-    state::RecordKey,
-    tuple_key::{
-        ScalarKeyPart::{self, Number, String as Text},
-        TupleKey,
-    },
+use gateway_core::error::GatewayError;
+use gateway_core::state::RecordKey;
+use gateway_core::tuple_key::{
+    ScalarKeyPart::{self, Number, String as Text},
+    TupleKey,
 };
 
 fn key(parts: &[ScalarKeyPart<'_>]) -> RecordKey {

@@ -5,16 +5,12 @@ use crate::{
     settlement,
     types::*,
 };
-use gateway_authority::{
-    kernel::KernelTerminal,
-    store::{AuthorityClock, TokenSource},
-};
-use gateway_core::{
-    error::GatewayError,
-    lifecycle::{PaidTerminalState, SemanticTerminal, TransportObservation},
-    provider::UpstreamProvider,
-    query::QueryStore,
-};
+use gateway_authority::kernel::KernelTerminal;
+use gateway_authority::store::{AuthorityClock, TokenSource};
+use gateway_core::error::GatewayError;
+use gateway_core::lifecycle::{PaidTerminalState, SemanticTerminal, TransportObservation};
+use gateway_core::provider::UpstreamProvider;
+use gateway_core::query::QueryStore;
 use gateway_providers::policy::{HopDecision, HopFailure};
 
 impl<

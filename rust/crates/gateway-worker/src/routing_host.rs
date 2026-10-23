@@ -1,19 +1,13 @@
 //! Routing credentials use the owner-derived current source and routing fences.
 use crate::{authority::RemoteAuthorityStore, host::PlatformHost, storage::now_ms};
-use gateway_auth::{
-    crypto::Secret,
-    provider_credentials::{codex_source_pool_key, read_codex_source_pool},
-    types::AuthPrincipal,
-};
-use gateway_authority::{
-    paid_types::{PaidReservation, PaidUsage},
-    routing_types::CohortProof,
-};
-use gateway_core::{
-    error::GatewayError,
-    provider::{PaidProvider, UpstreamProvider},
-    state::{AuthorityStore, RecordKey},
-};
+use gateway_auth::crypto::Secret;
+use gateway_auth::provider_credentials::{codex_source_pool_key, read_codex_source_pool};
+use gateway_auth::types::AuthPrincipal;
+use gateway_authority::paid_types::{PaidReservation, PaidUsage};
+use gateway_authority::routing_types::CohortProof;
+use gateway_core::error::GatewayError;
+use gateway_core::provider::{PaidProvider, UpstreamProvider};
+use gateway_core::state::{AuthorityStore, RecordKey};
 use gateway_providers::types::{AuthMaterial, PrepareOptions};
 use gateway_routing_runtime::types::{
     ClaudeSelection, CodexRecovery, CredentialFence, CredentialRequest, PublishedCredential,

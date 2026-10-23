@@ -24,12 +24,10 @@ use gateway_authority::{
     },
     routing_types::RouteSelection,
 };
-use gateway_core::{
-    identity::{ApiKeyId, PaidAttemptId, PoolVersionstamp, RequestId},
-    lifecycle::{BillingState, PaidTerminalState},
-    provider::{CodexQuotaClass, PaidProvider, UpstreamProvider},
-    state::AuthorityStore,
-};
+use gateway_core::identity::{ApiKeyId, PaidAttemptId, PoolVersionstamp, RequestId};
+use gateway_core::lifecycle::{BillingState, PaidTerminalState};
+use gateway_core::provider::{CodexQuotaClass, PaidProvider, UpstreamProvider};
+use gateway_core::state::AuthorityStore;
 use std::sync::atomic::Ordering;
 use support::*;
 

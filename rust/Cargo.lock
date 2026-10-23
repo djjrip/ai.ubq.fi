@@ -843,6 +843,7 @@ name = "gateway-admin"
 version = "0.1.0"
 dependencies = [
  "gateway-admin-data",
+ "gateway-admin-test-support",
  "gateway-auth",
  "gateway-authority",
  "gateway-core",
@@ -872,12 +873,22 @@ version = "0.1.0"
 dependencies = [
  "gateway-admin",
  "gateway-admin-data",
+ "gateway-admin-test-support",
  "gateway-auth",
  "gateway-authority",
  "gateway-core",
  "gateway-schema",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "gateway-admin-test-support"
+version = "0.1.0"
+dependencies = [
+ "gateway-auth",
+ "gateway-core",
+ "gateway-schema",
 ]
 
 [[package]]
@@ -917,6 +928,7 @@ dependencies = [
  "gateway-auth",
  "gateway-core",
  "gateway-providers",
+ "gateway-routing-runtime-test-support",
  "gateway-schema",
  "getrandom 0.4.3",
  "rustls",
@@ -931,11 +943,13 @@ dependencies = [
 name = "gateway-catalog-runtime"
 version = "0.1.0"
 dependencies = [
+ "gateway-admin-test-support",
  "gateway-auth",
  "gateway-authority",
  "gateway-core",
  "gateway-native",
  "gateway-providers",
+ "gateway-routing-runtime-test-support",
  "gateway-schema",
  "serde",
  "serde_json",
@@ -949,11 +963,27 @@ dependencies = [
  "gateway-admin-runtime",
  "gateway-auth",
  "gateway-catalog-runtime",
+ "gateway-claude-runtime-test-support",
  "gateway-core",
  "gateway-providers",
  "gateway-schema",
  "rusqlite",
  "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "gateway-claude-runtime-test-support"
+version = "0.1.0"
+dependencies = [
+ "gateway-admin-runtime",
+ "gateway-auth",
+ "gateway-catalog-runtime",
+ "gateway-claude-runtime",
+ "gateway-core",
+ "gateway-providers",
+ "gateway-schema",
+ "rusqlite",
  "serde_json",
 ]
 
@@ -988,11 +1018,20 @@ dependencies = [
  "futures-util",
  "gateway-auth",
  "gateway-core",
+ "gateway-extras-runtime-test-support",
  "gateway-providers",
  "gateway-schema",
  "serde",
  "serde_json",
  "sha2 0.10.9",
+]
+
+[[package]]
+name = "gateway-extras-runtime-test-support"
+version = "0.1.0"
+dependencies = [
+ "gateway-core",
+ "serde_json",
 ]
 
 [[package]]
@@ -1017,6 +1056,7 @@ dependencies = [
  "gateway-authority",
  "gateway-claude-runtime",
  "gateway-core",
+ "gateway-migration-test-support",
  "gateway-native",
  "gateway-observability",
  "gateway-routing-runtime",
@@ -1025,6 +1065,15 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2 0.10.9",
+]
+
+[[package]]
+name = "gateway-migration-test-support"
+version = "0.1.0"
+dependencies = [
+ "gateway-core",
+ "rusqlite",
+ "serde_json",
 ]
 
 [[package]]

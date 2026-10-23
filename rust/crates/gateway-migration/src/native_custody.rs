@@ -2,12 +2,10 @@
 use crate::inverse::{ArtifactContext, CustodyRecord};
 use crate::native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native};
 use crate::{engine::PreparedAdoption, error::MigrationError, *};
-use gateway_auth::{
-    managed_access::ManagedAccessProjection,
-    native_credentials::{NativeGeneration, OwnerFence, verify_fence},
-    provider_credentials::{
-        CodexNativeOwner, CodexSourcePool, ManagedNativeSource, parse_codex_source_pool,
-    },
+use gateway_auth::managed_access::ManagedAccessProjection;
+use gateway_auth::native_credentials::{NativeGeneration, OwnerFence, verify_fence};
+use gateway_auth::provider_credentials::{
+    CodexNativeOwner, CodexSourcePool, ManagedNativeSource, parse_codex_source_pool,
 };
 use gateway_core::{query::QueryStore, value::PortableValue};
 use std::future::Future;

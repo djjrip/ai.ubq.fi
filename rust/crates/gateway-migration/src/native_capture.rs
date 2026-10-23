@@ -1,9 +1,7 @@
 //! Closed native interchange; no runtime VM bytes or source database are opened here.
 use crate::{capture::SourceEntry, engine::PreparedAdoption, error::MigrationError, *};
-use gateway_core::{
-    source_graph::SourceGraph,
-    value::{PortableValue, ValueEncoding},
-};
+use gateway_core::source_graph::SourceGraph;
+use gateway_core::value::{PortableValue, ValueEncoding};
 use std::collections::BTreeSet;
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]

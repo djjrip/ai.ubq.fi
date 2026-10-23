@@ -9,7 +9,7 @@ use gateway_migration::{
     native_custody::{NativeCustody, OwnedNativeSnapshot},
     native_inverse::{export_native_latest, export_native_rollback_bundle},
     native_operator, native_stage,
-    staged::{self, *},
+    staged::*,
 };
 use support::{fixture::*, sqlite_store::*};
 fn fixture() -> NativeCapture {

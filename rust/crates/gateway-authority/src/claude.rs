@@ -4,15 +4,13 @@ use crate::{
     store::{Authority, TokenSource, Transaction},
     unavailable,
 };
-use gateway_core::{
-    error::GatewayError,
-    js_string::JsString16,
-    model::ModelId,
-    source_json::SourceJson,
-    source_serialization as source,
-    state::{AuthorityStore, RevisionCheck},
-    value::PortableValue,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::js_string::JsString16;
+use gateway_core::model::ModelId;
+use gateway_core::source_json::SourceJson;
+use gateway_core::source_serialization as source;
+use gateway_core::state::{AuthorityStore, RevisionCheck};
+use gateway_core::value::PortableValue;
 use sha2::{Digest, Sha256};
 use std::collections::BTreeSet;
 

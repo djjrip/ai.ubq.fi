@@ -6,13 +6,11 @@ mod copied_store_inverse {
 mod support;
 
 use copied_store_inverse::store::ReadonlyStore;
-use gateway_auth::{
-    crypto::base64url,
-    native_auth::NativeNonceAuthority,
-    native_credentials::{NativeOwnerId, OwnerFence, parse_native_document},
-    native_replay::StoreNonceAuthority,
-    provider_credentials::codex_source_pool_key,
-};
+use gateway_auth::crypto::base64url;
+use gateway_auth::native_auth::NativeNonceAuthority;
+use gateway_auth::native_credentials::{NativeOwnerId, OwnerFence, parse_native_document};
+use gateway_auth::native_replay::StoreNonceAuthority;
+use gateway_auth::provider_credentials::codex_source_pool_key;
 use gateway_core::{
     js_string::JsString16,
     query::{QueryRequest, QuerySelector, QueryStore},

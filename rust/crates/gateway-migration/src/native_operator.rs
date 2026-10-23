@@ -3,10 +3,8 @@
 use crate::native_custody::{NativeCustody, OwnedNativeSnapshot};
 use gateway_auth::native_credentials::{NativeGeneration, OwnerFence};
 use gateway_core::{error::GatewayError, identity::MAX_SAFE_INTEGER};
-use gateway_native::{
-    transport::NativeOwnerTransport,
-    unix::{NativeOwnerLocation, UnixOwnerTransport},
-};
+use gateway_native::transport::NativeOwnerTransport;
+use gateway_native::unix::{NativeOwnerLocation, UnixOwnerTransport};
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::PathBuf,

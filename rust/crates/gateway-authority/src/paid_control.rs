@@ -6,19 +6,15 @@ use crate::{
     store::{Authority, TokenSource, Transaction},
     text, unavailable,
 };
-use gateway_core::{
-    error::GatewayError,
-    model::ModelId,
-    provider::PaidProvider,
-    source_json::SourceJson,
-    source_serialization as source,
-    state::{AuthorityStore, RecordKey, RevisionCheck},
-    tuple_key::{ScalarKeyPart, TupleKey},
-};
-use gateway_providers::{
-    policy::{self, DeepseekHop, PaidRoutingInput},
-    types::ClientSurface,
-};
+use gateway_core::error::GatewayError;
+use gateway_core::model::ModelId;
+use gateway_core::provider::PaidProvider;
+use gateway_core::source_json::SourceJson;
+use gateway_core::source_serialization as source;
+use gateway_core::state::{AuthorityStore, RecordKey, RevisionCheck};
+use gateway_core::tuple_key::{ScalarKeyPart, TupleKey};
+use gateway_providers::policy::{self, DeepseekHop, PaidRoutingInput};
+use gateway_providers::types::ClientSurface;
 use gateway_schema::{catalog_store, selection::ProviderSelection};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

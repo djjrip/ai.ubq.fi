@@ -10,17 +10,13 @@ use crate::{
     routing_types::SubscriptionPool,
     store::{Authority, TokenSource, Transaction},
 };
-use gateway_auth::{
-    crypto::sha256_hex,
-    provider_credentials::{codex_source_pool_key, parse_codex_source_pool},
-    types::AuthConfig,
-};
-use gateway_core::{
-    error::GatewayError,
-    identity::AccountBinding,
-    state::{AuthorityStore, RecordKey},
-    tuple_key::{ScalarKeyPart, TupleKey},
-};
+use gateway_auth::crypto::sha256_hex;
+use gateway_auth::provider_credentials::{codex_source_pool_key, parse_codex_source_pool};
+use gateway_auth::types::AuthConfig;
+use gateway_core::error::GatewayError;
+use gateway_core::identity::AccountBinding;
+use gateway_core::state::{AuthorityStore, RecordKey};
+use gateway_core::tuple_key::{ScalarKeyPart, TupleKey};
 use serde_json::Value;
 
 /// One or two explicitly configured independent native owners. No environment/default lookup.

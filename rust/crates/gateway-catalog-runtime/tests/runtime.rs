@@ -1,28 +1,23 @@
 mod support;
 
-use gateway_catalog_runtime::{
-    CatalogRuntime, admin,
-    host::{
-        self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogMaintenance,
-        CatalogObservation, CatalogProvider, CodexAccount, CredentialPublication, ProviderBinding,
-    },
-    providers,
-    state::{self, source_key},
+use gateway_catalog_runtime::CatalogRuntime;
+use gateway_catalog_runtime::admin;
+use gateway_catalog_runtime::host::{
+    self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogMaintenance, CatalogObservation,
+    CatalogProvider, CodexAccount, CredentialPublication, ProviderBinding,
 };
-use gateway_core::{
-    error::GatewayError,
-    query::{QueryEntry, QueryPage, QueryRequest, QueryStore},
-    source_json::SourceJson,
-    state::{
-        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, RevisionCheck,
-        StoredRecord,
-    },
-    tuple_key::TupleKey,
+use gateway_catalog_runtime::providers;
+use gateway_catalog_runtime::state::{self, source_key};
+use gateway_core::error::GatewayError;
+use gateway_core::query::{QueryEntry, QueryPage, QueryRequest, QueryStore};
+use gateway_core::source_json::SourceJson;
+use gateway_core::state::{
+    AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, RevisionCheck,
+    StoredRecord,
 };
-use gateway_schema::{
-    catalog_cache::{self, CatalogResponse},
-    catalog_store,
-};
+use gateway_core::tuple_key::TupleKey;
+use gateway_schema::catalog_cache::{self, CatalogResponse};
+use gateway_schema::catalog_store;
 use serde_json::{Value, json};
 use std::{
     cell::{Cell, RefCell},

@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_core::state::AuthorityStore;
 use gateway_migration::{
     engine::adopt_empty,
@@ -11,7 +10,8 @@ use gateway_migration::{
     native_operator, native_stage,
     staged::*,
 };
-use support::{fixture::*, sqlite_store::*};
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 fn fixture() -> NativeCapture {
     serde_json::from_str(include_str!("fixtures/native-source.json")).unwrap()
 }

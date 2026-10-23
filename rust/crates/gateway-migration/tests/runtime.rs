@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_admin_data::profile::{
     CanonicalDates, SourceDateHost,
     source::{from_source_profile as from_profile, to_source_profile as to_profile},
@@ -17,9 +16,10 @@ use gateway_migration::engine::{adopt_empty, prepare};
 use gateway_migration::error::MigrationError;
 use gateway_migration::inverse::{ArtifactContext, export_latest, export_rollback_bundle};
 use gateway_migration::projection::known_source_family;
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
 use std::sync::atomic::{AtomicU64, Ordering};
-use support::{fixture::*, sqlite_store::*};
 
 fn raw(value: Value) -> SourceJson {
     SourceJson::from_serializable(&value).unwrap()

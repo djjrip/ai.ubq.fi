@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_auth::store::key;
 use gateway_core::{state::AuthorityStore, tuple_key::TupleKey};
 use gateway_migration::{
@@ -10,8 +9,9 @@ use gateway_migration::{
     native_inverse::export_native_latest,
     native_stage::Captured,
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
-use support::{fixture::*, sqlite_store::*};
 
 const SOURCE: &str = "6d4d4790a7c06514b92938ff677dbfd52764461d";
 

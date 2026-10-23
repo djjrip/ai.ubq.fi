@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_admin_data::profile::{CanonicalDates, source::to_source_profile};
 use gateway_core::{
     source_control::decode_source_control_record,
@@ -15,8 +14,9 @@ use gateway_migration::{
     native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native},
     native_inverse::{export_native_latest, export_native_rollback_bundle},
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
-use support::{fixture::*, sqlite_store::*};
 
 fn key(kind: &str, reference: &str) -> RecordKey {
     gateway_auth::store::key(json!([

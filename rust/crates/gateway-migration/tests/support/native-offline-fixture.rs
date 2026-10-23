@@ -1,9 +1,9 @@
 //! Fixed synthetic source -> one persisted authority -> latest native inverse.
 use gateway_core::error::GatewayError;
 #[cfg(not(target_arch = "wasm32"))]
-mod fixture;
+use gateway_migration_test_support::fixture;
 #[cfg(not(target_arch = "wasm32"))]
-mod sqlite_store;
+use gateway_migration_test_support::sqlite_store;
 #[cfg(not(target_arch = "wasm32"))]
 fn main() {
     assert_eq!(

@@ -1,6 +1,5 @@
 #![cfg(not(target_arch = "wasm32"))]
 //! Invalid source metadata views are retained raw, not promoted into normalized authority.
-mod support;
 use gateway_admin_data::profile::{
     CanonicalDates,
     source::{from_source_profile, to_source_profile},
@@ -14,8 +13,9 @@ use gateway_migration::{
     error::MigrationError,
     inverse::export_latest,
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
-use support::{fixture::*, sqlite_store::*};
 
 fn entry(key: Value, value: &str) -> SourceEntry {
     SourceEntry {

@@ -1,5 +1,4 @@
 #![cfg(not(target_arch = "wasm32"))]
-mod support;
 use gateway_admin_data::profile::{CanonicalDates, source::to_source_profile};
 use gateway_core::{state::*, value::PortableValue};
 use gateway_migration::{
@@ -7,8 +6,9 @@ use gateway_migration::{
     engine::{adopt_empty, prepare},
     inverse::{ArtifactContext, export_latest, export_rollback_bundle},
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
-use support::{fixture::*, sqlite_store::*};
 
 fn source(parts: Value, value: Value) -> SourceEntry {
     SourceEntry {

@@ -1,7 +1,4 @@
 #![cfg(all(unix, not(target_arch = "wasm32")))]
-mod support {
-    pub mod fixture;
-}
 use gateway_auth::{
     crypto::base64url,
     native_credentials::{NativeOwnerId, OwnerFence, parse_native_document},
@@ -10,12 +7,12 @@ use gateway_migration::{
     native_custody::NativeCustody,
     native_operator::{ConfiguredNativeCustody, NativeCustodyRegistration},
 };
+use gateway_migration_test_support::fixture::{Directory, run};
 use serde_json::{Value, json};
 use std::{
     path::PathBuf,
     time::{SystemTime, UNIX_EPOCH},
 };
-use support::fixture::{Directory, run};
 
 fn document(account: &str, serial: u32) -> Value {
     let expiry = SystemTime::now()

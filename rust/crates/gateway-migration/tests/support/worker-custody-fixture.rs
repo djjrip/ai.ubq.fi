@@ -1,6 +1,6 @@
 //! Synthetic-only stdin/stdout controller; no network, child process, or live owner access.
 #[cfg(all(test, not(target_arch = "wasm32")))]
-mod fixture;
+use gateway_migration_test_support::fixture;
 #[cfg(not(target_arch = "wasm32"))]
 mod worker_custody_fixture;
 #[cfg(not(target_arch = "wasm32"))]

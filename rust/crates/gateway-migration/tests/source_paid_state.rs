@@ -1,7 +1,6 @@
 #![cfg(not(target_arch = "wasm32"))]
 //! Source-shaped stopped input exercises M20's real projection/reader/inverse.
 //! This does not replace the separately required actual M19 writer fixture.
-mod support;
 use gateway_admin_data::profile::{
     CanonicalDates,
     source::{from_source_profile, to_source_profile},
@@ -19,8 +18,9 @@ use gateway_migration::{
     engine::{adopt_empty, prepare},
     inverse::export_latest,
 };
+use gateway_migration_test_support::fixture::{Directory, run};
+use gateway_migration_test_support::sqlite_store::SqliteStore;
 use serde_json::{Value, json};
-use support::{fixture::*, sqlite_store::*};
 
 fn entry(parts: Value, document: SourceJson) -> SourceEntry {
     SourceEntry {

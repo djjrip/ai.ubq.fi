@@ -1,14 +1,16 @@
 #![cfg(not(target_arch = "wasm32"))]
+use gateway_claude_runtime_test_support::fixture::{
+    Host, KEY, MODEL, NOW, Store, account, apply, error_evidence, exhausted, fixture_effort, head,
+    raw, run, seed, selected,
+};
 mod oracle;
-mod support;
 use gateway_admin_runtime::claude::{self, AccountUpdate};
-use gateway_claude_runtime::host::{self, OutcomeDecision, PoolSelection, SelectionInput};
+use gateway_claude_runtime::host::{OutcomeDecision, PoolSelection, SelectionInput};
 use gateway_claude_runtime::persistence::{clear_guards, quota_key};
 use gateway_claude_runtime::pool::ClaudePoolSession;
 use gateway_claude_runtime::quota;
 use gateway_providers::types::Headers;
 use serde_json::{Value, json};
-use support::*;
 
 #[test]
 fn authoritative_refusal_rotates_durable_active_and_all_current_accounts_prove_paid() {

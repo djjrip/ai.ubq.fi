@@ -2,6 +2,7 @@ import { afterAll, test } from "bun:test";
 import assert from "node:assert/strict";
 import { copyFileSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { stagedClippyArguments } from "./rust-quality-clippy.ts";
 import { join } from "node:path";
 import {
   executeRustPlan,
@@ -87,9 +88,17 @@ test("plan retains fmt, clippy, native tests and the Worker build without a redu
   const nativeClippyCommand = nativeClippy[0];
   assert.ok(nativeClippyCommand);
   assert.deepEqual(packageFlags(nativeClippyCommand), native.packages);
-  assert.deepEqual(nativeClippyCommand.argv.slice(-4), ["--all-targets", "--", "-D", "warnings"]);
+  assert.deepEqual(nativeClippyCommand.argv.slice(-(4 + stagedClippyArguments().length)), [
+    "--all-targets",
+    "--",
+    "-D",
+    "warnings",
+    ...stagedClippyArguments(),
+  ]);
   assert.deepEqual(native.testPackages, ["gateway-core"]);
-  const nativeTests = native.commands.filter((command) => command.testListing === true || command.testRun === true);
+  const nativeTests = native.commands.filter(
+    (command) => !command.argv.includes("gateway-quality") && (command.testListing === true || command.testRun === true)
+  );
   assert.equal(nativeTests.length, 2);
   assert.ok(nativeTests.every((command) => command.argv[0] === "cargo" && command.argv[1] === "test" && packageFlags(command).includes("gateway-core")));
   assert.ok(native.commands.every((command) => command.argv[0] !== "cargo" || command.argv[1] !== "check"));
@@ -105,7 +114,7 @@ test("plan retains fmt, clippy, native tests and the Worker build without a redu
   const wasmClippyCommand = wasmClippy[0];
   assert.ok(wasmClippyCommand);
   assert.deepEqual(packageFlags(wasmClippyCommand), wasm.packages);
-  assert.deepEqual(wasmClippyCommand.argv.slice(-4), ["--lib", "--", "-D", "warnings"]);
+  assert.deepEqual(wasmClippyCommand.argv.slice(-(4 + stagedClippyArguments().length)), ["--lib", "--", "-D", "warnings", ...stagedClippyArguments()]);
   assert.equal(wasm.buildWorker, true);
   assert.equal(wasm.testPackages.length, 0);
   assert.deepEqual(wasm.commands.at(-1)?.argv, ["worker-build", "--release", "--locked"]);
@@ -247,7 +256,9 @@ test("missing frozen lock and malformed workspace refuse a plan instead of skipp
 
 test("gate runner refuses empty plans, nonzero child status and zero tests", async () => {
   const root = fixture();
-  const plan = planRustVerification(root, ["rust/crates/gateway-core/src/lib.rs"], "native");
+  const planned = planRustVerification(root, ["rust/crates/gateway-core/src/lib.rs"], "native");
+  // JSON parsing/ratchet evidence is covered by rust-quality-clippy.test.ts.
+  const plan = { ...planned, commands: planned.commands.map(({ clippyStage: _stage, clippyPackages: _packages, ...command }) => command) };
   await assert.rejects(
     executeRustPlan({ ...plan, packages: [] }, {}, () => Promise.resolve({ code: 0, stdout: "", stderr: "" })),
     /empty plan/
@@ -258,7 +269,7 @@ test("gate runner refuses empty plans, nonzero child status and zero tests", asy
   );
   await assert.rejects(
     executeRustPlan(plan, {}, () => Promise.resolve({ code: 0, stdout: "", stderr: "" })),
-    /listed zero tests/
+    /executed zero passing tests/
   );
   let calls = 0;
   const count = await executeRustPlan(plan, {}, (command) => {
@@ -518,7 +529,11 @@ test("Darwin native packages alone select the source-bound prelaunch split; Linu
     assert.deepEqual(plan.testPackages, ["gateway-native"]);
     assert.equal(plan.commands.filter((command) => command.darwinNativeTests).length, host === darwin ? 1 : 0);
     assert.ok(plan.commands.every((command) => command.isolated));
-    if (host === linux) assert.equal(plan.commands.filter((command) => command.testListing === true || command.testRun === true).length, 2);
+    if (host === linux)
+      assert.equal(
+        plan.commands.filter((command) => !command.argv.includes("gateway-quality") && (command.testListing === true || command.testRun === true)).length,
+        2
+      );
   }
   assert.ok(
     !planRustVerification(fixture.root, ["rust/crates/gateway-core/src/lib.rs"], "wasm", false, darwin).commands.some((command) => command.darwinNativeTests)
@@ -834,4 +849,17 @@ test("native CI preparation selects only pinned matching Darwin components and r
     assert.ok(bootstrap.includes(checksum));
   assert.ok(bootstrap.includes("Darwin-arm64") && bootstrap.includes("--disable-ldconfig") && bootstrap.includes("uos_check"));
   assert.ok(bootstrap.includes('mkdir "$uos_toolchain"'), "Prepared tool destinations must still be fresh");
+});
+
+test("every native and WASM plan runs native parser fixtures and all-source policy before selected Clippy", () => {
+  const root = fixture();
+  for (const stage of ["native", "wasm"] as const) {
+    const plan = planRustVerification(root, ["rust/crates/gateway-core/src/lib.rs"], stage);
+    const parser = plan.commands.findIndex((command) => command.argv.includes("gateway-quality") && command.argv.includes("run"));
+    const fixtures = plan.commands.findIndex((command) => command.argv.includes("gateway-quality") && command.argv.includes("test"));
+    const clippy = plan.commands.findIndex((command) => command.clippyStage === stage);
+    assert.ok(fixtures >= 0 && parser > fixtures && clippy > parser);
+    assert.ok(!plan.commands[parser].argv.includes("--target"));
+    assert.ok(plan.commands[parser].argv.includes("--offline"));
+  }
 });

@@ -9,10 +9,10 @@ use serde_json::Value;
 use sha2::Sha256;
 
 use crate::{
-    AuthConfig, AuthRequest, GatewayError,
     crypto::{Secret, decode_base64url, sha256_base64url},
-    invalid, unauthorized,
+    types::{AuthConfig, AuthRequest, invalid, unauthorized},
 };
+use gateway_core::GatewayError;
 
 #[derive(Clone, Debug)]
 pub enum AuthUpstreamRequest {

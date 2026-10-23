@@ -1,10 +1,13 @@
-use super::*;
-use crate::{
-    native::{NATIVE_RENEWAL_AUTHORITY_PATH, signature_input},
+use gateway_auth::{
+    crypto::base64url,
+    native::{NATIVE_MAX_BODY_BYTES, NATIVE_RENEWAL_AUTHORITY_PATH, signature_input},
     native_control::{
         NATIVE_AUTHORITY_MAX_BYTES, NATIVE_CONTROL_ERROR_MAX_BYTES, authority_response_input,
     },
-    native_import::{NativeImportMetadata, NativeImportTarget},
+    native_import::{
+        NativeImportMetadata, NativeImportTarget, authority::ImportAuthorityStateData,
+        catalog_seed::*,
+    },
 };
 fn request() -> ImportCatalogSeedRequestData {
     let hash = "a".repeat(64);
@@ -56,7 +59,7 @@ fn exact_existing_frame_ceiling_and_one_over_are_optional_transport_not_raw_caps
             NATIVE_RENEWAL_AUTHORITY_PATH,
             "fixture-key",
             0,
-            &crate::crypto::base64url(&[7; 32]),
+            &base64url(&[7; 32]),
             &bytes
         )
         .is_ok()
@@ -68,7 +71,7 @@ fn exact_existing_frame_ceiling_and_one_over_are_optional_transport_not_raw_caps
             NATIVE_RENEWAL_AUTHORITY_PATH,
             "fixture-key",
             0,
-            &crate::crypto::base64url(&[7; 32]),
+            &base64url(&[7; 32]),
             &serde_json::to_vec(&request).unwrap()
         )
         .is_err()
@@ -87,15 +90,21 @@ fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed(
     let mut invalid = request.clone();
     invalid.v = 2;
     assert!(
-        crate::native_import::authority::new_request_limit(&serde_json::to_vec(&invalid).unwrap())
-            .is_err()
+        signature_input(
+            NATIVE_RENEWAL_AUTHORITY_PATH,
+            "fixture-key",
+            0,
+            &base64url(&[7; 32]),
+            &serde_json::to_vec(&invalid).unwrap()
+        )
+        .is_err()
     );
     assert!(
         signature_input(
             NATIVE_RENEWAL_AUTHORITY_PATH,
             "fixture-key",
             0,
-            &crate::crypto::base64url(&[7; 32]),
+            &base64url(&[7; 32]),
             &vec![b'x'; NATIVE_AUTHORITY_MAX_BYTES + 1]
         )
         .is_err()
@@ -103,19 +112,13 @@ fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed(
     for seeded in [false, true] {
         let reply = ImportCatalogSeedReplyData::new(seeded).bytes().unwrap();
         assert!(
-            authority_response_input(
-                "fixture-key",
-                &crate::crypto::base64url(&[7; 32]),
-                &bytes,
-                200,
-                &reply
-            )
-            .is_ok()
+            authority_response_input("fixture-key", &base64url(&[7; 32]), &bytes, 200, &reply)
+                .is_ok()
         );
         assert!(
             authority_response_input(
                 "fixture-key",
-                &crate::crypto::base64url(&[7; 32]),
+                &base64url(&[7; 32]),
                 &bytes,
                 200,
                 b"{\"seeded\":true}"
@@ -125,7 +128,7 @@ fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed(
         assert!(
             authority_response_input(
                 "fixture-key",
-                &crate::crypto::base64url(&[7; 32]),
+                &base64url(&[7; 32]),
                 &bytes,
                 500,
                 &vec![b'x'; NATIVE_CONTROL_ERROR_MAX_BYTES + 1]

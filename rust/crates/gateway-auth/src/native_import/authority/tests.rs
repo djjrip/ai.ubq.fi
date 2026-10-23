@@ -1,4 +1,5 @@
 use super::*;
+use super::{completion::*, result::*};
 use crate::{
     crypto::base64url,
     native::{NATIVE_MAX_BODY_BYTES, NATIVE_RENEWAL_AUTHORITY_PATH, signature_input},

@@ -1,11 +1,8 @@
 //! Closed import-authority DATA only. Private body/start/currentness proofs live
 //! above this crate and cannot be reconstructed by deserializing these frames.
 use super::{NativeImportMetadata, NativeImportTarget};
-use crate::{
-    GatewayError,
-    native_control::{NATIVE_CONTROL_ERROR_MAX_BYTES, NATIVE_RENEWAL_MAX_MS},
-};
-use gateway_core::identity::MAX_SAFE_INTEGER;
+use crate::native_control::{NATIVE_CONTROL_ERROR_MAX_BYTES, NATIVE_RENEWAL_MAX_MS};
+use gateway_core::{GatewayError, identity::MAX_SAFE_INTEGER};
 use serde::{Deserialize, Serialize};
 
 pub const IMPORT_AUTHORITY_OPERATION: &str = "codex_auth_import_authority";
@@ -276,12 +273,8 @@ impl ImportAuthorityTerminalData {
         Ok(())
     }
 }
-#[path = "authority_completion.rs"]
-mod completion;
-pub use completion::{ImportCompletionData, ImportCompletionModelsData};
-#[path = "authority_result.rs"]
-mod result;
-pub use result::{ImportAuthorityReplyData, ImportAuthorityResult};
+pub mod completion;
+pub mod result;
 
 /// Exact existing B1 canonical12-field DATA. This duplicate wire shape selects
 /// authentication bounds only; it never constructs the authority's private proof.
@@ -482,7 +475,7 @@ pub fn import_authority_reply_max_bytes() -> usize {
     let s = max_state();
     let r = "r".repeat(256);
     let results = [
-        ImportAuthorityResult::CustodyTerminal {
+        result::ImportAuthorityResult::CustodyTerminal {
             started: max_custody(),
             publication_revision: r.clone(),
             terminal: Box::new({
@@ -492,32 +485,32 @@ pub fn import_authority_reply_max_bytes() -> usize {
                 terminal
             }),
         },
-        ImportAuthorityResult::Admit { state: s.clone() },
-        ImportAuthorityResult::FinishCurrent { state: s.clone() },
-        ImportAuthorityResult::Claim {
+        result::ImportAuthorityResult::Admit { state: s.clone() },
+        result::ImportAuthorityResult::FinishCurrent { state: s.clone() },
+        result::ImportAuthorityResult::Claim {
             state: s.clone(),
             claim_ref: r.clone(),
             mode: ImportAuthorityClaimMode::ImportOnce,
             start_permit: Some("\u{1}".repeat(4096)),
         },
-        ImportAuthorityResult::Start {
+        result::ImportAuthorityResult::Start {
             state: s.clone(),
             claim_ref: r.clone(),
             started_revision: Some("\u{1}".repeat(4096)),
         },
-        ImportAuthorityResult::Current {
+        result::ImportAuthorityResult::Current {
             state: s.clone(),
             claim_ref: Some(r.clone()),
             catalog_revision: Some("\u{1}".repeat(4096)),
         },
-        ImportAuthorityResult::Unknown {
+        result::ImportAuthorityResult::Unknown {
             state: s.clone(),
             claim_ref: r,
         },
     ];
     results
         .into_iter()
-        .map(|result| encoded(&ImportAuthorityReplyData::new(result)))
+        .map(|result| encoded(&result::ImportAuthorityReplyData::new(result)))
         .max()
         .expect("finite phases")
         .max(original_terminal_reply_max_bytes())
@@ -606,7 +599,7 @@ pub(crate) fn new_response_limit(
         return Err(invalid());
     }
     if let Ok(request) = ImportAuthorityRequestData::parse(request) {
-        ImportAuthorityReplyData::parse_for(response, &request)?;
+        result::ImportAuthorityReplyData::parse_for(response, &request)?;
         return Ok(Some(import_authority_reply_max_bytes_for(&request)?));
     }
     let request = ImportCustodyStartedWire::parse(request)?;
@@ -615,5 +608,4 @@ pub(crate) fn new_response_limit(
 }
 
 #[cfg(test)]
-#[path = "authority_tests.rs"]
 mod tests;

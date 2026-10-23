@@ -2,7 +2,8 @@
 //! server-owned authority; deserializing this wire never creates permission.
 use serde::{Deserialize, Serialize};
 
-use crate::{GatewayError, crypto::sha256_hex, native::*};
+use crate::{crypto::sha256_hex, native::*};
+use gateway_core::GatewayError;
 
 pub const NATIVE_CONTROL_MAX_BYTES: usize = 65_536;
 pub const NATIVE_CONTROL_ERROR_MAX_BYTES: usize = 4096;

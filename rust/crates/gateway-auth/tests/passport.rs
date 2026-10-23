@@ -6,13 +6,14 @@ use std::{
 };
 
 use gateway_auth::{
-    AuthConfig, AuthHost, AuthMethod, AuthRequest, AuthService,
     crypto::base64url,
     origin::same_origin_mutation,
     passport::{
         PASSPORT_COOKIE, PASSPORT_STATE_COOKIE, PassportClaims, PassportConfig, PassportService,
         reset_jwks_cache, verify_jwt,
     },
+    resolve::AuthService,
+    types::{AuthConfig, AuthHost, AuthMethod, AuthRequest},
     upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
     webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
 };
@@ -511,7 +512,7 @@ fn jwks_transport_failure_and_non_success_status_are_unavailable() {
     );
 }
 
-fn assert_unauthorized(result: Result<gateway_auth::AuthPrincipal, GatewayError>) {
+fn assert_unauthorized(result: Result<gateway_auth::types::AuthPrincipal, GatewayError>) {
     let error = match result {
         Ok(_) => panic!("expected unauthorized"),
         Err(error) => error,

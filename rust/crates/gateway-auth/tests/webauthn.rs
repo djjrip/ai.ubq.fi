@@ -1,10 +1,10 @@
 use ciborium::value::Value as Cbor;
 use gateway_auth::{
-    GatewayError,
     crypto::{base64url, decode_base64url},
     passkeys::{AssertionVerification, PasskeyCredential, RegistrationVerification},
     webauthn::*,
 };
+use gateway_core::GatewayError;
 use p256::ecdsa::{
     Signature, SigningKey, VerifyingKey,
     signature::{Signer, Verifier},
@@ -55,7 +55,7 @@ impl WebAuthnCrypto for RealP256 {
         point.extend(decode_base64url(key.jwk["x"].as_str().unwrap())?);
         point.extend(decode_base64url(key.jwk["y"].as_str().unwrap())?);
         p256::PublicKey::from_sec1_bytes(&point)
-            .map_err(|_| gateway_auth::invalid("Invalid curve point"))?;
+            .map_err(|_| gateway_auth::types::invalid("Invalid curve point"))?;
         Ok(())
     }
     async fn verify_signature(&self, input: SignatureInput) -> Result<bool, GatewayError> {
@@ -63,9 +63,9 @@ impl WebAuthnCrypto for RealP256 {
         point.extend(decode_base64url(input.key.jwk["x"].as_str().unwrap())?);
         point.extend(decode_base64url(input.key.jwk["y"].as_str().unwrap())?);
         let key = VerifyingKey::from_sec1_bytes(&point)
-            .map_err(|_| gateway_auth::invalid("Invalid curve point"))?;
+            .map_err(|_| gateway_auth::types::invalid("Invalid curve point"))?;
         let signature = Signature::from_slice(&input.signature)
-            .map_err(|_| gateway_auth::invalid("Invalid signature"))?;
+            .map_err(|_| gateway_auth::types::invalid("Invalid signature"))?;
         Ok(key.verify(&input.data, &signature).is_ok())
     }
 }

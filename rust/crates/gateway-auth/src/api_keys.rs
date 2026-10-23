@@ -4,7 +4,8 @@ use serde_json::json;
 
 use crate::{
     crypto::{Secret, sha256_base64url},
-    store, unauthorized,
+    store,
+    types::unauthorized,
 };
 
 pub const NO_LIMIT: i64 = -1;

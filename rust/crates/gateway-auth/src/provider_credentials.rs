@@ -7,6 +7,7 @@ use base64::{
     engine::{DecodePaddingMode, GeneralPurpose, GeneralPurposeConfig},
 };
 use gateway_core::{
+    GatewayError,
     identity::{CredentialVersion, RoutingAccountHash, SubscriptionSelectionHash},
     state::{AuthorityStore, RecordKey},
 };
@@ -14,7 +15,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use crate::{
-    GatewayError,
     crypto::{Secret, sha256_hex},
     store,
 };

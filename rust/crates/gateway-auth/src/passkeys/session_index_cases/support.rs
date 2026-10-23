@@ -1,6 +1,10 @@
-use super::auth;
-use auth::{AuthHost, AuthRequest, GatewayError, passkeys::*, session_index, upstream::*};
-use gateway_core::state::*;
+use crate::{
+    passkeys::*,
+    session_index,
+    types::{AuthHost, AuthRequest},
+    upstream::*,
+};
+use gateway_core::{GatewayError, state::*};
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,
@@ -127,8 +131,8 @@ impl AuthHost for Host {
         ))
     }
 }
-impl auth::webauthn::WebAuthnCrypto for Host {
-    async fn validate_key(&self, _: &auth::webauthn::CosePublicKey) -> Result<(), GatewayError> {
+impl crate::webauthn::WebAuthnCrypto for Host {
+    async fn validate_key(&self, _: &crate::webauthn::CosePublicKey) -> Result<(), GatewayError> {
         Err(GatewayError::unavailable(
             "Fixture does not execute ceremonies",
             "fixture_denied",
@@ -136,7 +140,7 @@ impl auth::webauthn::WebAuthnCrypto for Host {
     }
     async fn verify_signature(
         &self,
-        _: auth::webauthn::SignatureInput,
+        _: crate::webauthn::SignatureInput,
     ) -> Result<bool, GatewayError> {
         Err(GatewayError::unavailable(
             "Fixture does not execute ceremonies",

@@ -8,13 +8,13 @@ use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 
 use crate::{
-    GatewayError,
     crypto::{base64url, decode_base64url},
-    invalid,
     passkeys::{
         AssertionVerification, RegistrationVerification, VerifiedRegistration, client_data,
     },
+    types::invalid,
 };
+use gateway_core::GatewayError;
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize)]
 #[serde(rename_all = "snake_case")]

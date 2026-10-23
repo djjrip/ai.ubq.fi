@@ -5,6 +5,7 @@ use gateway_auth::{
     native_import::catalog_seed::{
         ImportCatalogSeedReplyData as Reply, ImportCatalogSeedRequestData as Request,
     },
+    native_import::publication::ImportCatalogDisposition,
 };
 use gateway_core::{
     query::QueryStore,

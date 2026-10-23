@@ -1,7 +1,13 @@
 use super::support::*;
 use gateway_auth::provider_credentials::{CodexSourcePool, codex_source_pool_key};
 use gateway_authority::{
-    Authority, AuthorityClock, capacity::*, keys, paid_control::PaidControlOwner, routing::*,
+    capacity::*,
+    capacity_rules::*,
+    keys,
+    paid_control::PaidControlOwner,
+    routing_codec::*,
+    routing_types::*,
+    store::{Authority, AuthorityClock},
 };
 use gateway_core::{
     GatewayError,

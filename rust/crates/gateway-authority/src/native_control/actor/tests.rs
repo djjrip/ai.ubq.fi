@@ -59,7 +59,7 @@ impl Store {
         *self.race.lock().unwrap() = Some((key, value));
     }
 }
-impl crate::AuthorityClock for Store {
+impl crate::store::AuthorityClock for Store {
     fn now_ms(&self) -> Result<i64, GatewayError> {
         Ok(self.now.load(Ordering::SeqCst))
     }

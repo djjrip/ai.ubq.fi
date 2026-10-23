@@ -1,5 +1,7 @@
 //! Actual fixed TLS import client. No generic response/carrier/reader input can
 //! mint body, claim, Started, currentness or terminal proofs through this type.
+use super::custody_session::{ImportCustodyStartedRequest, VerifiedCurrentImportStarted};
+use super::effects::{NativeImportBinding, NativeImportClaim, NativeImportMode, NativeImportStart};
 use super::remote_state::RemoteImportState;
 use super::remote_tls::{ImportAuthorityTls, Roots};
 use super::*;
@@ -33,7 +35,7 @@ pub struct RemoteImportAuthority<'a, C> {
 }
 /// Genuine header/current-action admission, before native body consumption.
 /// ```compile_fail
-/// use gateway_authority::native_control::import::RemoteAdmittedImport;
+/// use gateway_authority::native_control::import::remote::RemoteAdmittedImport;
 /// let forged:RemoteAdmittedImport=serde_json::from_str("{}").unwrap();
 /// ```
 pub struct RemoteAdmittedImport {
@@ -63,7 +65,7 @@ impl AuthenticatedImportCatalogObservation {
 }
 /// A current authenticated matching terminal; NOT native physical durability.
 /// ```compile_fail
-/// use gateway_authority::native_control::import::AuthenticatedImportTerminal;
+/// use gateway_authority::native_control::import::remote::AuthenticatedImportTerminal;
 /// let forged:AuthenticatedImportTerminal=serde_json::from_str("{}").unwrap();
 /// ```
 pub struct AuthenticatedImportTerminal {
@@ -75,7 +77,7 @@ pub struct AuthenticatedImportTerminal {
 /// A current matching terminal for request-correlated original B1 DATA.
 /// Never proves historical Started, physical custody, or permission to stop/write.
 /// ```compile_fail
-/// use gateway_authority::native_control::import::VerifiedCurrentImportTerminal;
+/// use gateway_authority::native_control::import::remote::VerifiedCurrentImportTerminal;
 /// let forged:VerifiedCurrentImportTerminal=serde_json::from_str("{}").unwrap();
 /// ```
 pub struct VerifiedCurrentImportTerminal {

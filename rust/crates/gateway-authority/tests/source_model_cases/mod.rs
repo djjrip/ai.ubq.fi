@@ -196,7 +196,7 @@ fn opaque_model_admission_learning_uses_same_raw_source_key_and_exact_detail() {
     assert_eq!(admission.requested_model, high);
     run(authority.ensure_admission_current(&admission, NOW)).unwrap();
     let encoded_admission = SourceJson::from_serializable(&admission).unwrap();
-    let restored: gateway_authority::routing::AdmittedAccount =
+    let restored: gateway_authority::routing_types::AdmittedAccount =
         encoded_admission.deserialize().unwrap();
     assert_eq!(restored, admission);
     let detail = |unit| {

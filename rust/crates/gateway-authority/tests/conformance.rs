@@ -10,16 +10,18 @@ mod source_model_cases;
 mod support;
 use std::sync::atomic::Ordering;
 
-use gateway_authority::paid::{
+use gateway_authority::kernel::{KernelPolicy, KernelTerminal, KernelWindow};
+use gateway_authority::paid_types::{
     PaidAdmission, PaidAuthorization, PaidCorrelation, PaidRequest, PaidRoutingPolicy, PaidUsage,
     PaidWindow,
 };
-use gateway_authority::quota::{ApiUsageWindow, KernelPolicy, KernelTerminal, KernelWindow};
-use gateway_authority::reset::{
+use gateway_authority::quota::ApiUsageWindow;
+use gateway_authority::reset::utc_day;
+use gateway_authority::reset_types::{
     AccountDayBudget, ResetCandidate, ResetClaim, ResetConfig, ResetCredit, ResetMode, ResetState,
-    reset_invocation, utc_day,
+    reset_invocation,
 };
-use gateway_authority::routing::RouteSelection;
+use gateway_authority::routing_types::RouteSelection;
 use gateway_authority::{DAY_MS, PAID_RETENTION_MS, QUOTA_RETENTION_MS, keys};
 use gateway_core::identity::{ApiKeyId, PaidAttemptId, PoolVersionstamp, RequestId};
 use gateway_core::lifecycle::{BillingState, PaidTerminalState};
@@ -68,7 +70,7 @@ async fn reserve_paid(
 fn paid_reservation(
     authority: &TestAuthority,
     input: &PaidRequest,
-) -> gateway_authority::paid::PaidReservation {
+) -> gateway_authority::paid_types::PaidReservation {
     match run(reserve_paid(
         authority,
         input,
@@ -275,7 +277,7 @@ fn concurrent_api_admissions_never_exceed_limit_and_cas_conflicts_retry() {
             let store = store.clone();
             let tokens = tokens.clone();
             std::thread::spawn(move || {
-                let authority = gateway_authority::Authority::new(store, tokens);
+                let authority = gateway_authority::store::Authority::new(store, tokens);
                 run(authority.reserve_api_key(
                     &policy().key_id,
                     &id(&format!("request-{index}")),
@@ -355,7 +357,7 @@ fn paid_usage_records_actual_overshoot_once_without_fabricating_a_terminal() {
     };
     assert!(run(authority.settle_paid(&reservation, &usage, NOW)).unwrap());
     assert!(!run(authority.settle_paid(&reservation, &usage, NOW)).unwrap());
-    let row: gateway_authority::paid::PaidAttempt =
+    let row: gateway_authority::paid_types::PaidAttempt =
         gateway_core::source_control::decode_source_control_record(
             &store.row(&keys::paid_attempt("key-a", "paid-one")).unwrap(),
         )
@@ -503,7 +505,7 @@ fn reset_candidate(store: &MemoryStore, authority: &TestAuthority) -> ResetCandi
 fn armed_reset(
     store: &MemoryStore,
     authority: &TestAuthority,
-) -> (ResetCandidate, gateway_authority::reset::ResetRecord) {
+) -> (ResetCandidate, gateway_authority::reset_types::ResetRecord) {
     let candidate = reset_candidate(store, authority);
     let credit = ResetCredit {
         credit_id: "synthetic-credit".to_owned(),

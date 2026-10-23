@@ -2,8 +2,10 @@
 //! Source b6e25555179ad2b195b0bab93e946be834ecda6c native-authority.test.ts1097-1113
 //! is a fixture-only generic service with permanent attempt_lifetime rows, not a live Rust RPC.
 use super::support;
-use gateway_authority::paid::{PaidAdmission, PaidAuthorization, PaidRequest, PaidRoutingPolicy};
 use gateway_authority::paid_control::*;
+use gateway_authority::paid_types::{
+    PaidAdmission, PaidAuthorization, PaidRequest, PaidRoutingPolicy,
+};
 use gateway_authority::{PAID_RETENTION_MS, keys};
 use gateway_core::identity::{ApiKeyId, PaidAttemptId, RequestId};
 use gateway_core::provider::{PaidProvider, UpstreamProvider};
@@ -460,7 +462,7 @@ fn f13_non_api_original_kernel_is_rechecked_without_renewing_it() {
     let (store, authority, input, _) = setup();
     let journal_key = super::paid_original::journal_key(&input.request_id.0);
     let mut journal = store.row(&journal_key).unwrap().value;
-    let kernel = gateway_authority::quota::KernelReservation {
+    let kernel = gateway_authority::kernel::KernelReservation {
         v: 2,
         owner: "fixture-owner".into(),
         repo: None,
@@ -503,7 +505,7 @@ fn f13_non_api_original_kernel_is_rechecked_without_renewing_it() {
 fn publish_active_paid(
     store: &MemoryStore,
     input: &PaidRequest,
-    paid: &gateway_authority::paid::PaidReservation,
+    paid: &gateway_authority::paid_types::PaidReservation,
 ) {
     let key = super::paid_original::journal_key(&input.request_id.0);
     let mut journal = store.row(&key).unwrap().value;

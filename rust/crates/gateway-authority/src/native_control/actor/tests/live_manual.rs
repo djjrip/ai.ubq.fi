@@ -1,5 +1,13 @@
 use super::*;
-use crate::{manual_reset::*, native_live::*, reset::*, routing::*};
+use crate::{
+    manual_reset::*,
+    native_live::wire::*,
+    native_live::*,
+    reset::*,
+    reset_types::*,
+    routing_codec::{normalize, parse_routing_state},
+    routing_types::*,
+};
 use gateway_auth::{
     native_auth::{
         NativeAuthHeaders, NativeCapability, NativeNonceAuthority, NativeTransportIdentity,
@@ -487,7 +495,7 @@ fn admin_recheck_writes_only_routing_and_retains_ambiguous_reset_identity() {
     run(async {
         let store = Store::default();
         let pool = source(&store, "SYNTHETIC_ACCESS", "source-one");
-        let mut state = normalize_routing_state(&pool, None, 1_000_000).unwrap();
+        let mut state = normalize(&pool, None, 1_000_000).unwrap();
         let slot = &mut state.slots[0];
         slot.quota_blocked_until_ms = Some(9_000_000);
         slot.quota_blocked_classes = vec!["standard".into()];

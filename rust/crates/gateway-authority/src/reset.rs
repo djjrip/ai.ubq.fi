@@ -4,10 +4,9 @@ use gateway_core::state::AuthorityStore;
 use sha2::{Digest, Sha256};
 
 use crate::routing::{class_name, read_view, validate_cohort};
-use crate::store::Transaction;
+use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
-    Authority, DAY_MS, PROBE_LEASE_MS, TokenSource, add, invalid, keys, next_generation,
-    nonnegative, text, unavailable,
+    DAY_MS, PROBE_LEASE_MS, add, invalid, keys, next_generation, nonnegative, text, unavailable,
 };
 
 pub(crate) fn hash(value: &str) -> String {
@@ -20,7 +19,7 @@ pub(crate) fn hash(value: &str) -> String {
     encoded
 }
 
-pub use crate::reset_types::*;
+use crate::reset_types::*;
 
 pub fn utc_day(now: i64) -> Result<String, GatewayError> {
     nonnegative(now)?;
@@ -158,7 +157,7 @@ fn shadow_episode(candidate: &ResetCandidate) -> String {
 #[derive(Clone, Copy)]
 pub(crate) enum ResetAuthorization<'a> {
     Legacy(&'a ResetCandidate),
-    FullPool(&'a crate::full_pool_reset::AutomaticResetPermit),
+    FullPool(&'a crate::full_pool_reset::types::AutomaticResetPermit),
     ExistingLedger(
         &'a ResetCandidate,
         &'a gateway_core::identity::RequestContext,
@@ -269,7 +268,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     /// Finite pre-inventory projection; the fixed host rechecks again before every effect.
     pub async fn reset_candidates(
         &self,
-        proof: &crate::routing::CohortProof,
+        proof: &crate::routing_types::CohortProof,
     ) -> Result<Vec<ResetCandidate>, GatewayError> {
         for _ in 0..3 {
             let now = self.fresh_time(0)?;
@@ -464,7 +463,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     /// Complete source audit permission, validated inside the existing shared spend transaction.
     pub async fn claim_full_pool_reset(
         &self,
-        permit: &crate::full_pool_reset::AutomaticResetPermit,
+        permit: &crate::full_pool_reset::types::AutomaticResetPermit,
     ) -> Result<ResetClaim, GatewayError> {
         let now = self.fresh_time(0)?;
         self.claim_reset_guarded(ResetAuthorization::FullPool(permit), now)
@@ -643,7 +642,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     /// Complete source audit permission, validated inside the existing shared spend transaction.
     pub async fn prepare_full_pool_reset_submission(
         &self,
-        permit: &crate::full_pool_reset::AutomaticResetPermit,
+        permit: &crate::full_pool_reset::types::AutomaticResetPermit,
         expected: &ResetRecord,
     ) -> Result<ResetRecord, GatewayError> {
         let now = self.fresh_time(0)?;
@@ -737,7 +736,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     /// Complete source audit permission, validated inside the existing shared spend transaction.
     pub async fn renew_full_pool_reset_before_redeem(
         &self,
-        permit: &crate::full_pool_reset::AutomaticResetPermit,
+        permit: &crate::full_pool_reset::types::AutomaticResetPermit,
         expected: &ResetRecord,
     ) -> Result<ResetRecord, GatewayError> {
         let now = self.fresh_time(0)?;

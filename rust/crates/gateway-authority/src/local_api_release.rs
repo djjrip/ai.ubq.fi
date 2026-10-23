@@ -1,6 +1,6 @@
 //! Exact local unused-release source errors, not a generic HTTP/error capability.
 use crate::quota::ApiReservation;
-use crate::{Authority, TokenSource};
+use crate::store::{Authority, TokenSource};
 use gateway_core::{GatewayError, state::AuthorityStore};
 
 #[derive(Clone, Copy)]

@@ -1,10 +1,12 @@
 use super::*;
+use crate::native_control::custody::validate_native_control_custody;
 use crate::{
     native_control::{
-        NativeRenewalAuthority, NativeRenewalCancellation, RegisteredRenewalOwner, actor,
+        NativeRenewalCancellation, actor, receiver::NativeRenewalAuthority,
+        receiver::RegisteredRenewalOwner,
     },
     paid_control::{PAID_CONTROL_CONFIG_VERSION, PaidControlConfig, PaidControlOwner},
-    routing::{PoolAccount, SubscriptionPool},
+    routing_types::{PoolAccount, SubscriptionPool},
 };
 use gateway_auth::{
     crypto::{base64url, sha256_hex},
@@ -220,25 +222,16 @@ fn existing_import_uses_actual_admin_source_before_header_and_body_proof() {
             assert_eq!(row.value["v"], 3);
             assert!(row.value.as_object().unwrap().contains_key("publication"));
             assert!(row.value["publication"].is_null());
-            crate::native_control::validate_native_control_custody(&custody_key, row).unwrap();
+            validate_native_control_custody(&custody_key, row).unwrap();
             let mut malformed = row.clone();
             malformed.value["body_sha256"] = json!(sha256_hex(body));
-            assert!(
-                crate::native_control::validate_native_control_custody(&custody_key, &malformed)
-                    .is_err()
-            );
+            assert!(validate_native_control_custody(&custody_key, &malformed).is_err());
             malformed = row.clone();
             malformed.value["v"] = json!(4);
-            assert!(
-                crate::native_control::validate_native_control_custody(&custody_key, &malformed)
-                    .is_err()
-            );
+            assert!(validate_native_control_custody(&custody_key, &malformed).is_err());
             malformed = row.clone();
             malformed.expires_at_ms = Some(1_100_000);
-            assert!(
-                crate::native_control::validate_native_control_custody(&custody_key, &malformed)
-                    .is_err()
-            );
+            assert!(validate_native_control_custody(&custody_key, &malformed).is_err());
         }
         store.seed(
             passkeys::key("users", "user-fixture"),

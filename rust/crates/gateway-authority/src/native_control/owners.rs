@@ -1,14 +1,11 @@
 //! Constructor-owned fixed profile registry. Picking a resource is not renewal authorization.
 use super::{
-    RegisteredRenewalOwner,
     actor::{self, NativeActorScope, NativeRenewalActor},
+    receiver::RegisteredRenewalOwner,
     rows::{self, ActionRow, fail},
 };
-use crate::{
-    Authority, TokenSource, keys,
-    routing::{LiveAccountSelection, SubscriptionPool},
-    store::Transaction,
-};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{keys, routing::LiveAccountSelection, routing_types::SubscriptionPool};
 use gateway_auth::{
     AuthConfig,
     crypto::sha256_hex,
@@ -30,7 +27,7 @@ impl RegisteredRenewalOwners {
     pub async fn for_inference<'a, S: AuthorityStore, I: TokenSource>(
         &'a self,
         authority: &Authority<S, I>,
-        admission: &crate::routing::AdmittedAccount,
+        admission: &crate::routing_types::AdmittedAccount,
     ) -> Result<&'a RegisteredRenewalOwner, GatewayError> {
         for _ in 0..3 {
             authority
@@ -212,7 +209,7 @@ impl RegisteredRenewalOwners {
         for _ in 0..3 {
             let mut tx = authority.transaction(authority.fresh_time(0)?)?;
             let (account_hash, native_owner) =
-                super::import::owner_selection(&mut tx, action_ref).await?;
+                super::import::owner_selection::read(&mut tx, action_ref).await?;
             let owner = self
                 .account(&mut tx, &account_hash, None, Some(&native_owner))
                 .await?;

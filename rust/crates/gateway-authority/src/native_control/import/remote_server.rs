@@ -1,6 +1,8 @@
 //! Finite original-import phases. Authentication and coherent authority reads,
 //! never request DATA, select the actual one-use operation/start permission.
 use super::super::rows::{GenerationEffect, Phase};
+use super::custody_session::ImportCustodyStartedRequest;
+use super::effects::NativeImportMode;
 use super::*;
 use gateway_auth::native_import::authority::{ImportCompletionData, ImportCompletionModelsData};
 use gateway_auth::{

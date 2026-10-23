@@ -4,10 +4,10 @@ use super::{
     model::*,
     state::{CyclePermit, record_key},
 };
+use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
-    Authority, TokenSource,
-    routing::{ProbeCircuit, ProbeLease, model_quota_class, read_pinned_view},
-    store::Transaction,
+    routing::{model_quota_class, read_pinned_view},
+    routing_types::{ProbeCircuit, ProbeLease},
 };
 use gateway_auth::{
     crypto::Secret,
@@ -93,7 +93,7 @@ impl<S: AuthorityStore, I: TokenSource> Authority<S, I> {
     pub async fn record_cache_quota_block(
         &self,
         dispatch: &CacheDispatch,
-        block: crate::routing::QuotaBlock,
+        block: crate::routing_types::QuotaBlock,
         now: i64,
     ) -> Result<bool, GatewayError> {
         self.record_bound_quota_block(

@@ -1,4 +1,9 @@
 use super::*;
+use crate::paid::source_records::decode_paid_attempt_record;
+use crate::paid::source_records::decode_paid_rollup_record;
+use crate::paid::source_usage::surplus_usage_from_source;
+use crate::paid_types::PaidCorrelation;
+use crate::paid_types::PaidRollup;
 use gateway_core::{
     js_string::JsString16,
     model::ModelId,
@@ -87,15 +92,13 @@ fn actual_settlement_preserves_first_label_for_three_source_physical_key_collisi
         put_source(&store, key(id), &raw);
         store.put(keys::paid_pending("key", id), json!({"key_id":"key","attempt_id":id,"created_at_ms":NOW-1000,"next_reconciliation_at_ms":NOW}));
         let mut usage = live_usage();
-        usage.correlation = crate::paid::PaidCorrelation::ProviderRequestId(id.into());
+        usage.correlation = PaidCorrelation::ProviderRequestId(id.into());
         assert!(run(authority.settle_paid(&row.reservation, &usage, NOW + index as i64)).unwrap());
         assert!(!run(authority.settle_paid(&row.reservation, &usage, NOW + 10)).unwrap());
-        let saved =
-            crate::paid::decode_paid_attempt_record(&key(id), &store.row(&key(id))).unwrap();
+        let saved = decode_paid_attempt_record(&key(id), &store.row(&key(id))).unwrap();
         assert_eq!(saved.model, logical);
         assert_eq!(saved.reasoning.unwrap().as_units(), &[0xdc00]);
-        let rollup =
-            crate::paid::decode_paid_rollup_record(&first_key, &store.row(&first_key)).unwrap();
+        let rollup = decode_paid_rollup_record(&first_key, &store.row(&first_key)).unwrap();
         assert_eq!(rollup.model, first);
         assert_eq!(rollup.request_count, index as i64 + 1);
         assert_eq!(rollup.provider_quota, (index + 1) as f64 * 5.0);
@@ -143,7 +146,7 @@ fn backfill_source_rows_preserve_unknown_units_restart_markers_and_collision_lab
         "metered",
         crate::paid::rollup_shard("a"),
     );
-    let rollup: crate::paid::PaidRollup = typed(&store, &rollup_key);
+    let rollup: PaidRollup = typed(&store, &rollup_key);
     assert_eq!(rollup.model, high);
     assert_eq!(rollup.request_count, 2);
     assert_eq!(rollup.spend_microcredits, 10.0);
@@ -162,7 +165,7 @@ fn backfill_source_rows_preserve_unknown_units_restart_markers_and_collision_lab
         );
     }
     assert_eq!(backfill(&store, 10).requests.rollups_written, 0);
-    let after: crate::paid::PaidRollup = typed(&store, &rollup_key);
+    let after: PaidRollup = typed(&store, &rollup_key);
     assert_eq!(after, rollup);
 }
 
@@ -186,21 +189,21 @@ fn keyed_paid_decoder_retains_expired_data_but_refuses_wrong_key_metadata_and_en
     let raw = source_request("a", true, &model(&[0xd800]));
     put_source(&store, key("a"), &raw);
     let row = store.row(&key("a"));
-    assert!(crate::paid::decode_paid_attempt_record(&key("a"), &row).is_ok());
-    assert!(crate::paid::decode_paid_attempt_record(&key("other"), &row).is_err());
+    assert!(decode_paid_attempt_record(&key("a"), &row).is_ok());
+    assert!(decode_paid_attempt_record(&key("other"), &row).is_err());
     let mut expired = row.clone();
     expired.expires_at_ms = Some(NOW - 1);
-    assert!(crate::paid::decode_paid_attempt_record(&key("a"), &expired).is_ok());
+    assert!(decode_paid_attempt_record(&key("a"), &expired).is_ok());
     assert_eq!(expired.expires_at_ms, Some(NOW - 1));
     let mut invalid = row.clone();
     invalid.revision = " ".into();
-    assert!(crate::paid::decode_paid_attempt_record(&key("a"), &invalid).is_err());
+    assert!(decode_paid_attempt_record(&key("a"), &invalid).is_err());
     let mut invalid = row.clone();
     invalid.schema_version = 999;
-    assert!(crate::paid::decode_paid_attempt_record(&key("a"), &invalid).is_err());
+    assert!(decode_paid_attempt_record(&key("a"), &invalid).is_err());
     let invalid =
         StoredRecord::profile("seed", gateway_core::value::PortableValue::Null, None).unwrap();
-    assert!(crate::paid::decode_paid_attempt_record(&key("a"), &invalid).is_err());
+    assert!(decode_paid_attempt_record(&key("a"), &invalid).is_err());
 }
 
 #[test]
@@ -216,8 +219,7 @@ fn source_pricing_keeps_absent_null_and_malformed_utf16_cache_leaves_distinct() 
         r#"{"input_price_per_token":0.001,"output_price_per_token":0.002,"cache_read_price_per_token":null,"cache_write_price_per_token":null}"#,
     ] {
         let pricing = SourceJson::parse(text).unwrap();
-        let actual =
-            crate::paid::surplus_usage_from_source(&row, Some(&usage), Some(&pricing)).unwrap();
+        let actual = surplus_usage_from_source(&row, Some(&usage), Some(&pricing)).unwrap();
         assert_eq!(actual.provider_quota, 17000.0);
     }
     for field in ["cache_read_price_per_token", "cache_write_price_per_token"] {
@@ -235,9 +237,7 @@ fn source_pricing_keeps_absent_null_and_malformed_utf16_cache_leaves_distinct() 
             ),
         ])
         .unwrap();
-        assert!(
-            crate::paid::surplus_usage_from_source(&row, Some(&usage), Some(&pricing)).is_none()
-        );
+        assert!(surplus_usage_from_source(&row, Some(&usage), Some(&pricing)).is_none());
     }
     let malformed = gateway_core::source_usage::extract_usage_tokens(Some(
         &json!({"input_tokens":10,"output_tokens":3,"buyer_cost_micro":"bad"}),
@@ -246,5 +246,5 @@ fn source_pricing_keeps_absent_null_and_malformed_utf16_cache_leaves_distinct() 
     let valid =
         SourceJson::parse(r#"{"input_price_per_token":0.001,"output_price_per_token":0.002}"#)
             .unwrap();
-    assert!(crate::paid::surplus_usage_from_source(&row, Some(&malformed), Some(&valid)).is_none());
+    assert!(surplus_usage_from_source(&row, Some(&malformed), Some(&valid)).is_none());
 }

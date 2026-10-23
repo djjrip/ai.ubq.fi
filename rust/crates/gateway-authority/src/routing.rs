@@ -9,22 +9,12 @@ use gateway_core::identity::{
 use gateway_core::provider::{CodexQuotaClass, OveragePermission};
 use gateway_core::state::AuthorityStore;
 
-use crate::store::Transaction;
-use crate::{
-    Authority, TokenSource, generation, invalid, keys, next_generation, nonnegative, text,
-    unavailable,
-};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{generation, invalid, keys, next_generation, nonnegative, text, unavailable};
 
-use crate::capacity_rules::capacity_for;
-pub use crate::capacity_rules::{
-    CapacityObservationStorePlan, capacity_headroom_for_observation, capacity_observation_is_fresh,
-    normalize_capacity_window, parse_capacity_observation, parse_capacity_store,
-    plan_capacity_observation_store,
-};
-use crate::routing_codec::normalize;
-pub use crate::routing_codec::{normalize as normalize_routing_state, parse_routing_state};
-pub use crate::routing_rules::apply_capacity_observation;
-pub use crate::routing_types::*;
+use crate::capacity_rules::{capacity_for, parse_capacity_store};
+use crate::routing_codec::{normalize, parse_routing_state};
+use crate::routing_types::*;
 
 pub fn model_quota_class(model: &ModelId) -> CodexQuotaClass {
     let trimmed = gateway_schema::reasoning::js_trim_source(model.as_js_string());

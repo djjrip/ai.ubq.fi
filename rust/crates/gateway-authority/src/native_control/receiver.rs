@@ -3,7 +3,8 @@ use super::{
     NativeRenewalFence, NativeRenewalMode, NativeRenewalPublished, OWNER_RENEWAL_MAX_MS, facts,
     rows::{self, ActionRow, GenerationEffect, OperationRow, Phase, conflict, fail},
 };
-use crate::{Authority, TokenSource, add, store::Transaction, text};
+use crate::store::{Authority, TokenSource, Transaction};
+use crate::{add, text};
 use gateway_auth::{
     AuthConfig, AuthHost, AuthRequest,
     crypto::sha256_hex,

@@ -1,14 +1,15 @@
 //! One fixed source/normalized/claim publication in the existing authority CAS.
 use super::{
-    NativeRenewalAuthority, NativeRenewalCancellation, NativeRenewalFence, facts,
+    NativeRenewalCancellation, NativeRenewalFence, facts,
+    receiver::NativeRenewalAuthority,
     rows::{
         self, ActionRow, GenerationEffect, OperationRow, Phase, TerminalPublication, conflict, fail,
     },
 };
+use crate::store::{TokenSource, Transaction};
 use crate::{
-    TokenSource, keys,
-    routing::{PoolAccount, SubscriptionPool},
-    store::Transaction,
+    keys,
+    routing_types::{PoolAccount, SubscriptionPool},
     text,
 };
 use gateway_auth::{

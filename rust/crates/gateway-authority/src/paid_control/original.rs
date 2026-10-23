@@ -1,11 +1,12 @@
 //! Read-only projection of the existing routing journal ownership fields.
 //! No second Journal DTO, stored format, lease extension or routing dependency.
 use super::{PaidRoutingReceipt, control_error, source_key};
+use crate::store::{Authority, TokenSource, Transaction};
 use crate::{
-    Authority, TokenSource, keys,
-    paid::{PaidAttempt, PaidRequest, PaidReservation},
-    quota::{ApiReservation, ApiUsageRequest, ApiUsageState, KernelReservation},
-    store::Transaction,
+    kernel::KernelReservation,
+    keys,
+    paid_types::{PaidAttempt, PaidRequest, PaidReservation},
+    quota::{ApiReservation, ApiUsageRequest, ApiUsageState},
 };
 use gateway_core::{
     GatewayError,

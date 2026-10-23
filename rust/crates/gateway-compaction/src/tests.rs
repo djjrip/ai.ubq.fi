@@ -3,7 +3,7 @@ use crate::{
     engine, hybrid,
     model::*,
     state,
-    text::{self, Text, text},
+    text::{self, Text},
     transcript,
     types::{CompactionHost, FailureKind, ResponseOptions},
 };

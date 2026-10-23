@@ -1,7 +1,7 @@
 //! Mechanical source state fitting ladder and calibrated UTF16 token estimator.
 use crate::{
     model::*,
-    text::{self, Text, text},
+    text::{self, Text},
     types::{CompactionFailure, FailureKind},
 };
 use gateway_core::source_json::SourceJson;

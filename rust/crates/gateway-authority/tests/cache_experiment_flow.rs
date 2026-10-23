@@ -1,5 +1,5 @@
 //! Controlled finite host callbacks validate durable orchestration, not live provider acceptance.
-pub use gateway_auth::crypto::Secret;
+use gateway_auth::crypto::Secret;
 use gateway_auth::provider_credentials::{codex_source_pool_key, parse_codex_source_pool};
 use gateway_authority::cache_experiment::{
     RefreshPermit,

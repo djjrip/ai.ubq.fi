@@ -2,7 +2,7 @@
 use crate::{
     engine::truncated_result,
     model::*,
-    text::{self, Text, text},
+    text::{self, Text},
     types::{CompactionFailure, CompactionStats},
 };
 use gateway_core::{js_string::JsString16, source_json::SourceJson};

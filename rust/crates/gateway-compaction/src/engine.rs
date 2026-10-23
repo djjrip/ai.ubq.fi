@@ -2,7 +2,7 @@
 use crate::{
     model::*,
     state::{self, estimate_tokens, fit_state},
-    text::{self, Text, text},
+    text::{self, Text},
     types::{CompactionFailure, CompactionHost, CompactionStats, FailureKind, JEV_TIMEOUT_MS},
 };
 use futures_util::{StreamExt, TryStreamExt, future::try_join_all, stream};

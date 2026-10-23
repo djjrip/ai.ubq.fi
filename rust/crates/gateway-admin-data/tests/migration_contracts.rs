@@ -414,7 +414,7 @@ fn kernel_audit_rejects_reset_mismatch_and_bad_terminal_intervals() {
         r,
     );
     assert!(
-        audit::inspect_kernel(&[observed, reservation_row])
+        audit::usage::inspect_kernel(&[observed, reservation_row])
             .unwrap()
             .errors
             .iter()

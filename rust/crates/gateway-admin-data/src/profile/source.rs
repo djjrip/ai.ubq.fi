@@ -1,5 +1,9 @@
 //! Source-profile JSON leaves preserve JavaScript UTF16 without passing through Value.
-use crate::{error, profile::*};
+use super::{
+    CanonicalDates, SourceDateHost, binary_alignment, collection_key, decode_base64, encode_base64,
+    js_number, normalize_bigint, regexp, same_primitive, to_profile,
+};
+use crate::error;
 use gateway_core::{
     GatewayError, js_string::JsString16, source_json::SourceJson, value::PortableValue,
 };

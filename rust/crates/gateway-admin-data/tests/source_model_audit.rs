@@ -113,8 +113,8 @@ impl audit::AuditInventory for Replay<'_> {
 fn inspect_model_snapshot(
     rows: &[ObservedRow],
 ) -> Result<Vec<JsString16>, gateway_core::GatewayError> {
-    let result = audit::inspect_model_snapshot(rows);
-    let replay = audit::inspect_model_inventory(&Replay(rows));
+    let result = audit::source_model::inspect_model_snapshot(rows);
+    let replay = audit::source_model::inspect_model_inventory(&Replay(rows));
     assert_eq!(format!("{result:?}"), format!("{replay:?}"));
     result
 }

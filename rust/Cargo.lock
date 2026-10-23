@@ -1157,6 +1157,7 @@ version = "0.1.0"
 dependencies = [
  "futures-util",
  "gateway-admin",
+ "gateway-admin-data",
  "gateway-admin-runtime",
  "gateway-admission",
  "gateway-auth",

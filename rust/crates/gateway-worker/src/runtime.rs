@@ -20,7 +20,6 @@ use gateway_live_runtime::{
     protocol::{LiveRoute, live_route},
 };
 use gateway_schema::{
-    catalog,
     catalog_cache::{CacheState, CatalogResponse, LoadedCatalog},
     catalog_store,
 };

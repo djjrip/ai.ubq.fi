@@ -1,6 +1,6 @@
 # Rust quality cleanup contract
 
-Version: 1c, 2026-10-23. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
+Version: 1e, 2026-10-23. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
 
 ## Outcome and invariants
 
@@ -39,6 +39,8 @@ Version 1c adds `gateway-quality` and `gateway-quality-syntax` to the existing `
 New test-target baseline entries may adopt only measured debt already present at immutable base `7223352101f448dd2ad46e40e285e689a2788435`. The adoption generator and its retained provenance must bind that base, source inventory and measured target closures so the adopted counts can be reproduced. No current-tree growth, new violation or upward update is grandfathered by adoption. The parser worker owns those generated baseline and provenance artifacts; integration preserves that ownership until its exact accepted tip lands.
 
 The controller explicitly transferred sole canonical mutation authority to m08 after cleanup integration. M08 may merge a future exact ready tip only after a separate controller acceptance message, retains every accepted worker ancestry, and returns the final clean source commit before m10 starts frozen-candidate validation. M08 owns only the approved three helper dependency edges in the root lockfile before parser integration; no dependency version upgrade is authorized.
+
+Version 1e additionally authorizes the direct `gateway-admin-data.workspace = true` normal dependency in `gateway-worker/Cargo.toml` and its matching root Cargo.lock edge. The Worker implements `gateway_admin_data::profile::SourceDateHost` from its defining crate after the migration forwarding alias is removed. No package version or workspace member changes are authorized by this extension; the parser lockfile owner receives the exact edge before integration.
 
 ## Execution and acceptance
 

@@ -4,7 +4,7 @@ use gateway_authority::{
     kernel::{KernelDefaults, KernelReservation, KernelWindow},
     keys,
     paid::source_records::decode_paid_attempt_record,
-    paid_types::{PaidAttempt, PaidRequest, PaidWindow, PendingPaid, ReconciliationGate},
+    paid_types::{PaidAttempt, PaidWindow, PendingPaid, ReconciliationGate},
     quota::*,
 };
 use gateway_core::{identity::ApiKeyId, lifecycle::BillingState};
@@ -22,7 +22,7 @@ pub(super) struct PaidAccounting {
 
 pub(super) fn account_paid(
     accounting: &mut BTreeMap<(String, i64), PaidAccounting>,
-    attempt: &gateway_authority::paid_types::PaidAttempt,
+    attempt: &PaidAttempt,
 ) -> Result<(), GatewayError> {
     let entry = accounting
         .entry((
@@ -290,10 +290,7 @@ pub(crate) fn bind(
                 }
             }
             Transform::PaidRequest => {
-                let attempt = gateway_authority::paid::source_records::decode_paid_attempt_record(
-                    &row.key,
-                    &row.record,
-                )?;
+                let attempt = decode_paid_attempt_record(&row.key, &row.record)?;
                 if attempt.reservation.window_reset_at_ms > now {
                     account_paid(&mut paid_accounting, &attempt)?;
                 }
@@ -334,10 +331,7 @@ pub(crate) fn bind(
                 let attempt = snapshot
                     .get(&attempt_key.0)
                     .ok_or_else(|| invalid("Pending paid marker has missing or expired request"))?;
-                let attempt = gateway_authority::paid::source_records::decode_paid_attempt_record(
-                    &attempt_key,
-                    attempt,
-                )?;
+                let attempt = decode_paid_attempt_record(&attempt_key, attempt)?;
                 if !matches!(
                     attempt.billing_state,
                     BillingState::Pending | BillingState::Unresolved

@@ -145,5 +145,4 @@ where
 }
 
 #[cfg(test)]
-#[path = "codex_capacity_recovery_tests.rs"]
 mod tests;

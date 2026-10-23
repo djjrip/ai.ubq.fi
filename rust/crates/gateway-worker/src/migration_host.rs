@@ -1,9 +1,7 @@
 //! Bounded migration bindings; full native capture is private, never a public admin body.
-pub mod wire;
-
 use gateway_core::{GatewayError, query::QueryStore};
-pub use gateway_migration::MigrationError;
-pub use gateway_migration::operational::{NativeMigrationRequest, NativeMigrationResponse};
+use gateway_migration::MigrationError;
+use gateway_migration::operational::{NativeMigrationRequest, NativeMigrationResponse};
 #[cfg(target_arch = "wasm32")]
 use worker::js_sys;
 

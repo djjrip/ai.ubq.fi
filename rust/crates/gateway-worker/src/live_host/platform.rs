@@ -12,7 +12,12 @@ use gateway_live_runtime::{
     types::{LiveAccount, LiveCreateRequest, LiveDispatchFailure, LiveHost, LiveResponse},
 };
 
-use super::{Body, CurrentLiveAccount, WorkerLiveHost, account, body, health};
+use super::{
+    WorkerLiveHost,
+    account::{self, CurrentLiveAccount},
+    body::{self, Body},
+    health,
+};
 use crate::{
     authority::RemoteAuthorityStore,
     host::{PlatformClock, PlatformTokens},
@@ -118,7 +123,7 @@ impl WorkerLiveHost {
     pub async fn upgrade(
         &self,
         prepared: PreparedSideband<RemoteAuthorityStore, CurrentLiveAccount>,
-    ) -> Result<crate::GatewayResponse, GatewayError> {
+    ) -> Result<crate::response::GatewayResponse, GatewayError> {
         let parts = prepared.into_parts();
         parts.account.ensure_current().await?;
         let transport = self.platform.native.transport()?;
@@ -332,7 +337,7 @@ mod source_detail_tests {
         let model = gateway_core::js_string::JsString16::from_units(vec![109, 0xd800]);
         let detail = gateway_core::js_string::JsString16::from_units(vec![100, 0xdc00]);
         let response = super::model_unavailable(Some(&model), Some(&detail)).unwrap();
-        let super::Body::Bytes(bytes) = response.body else {
+        let crate::live_host::body::Body::Bytes(bytes) = response.body else {
             panic!("model refusal is bytes");
         };
         let value =

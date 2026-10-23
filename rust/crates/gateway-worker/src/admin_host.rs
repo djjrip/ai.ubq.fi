@@ -205,7 +205,7 @@ impl RuntimeCapabilities for Capabilities {
         context: Context,
     ) -> Result<AuthResponse, GatewayError> {
         self.measured_body_bytes(&context)?;
-        crate::claude_host::admin(
+        crate::claude_host::admin::admin(
             &self.catalog_host.store,
             &self.catalog_host.platform,
             &self.observations,

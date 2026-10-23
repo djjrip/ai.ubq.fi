@@ -1,6 +1,4 @@
 use super::prepare_credential_catalog;
-#[path = "../../gateway-schema/tests/support/source_catalog.rs"]
-mod source_catalog;
 use gateway_auth::{
     crypto::{Secret, base64url},
     native::NATIVE_PUBLICATION_PATH,
@@ -39,6 +37,7 @@ use gateway_publication::{
         PublicationResponse,
     },
 };
+use gateway_routing_runtime_test_support::source_catalog;
 use serde_json::json;
 use std::{
     cell::{Cell, RefCell},

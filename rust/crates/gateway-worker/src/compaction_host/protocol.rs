@@ -197,5 +197,4 @@ pub(super) fn parse_response(
 }
 
 #[cfg(test)]
-#[path = "tests.rs"]
 mod tests;

@@ -33,7 +33,7 @@ pub async fn route(
     release: &str,
     request_id: RequestId,
     native: crate::native_host::NativeBindings,
-) -> Result<crate::GatewayResponse, GatewayError> {
+) -> Result<crate::response::GatewayResponse, GatewayError> {
     let started_at_ms = now_ms()?;
     let path = crate::normalized_path(&request.path()).to_owned();
     if let Some(response) = crate::assets::handle(&request, &env, &path).await? {
@@ -238,7 +238,7 @@ pub async fn route(
                 let response = runtime
                     .create_call(&principal, input, &live, host.cancellation.as_ref())
                     .await;
-                crate::live_host::into_response(response, context)
+                crate::live_host::body::into_response(response, context)
             }
             LiveRoute::Sideband(call_id) => {
                 let upgrade = request
@@ -251,7 +251,7 @@ pub async fn route(
                     .await
                 {
                     Ok(prepared) => live.upgrade(prepared).await,
-                    Err(response) => crate::live_host::into_response(response, context),
+                    Err(response) => crate::live_host::body::into_response(response, context),
                 }
             }
         };

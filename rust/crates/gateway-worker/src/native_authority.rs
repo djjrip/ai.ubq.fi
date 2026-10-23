@@ -1,6 +1,5 @@
 //! Fixed reverse native protocols, authenticated against the common durable nonce authority.
-#[path = "native_import_dispatch.rs"]
-mod import_dispatch;
+pub(crate) mod import_dispatch;
 use gateway_auth::{
     GatewayError,
     native::*,
@@ -17,7 +16,6 @@ use gateway_authority::{
         },
     },
 };
-pub use import_dispatch::publication as import_publication;
 use serde::Serialize;
 use worker::{Env, Method, Request, Response};
 

@@ -36,5 +36,9 @@ futures-util = { version = "=0.3.34", default-features = false, features = ["std
 worker.workspace = true
 wasm-bindgen.workspace = true
 
+[dev-dependencies]
+gateway-observability-test-support.workspace = true
+gateway-routing-runtime-test-support.workspace = true
+
 [lints]
 workspace = true

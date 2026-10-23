@@ -1,4 +1,7 @@
-use gateway_admin::{AdminHost, AdminInput, AdminOperation};
+use gateway_admin::{
+    operations::{AdminHost, AdminInput},
+    routes::AdminOperation,
+};
 use gateway_admin_runtime::{
     AdminRuntime, RuntimeConfig,
     capabilities::{Context, ErrorDiagnostics, RuntimeCapabilities},

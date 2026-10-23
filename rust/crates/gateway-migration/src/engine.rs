@@ -1,4 +1,5 @@
-use crate::*;
+use crate::{capture::PrivateCapture, error::MigrationError, *};
+use gateway_admin_data::profile::SourceDateHost;
 use gateway_core::{
     query::{QueryRequest, QuerySelector, QueryStore},
     state::{AtomicTransition, CommitOutcome, RecordMutation, RevisionCheck},
@@ -15,7 +16,7 @@ pub(crate) struct Manifest {
     pub source_rows: usize,
     pub mapping_checksum: String,
     pub derived: BTreeMap<String, String>,
-    pub native_revision: Option<crate::NativeRevision>,
+    pub native_revision: Option<crate::native_capture::NativeRevision>,
 }
 pub struct PreparedAdoption {
     pub(crate) manifest: Manifest,
@@ -149,7 +150,7 @@ pub(crate) fn prepare_rows(
     capture_id: String,
     source_git_sha: &str,
     captured_at_ms: i64,
-    native_revision: Option<crate::NativeRevision>,
+    native_revision: Option<crate::native_capture::NativeRevision>,
 ) -> Result<PreparedAdoption, MigrationError> {
     let (mut rows, audited) = validate_source_inventories(rows, captured_at_ms)?;
     if !audited.errors.is_empty() {
@@ -278,6 +279,6 @@ pub async fn adopt_empty_with_initial_control_owner<S: QueryStore>(
     prepared: &PreparedAdoption,
     owner: &gateway_authority::initial_control_owner::PreparedInitialControlOwner,
     now_ms: i64,
-) -> Result<crate::InitialControlOwnerAdoptionReceipt, GatewayError> {
+) -> Result<crate::initial_owner::InitialControlOwnerAdoptionReceipt, GatewayError> {
     crate::initial_owner::adopt(store, prepared, owner, now_ms).await
 }

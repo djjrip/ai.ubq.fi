@@ -18,7 +18,8 @@ use gateway_core::{
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use crate::{AdminHost, AdminOperation, PaidKeyFields, audit, source_input as input};
+use crate::operations::{AdminHost, PaidKeyFields};
+use crate::{audit, routes::AdminOperation, source_input as input};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ApiKeyRecord {

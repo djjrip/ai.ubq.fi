@@ -1,5 +1,7 @@
 //! Trusted offline/native preparation only; the common candidate never receives refresh material.
-use crate::*;
+use crate::inverse::{ArtifactContext, CustodyRecord};
+use crate::native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native};
+use crate::{engine::PreparedAdoption, error::MigrationError, *};
 use gateway_auth::{
     managed_access::ManagedAccessProjection,
     native_credentials::{NativeGeneration, OwnerFence, verify_fence},
@@ -168,7 +170,7 @@ pub async fn export_native_with_custody<S: QueryStore, H: NativeCustody>(
     now_ms: i64,
     host: &H,
 ) -> Result<LocalNativeCapture, MigrationError> {
-    let source = crate::export_native_latest(store, now_ms).await?;
+    let source = crate::native_inverse::export_native_latest(store, now_ms).await?;
     reconstruct_native(store, source, host).await
 }
 

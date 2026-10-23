@@ -1,5 +1,5 @@
 use crate::capabilities::*;
-use gateway_admin::{AdminInput, source_input as source_body};
+use gateway_admin::{operations::AdminInput, source_input as source_body};
 use gateway_auth::invalid;
 use gateway_core::{
     GatewayError, identity::MAX_SAFE_INTEGER, js_string::JsString16, source_json::SourceJson,
@@ -393,8 +393,9 @@ pub fn claude_source(body: &SourceJson) -> Result<ClaudeSubmission, GatewayError
         return Err(invalid("create_new cannot target an existing account"));
     }
     Ok(ClaudeSubmission {
-        credential: credential
-            .map(|text| std::sync::Arc::new(crate::claude::ClaudeSourceSecret::from_source(text))),
+        credential: credential.map(|text| {
+            std::sync::Arc::new(crate::claude::source_secret::ClaudeSourceSecret::from_source(text))
+        }),
         label,
         workspace_id,
         account_id,

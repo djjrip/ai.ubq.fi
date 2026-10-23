@@ -1,5 +1,6 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
+use gateway_admin_data::profile::{CanonicalDates, SourceDateHost};
 use gateway_admin_data::profile::{
     from_source_profile as from_profile, to_source_profile as to_profile,
 };
@@ -11,7 +12,13 @@ use gateway_core::{
     identity::{ApiKeyId, RequestId},
     state::*,
 };
-use gateway_migration::*;
+use gateway_migration::{
+    capture::{PrivateCapture, SourceEntry},
+    engine::{adopt_empty, prepare},
+    error::MigrationError,
+    inverse::{ArtifactContext, export_latest, export_rollback_bundle},
+    projection::known_source_family,
+};
 use serde_json::{Value, json};
 use std::sync::atomic::{AtomicU64, Ordering};
 use support::{fixture::*, sqlite_store::*};
@@ -628,8 +635,8 @@ impl gateway_auth::AuthHost for AdminHost {
 }
 struct Capabilities;
 impl gateway_admin_runtime::capabilities::RuntimeCapabilities for Capabilities {}
-fn admin_input(body: Value) -> gateway_admin::AdminInput {
-    gateway_admin::AdminInput {
+fn admin_input(body: Value) -> gateway_admin::operations::AdminInput {
+    gateway_admin::operations::AdminInput {
         parameter: None,
         query: Default::default(),
         body: gateway_core::source_json::SourceJson::from_serializable(&body).unwrap(),
@@ -645,7 +652,7 @@ fn admin_input(body: Value) -> gateway_admin::AdminInput {
 }
 #[test]
 fn actual_admin_reads_and_writes_adopted_state_then_inverse_uses_new_revision() {
-    use gateway_admin::AdminHost;
+    use gateway_admin::operations::AdminHost;
     let directory = Directory::new();
     let path = directory.file("admin.sqlite3");
     let (input, _) = fixture();
@@ -667,7 +674,7 @@ fn actual_admin_reads_and_writes_adopted_state_then_inverse_uses_new_revision() 
         config: &config,
     };
     let response = run(runtime.execute(
-        gateway_admin::AdminOperation::DebugGet,
+        gateway_admin::routes::AdminOperation::DebugGet,
         admin_input(Value::Null),
     ))
     .unwrap();
@@ -676,7 +683,7 @@ fn actual_admin_reads_and_writes_adopted_state_then_inverse_uses_new_revision() 
         "codex_429"
     );
     run(runtime.execute(
-        gateway_admin::AdminOperation::DebugSet,
+        gateway_admin::routes::AdminOperation::DebugSet,
         admin_input(json!({"scenario":"normal","duration_ms":0})),
     ))
     .unwrap();

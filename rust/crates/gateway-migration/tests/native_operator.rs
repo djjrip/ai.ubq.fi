@@ -7,7 +7,7 @@ use gateway_auth::{
     native_credentials::{NativeOwnerId, OwnerFence, parse_native_document},
 };
 use gateway_migration::{
-    NativeCustody,
+    native_custody::NativeCustody,
     native_operator::{ConfiguredNativeCustody, NativeCustodyRegistration},
 };
 use serde_json::{Value, json};

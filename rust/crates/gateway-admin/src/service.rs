@@ -10,8 +10,11 @@ use gateway_core::source_json::SourceJson;
 use serde_json::json;
 use url::Url;
 
+use crate::operations::{AdminHost, AdminInput};
 use crate::{
-    AdminHost, AdminInput, AdminOperation, keys::KeyService, match_route, source_input as input,
+    keys::KeyService,
+    routes::{AdminOperation, match_route},
+    source_input as input,
 };
 
 pub struct AdminService<'a, S, H, A> {

@@ -2,7 +2,11 @@
 mod support;
 use gateway_admin_data::profile::{CanonicalDates, to_source_profile};
 use gateway_core::{state::*, value::PortableValue};
-use gateway_migration::*;
+use gateway_migration::{
+    capture::{PrivateCapture, SourceEntry},
+    engine::{adopt_empty, prepare},
+    inverse::{ArtifactContext, export_latest, export_rollback_bundle},
+};
 use serde_json::{Value, json};
 use support::{fixture::*, sqlite_store::*};
 

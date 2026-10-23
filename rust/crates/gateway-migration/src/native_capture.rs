@@ -1,5 +1,5 @@
 //! Closed native interchange; no runtime VM bytes or source database are opened here.
-use crate::*;
+use crate::{capture::SourceEntry, engine::PreparedAdoption, error::MigrationError, *};
 use gateway_core::{
     source_graph::SourceGraph,
     value::{PortableValue, ValueEncoding},

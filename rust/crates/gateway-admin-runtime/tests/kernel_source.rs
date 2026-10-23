@@ -1,6 +1,10 @@
 //! Real Rust administrative operations over a deterministic atomic test store;
 //! these records are not live-runtime, signed-issuer or backend acceptance.
-use gateway_admin::{AdminHost, AdminInput, AdminOperation, source_input as body};
+use gateway_admin::{
+    operations::{AdminHost, AdminInput},
+    routes::AdminOperation,
+    source_input as body,
+};
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::UnboundCapabilities};
 use gateway_auth::{
     AuthHost, AuthMethod, AuthPrincipal, AuthResponse,

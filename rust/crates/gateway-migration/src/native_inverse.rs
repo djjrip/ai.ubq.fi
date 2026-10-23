@@ -1,6 +1,10 @@
 //! Latest native logical state; original VM bytes are never replayed as new state.
+use crate::inverse::{ArtifactContext, CustodyRecord};
 use crate::native_capture::NativeKind;
-use crate::*;
+use crate::native_capture::{
+    NativeCapture, NativeEntry, NativeRevision, NativeValue, prepare_native,
+};
+use crate::{error::MigrationError, *};
 use gateway_core::{
     query::QueryStore,
     value::{PortableValue, ValueEncoding},

@@ -8,7 +8,7 @@ use gateway_admin_runtime::{
     claude_generation::{StateGeneration, StateSnapshot},
 };
 use gateway_auth::AuthHost;
-use gateway_catalog_runtime::ProviderBinding;
+use gateway_catalog_runtime::host::ProviderBinding;
 use gateway_core::{
     GatewayError, js_string::JsString16, model::ModelId, source_json::SourceJson,
     source_serialization as source, state::RevisionCheck,

@@ -2,8 +2,9 @@
 use crate::quota::{
     Exhaustion, QuotaObservation, QuotaWindow, STANDARD_FAMILIES, StandardWindow, WINDOWS,
 };
-pub use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
-use gateway_core::{js_string::JsString16, source_json::SourceJson};
+use gateway_core::{
+    claude::ClaudeErrorEvidence as ErrorEvidence, js_string::JsString16, source_json::SourceJson,
+};
 use gateway_providers::Headers;
 use gateway_schema::util::js_trim;
 use serde_json::Value;

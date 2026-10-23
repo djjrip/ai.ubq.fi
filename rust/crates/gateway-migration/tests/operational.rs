@@ -1,6 +1,6 @@
 #![cfg(not(target_arch = "wasm32"))]
 mod support;
-use gateway_migration::{operational::*, *};
+use gateway_migration::{native_capture::NativeCapture, operational::*};
 use support::{fixture::*, sqlite_store::*};
 
 #[test]

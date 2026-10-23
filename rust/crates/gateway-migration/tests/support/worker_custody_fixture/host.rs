@@ -8,7 +8,8 @@ use gateway_core::{
     GatewayError, identity::MAX_SAFE_INTEGER, state::StoredRecord, tuple_key::TupleKey,
 };
 use gateway_migration::{
-    NativeCapture, NativeCustody, NativeValue, OwnedNativeSnapshot,
+    native_capture::{NativeCapture, NativeValue},
+    native_custody::{NativeCustody, OwnedNativeSnapshot},
     native_operator::{ConfiguredNativeCustody, NativeCustodyRegistration},
 };
 use gateway_native::{
@@ -124,8 +125,8 @@ impl Host {
         self,
         store: &super::port::Store,
         time: super::inputs::FixtureTime,
-        artifacts: &gateway_migration::ArtifactContext,
-    ) -> Result<(Self, super::producers::Receipt), gateway_migration::MigrationError> {
+        artifacts: &gateway_migration::inverse::ArtifactContext,
+    ) -> Result<(Self, super::producers::Receipt), gateway_migration::error::MigrationError> {
         use gateway_auth::{
             crypto::Secret,
             managed_access::ManagedAccessProjection,
@@ -167,12 +168,14 @@ impl Host {
             serde_json::json!("synthetic-native-managed-a-2-refresh");
         document["last_refresh"] = serde_json::json!("2026-10-19T00:00:00.000000002Z");
         std::fs::write(&path, serde_json::to_vec(&document).map_err(error)?).map_err(error)?;
-        if super::support_run(gateway_migration::export_native_rollback_with_custody(
-            store,
-            time.runtime(),
-            &self,
-            artifacts.clone(),
-        ))
+        if super::support_run(
+            gateway_migration::native_custody::export_native_rollback_with_custody(
+                store,
+                time.runtime(),
+                &self,
+                artifacts.clone(),
+            ),
+        )
         .is_ok()
         {
             return Err(error("Stale native generation was accepted").into());
@@ -242,12 +245,14 @@ impl Host {
         let current = super::support_run(store.read(&pool_key))?
             .ok_or_else(|| error("Published source is missing"))?;
         let fixed = self.with_current_pool(&current, time.export())?;
-        super::support_run(gateway_migration::export_native_rollback_with_custody(
-            store,
-            time.export(),
-            &fixed,
-            artifacts.clone(),
-        ))?;
+        super::support_run(
+            gateway_migration::native_custody::export_native_rollback_with_custody(
+                store,
+                time.export(),
+                &fixed,
+                artifacts.clone(),
+            ),
+        )?;
         if std::fs::read(sibling_path).map_err(error)? != sibling_bytes {
             return Err(error("Sibling physical auth changed").into());
         }

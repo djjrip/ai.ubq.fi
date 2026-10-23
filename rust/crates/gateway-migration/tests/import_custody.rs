@@ -8,7 +8,13 @@ use gateway_core::{
     tuple_key::TupleKey,
     value::PortableValue,
 };
-use gateway_migration::*;
+use gateway_migration::{
+    capture::{PrivateCapture, SourceEntry},
+    engine::{adopt_empty, prepare},
+    inverse::{ArtifactContext, export_rollback_bundle},
+    native_capture::{NativeCapture, NativeEntry, NativeValue, prepare_native},
+    native_inverse::{export_native_latest, export_native_rollback_bundle},
+};
 use serde_json::{Value, json};
 use support::{fixture::*, sqlite_store::*};
 

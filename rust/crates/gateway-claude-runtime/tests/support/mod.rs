@@ -8,8 +8,17 @@ use gateway_auth::{
     upstream::{AuthUpstreamRequest, AuthUpstreamResponse},
     webauthn::{CosePublicKey, SignatureInput, WebAuthnCrypto},
 };
-use gateway_catalog_runtime::ProviderBinding;
-use gateway_claude_runtime::*;
+use gateway_catalog_runtime::host::ProviderBinding;
+use gateway_claude_runtime::{
+    host::{
+        self, AcceptedObservation, ClaudePoolHost, HealthObservation, OutcomeDecision, PoolConfig,
+        PoolSelection, ResponseObservation, SelectedAccount, SelectionInput, WorkspaceResponse,
+    },
+    persistence::quota_key,
+    pool::ClaudePoolSession,
+    quota, response,
+};
+use gateway_core::claude::ClaudeErrorEvidence as ErrorEvidence;
 use gateway_core::{
     GatewayError,
     js_string::JsString16,
@@ -170,7 +179,7 @@ impl AuthorityStore for Store {
 pub fn account(n: u8) -> AccountBinding {
     let credential = Credential {
         kind: CredentialKind::Oauth,
-        secret: Arc::new(claude::ClaudeSourceSecret::from_source(
+        secret: Arc::new(claude::source_secret::ClaudeSourceSecret::from_source(
             JsString16::from_utf8(&format!("fixture-secret-{n}")),
         )),
         hint: "configured".into(),
@@ -421,6 +430,6 @@ pub fn apply(
         run(session.observe_response(store, host, selected, head(status, headers, at))).unwrap();
     run(session.after_outcome(store, host, head, error_evidence(None, false))).unwrap()
 }
-pub fn error_evidence(prefix: Option<Vec<u16>>, complete: bool) -> response::ErrorEvidence {
-    response::ErrorEvidence::from_prefix(prefix, complete).unwrap()
+pub fn error_evidence(prefix: Option<Vec<u16>>, complete: bool) -> ErrorEvidence {
+    ErrorEvidence::from_prefix(prefix, complete).unwrap()
 }

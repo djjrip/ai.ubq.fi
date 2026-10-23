@@ -1,7 +1,10 @@
 //! Fixed TEST producers only, from native-offline-fixture.rs:20-77 and
 //! runtime.rs:137-248,571-695. No command accepts keys, rows, SQL or callbacks.
 use super::{port, support_run};
-use gateway_admin::{AdminHost, AdminInput, AdminOperation};
+use gateway_admin::{
+    operations::{AdminHost, AdminInput},
+    routes::AdminOperation,
+};
 use gateway_auth::{AuthHost, store::key};
 use gateway_core::{
     GatewayError,

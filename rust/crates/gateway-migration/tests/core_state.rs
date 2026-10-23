@@ -2,7 +2,15 @@
 mod support;
 use gateway_auth::store::key;
 use gateway_core::{state::AuthorityStore, tuple_key::TupleKey};
-use gateway_migration::{native_stage::Captured, *};
+use gateway_migration::{
+    core_state::CORE_STATE_DO_ROW_WRITE_LIMIT,
+    engine::adopt_empty,
+    native_capture::{NativeCapture, NativeEntry, NativeRevision, NativeValue, prepare_native},
+    native_custody::{NativeCustody, OwnedNativeSnapshot},
+    native_inverse::export_native_latest,
+    native_stage::Captured,
+    staged,
+};
 use serde_json::{Value, json};
 use support::{fixture::*, sqlite_store::*};
 
@@ -354,7 +362,7 @@ fn selected_core_adopts_restarts_reads_quota_and_round_trips_current_accounting(
         .unwrap();
     let prepared = match prepare_native(&core.capture) {
         Ok(prepared) => prepared,
-        Err(gateway_migration::MigrationError::SourceInventory(audit)) => panic!(
+        Err(gateway_migration::error::MigrationError::SourceInventory(audit)) => panic!(
             "prepare_native failed: {:?}",
             audit
                 .errors

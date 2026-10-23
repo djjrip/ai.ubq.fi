@@ -6,7 +6,14 @@ use gateway_core::{
     state::AuthorityStore,
     tuple_key::TupleKey,
 };
-use gateway_migration::{staged::*, *};
+use gateway_migration::{
+    error::MigrationError,
+    graph_transport,
+    native_capture::{NativeCapture, NativeEntry, NativeValue},
+    native_inverse::export_native_latest,
+    native_operator, native_stage, operational,
+    staged::{self, *},
+};
 use serde::{Deserialize, Serialize};
 use std::{fs::OpenOptions, os::unix::fs::OpenOptionsExt, path::Path};
 #[derive(Deserialize)]

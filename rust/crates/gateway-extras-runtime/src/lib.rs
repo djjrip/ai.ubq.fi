@@ -9,7 +9,7 @@ mod store;
 mod systemone;
 pub mod types;
 use gateway_core::{GatewayError, query::QueryStore};
-pub use types::*;
+use types::{ExtrasHost, ExtrasRequest, ExtrasResponse, ExtrasRoute, KernelDisposition};
 
 pub struct ExtrasRuntime<S, H> {
     store: S,

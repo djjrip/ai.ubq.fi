@@ -2,8 +2,9 @@
 //!
 //! This is a local, offline policy over one complete stopped-source capture. It
 //! does not open a database, target, credential, service, or public route.
+use crate::native_capture::{NativeCapture, NativeEntry, NativeValue};
 use crate::native_spool::Spool;
-use crate::*;
+use crate::{error::MigrationError, *};
 use gateway_core::{js_string::JsString16, value::PortableValue};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};

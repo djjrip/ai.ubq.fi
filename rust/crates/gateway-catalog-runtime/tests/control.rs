@@ -5,7 +5,14 @@ use support::source_catalog;
 type MemoryStore = Store;
 type TestAuthority = gateway_authority::Authority<Store, Tokens>;
 use gateway_authority::{keys, paid_control::*};
-use gateway_catalog_runtime::{state, *};
+use gateway_catalog_runtime::{
+    CatalogRuntime,
+    host::{
+        self, CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogProvider,
+        CredentialPublication, ProviderBinding,
+    },
+    providers, state,
+};
 use gateway_core::{
     GatewayError,
     provider::PaidProvider,

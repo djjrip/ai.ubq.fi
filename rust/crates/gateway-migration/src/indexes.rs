@@ -436,6 +436,4 @@ pub(crate) fn bind(
 }
 
 #[cfg(all(unix, not(target_arch = "wasm32")))]
-mod disk;
-#[cfg(all(unix, not(target_arch = "wasm32")))]
-pub(crate) use disk::bind_spooled;
+pub(crate) mod disk;

@@ -1,4 +1,8 @@
-use gateway_admin::{AdminHost, AdminInput, AdminOperation, source_input as input};
+use gateway_admin::{
+    operations::{AdminHost, AdminInput},
+    routes::AdminOperation,
+    source_input as input,
+};
 use gateway_admin_runtime::{
     AdminRuntime, RuntimeConfig, capabilities::RuntimeCapabilities, claude_access, parse,
 };

@@ -11,7 +11,11 @@ use gateway_core::{
     source_serialization as source,
     value::PortableValue,
 };
-use gateway_migration::*;
+use gateway_migration::{
+    capture::{PrivateCapture, SourceEntry},
+    engine::{adopt_empty, prepare},
+    inverse::export_latest,
+};
 use serde_json::{Value, json};
 use support::{fixture::*, sqlite_store::*};
 

@@ -1,6 +1,11 @@
 //! The physical native control boundary has one operation. References name
 //! server-owned authority; deserializing this wire never creates permission.
-use crate::{crypto::sha256_hex, native::*};
+use crate::{
+    crypto::sha256_hex,
+    native::{
+        NATIVE_CONTROL_PATH, NATIVE_RENEWAL_AUTHORITY_PATH, NATIVE_WIRE_VERSION, signature_input,
+    },
+};
 use gateway_core::error::GatewayError;
 use serde::{Deserialize, Serialize};
 

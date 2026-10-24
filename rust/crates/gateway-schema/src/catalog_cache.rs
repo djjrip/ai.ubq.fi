@@ -1,5 +1,5 @@
 //! Exact-version cache values, real portable gzip and deterministic refresh decisions.
-use crate::{metadata::MetadataHint, model_control as c, snapshot::parse_client_version, util::*};
+use crate::{metadata::MetadataHint, model_control as c, util::sha256};
 use flate2::{Compression, read::GzDecoder, write::GzEncoder};
 use gateway_core::{
     error::GatewayError, model::ModelId, source_json::SourceJson, source_serialization as source,
@@ -187,7 +187,7 @@ pub fn prepare_catalog(
     fetched_at_ms: i64,
     enrichment: &std::collections::BTreeMap<ModelId, MetadataHint>,
 ) -> Result<PreparedCatalog, GatewayError> {
-    if parse_client_version(identity.client_version).is_none()
+    if crate::snapshot::parse_client_version(identity.client_version).is_none()
         || parse_catalog(source_body).is_none()
     {
         return Err(GatewayError::new(
@@ -256,7 +256,7 @@ pub fn requested_client_version<'a>(values: &'a [&str]) -> Option<&'a str> {
 }
 pub fn validate_client_version(raw: &str) -> Result<String, GatewayError> {
     let version = raw.trim_matches(crate::util::js_whitespace);
-    if parse_client_version(version).is_none() {
+    if crate::snapshot::parse_client_version(version).is_none() {
         return Err(GatewayError::new(
             400,
             "client_version must be an exact X.Y.Z version",

@@ -135,67 +135,22 @@ impl NativeImportPublication {
 }
 /// Derived from the two exact finite success shapes, not an enlarged old cap.
 pub fn import_publication_reply_max_bytes() -> usize {
-    let reference = "r".repeat(256);
-    let long = "\u{1}".repeat(4096);
-    let hash = "a".repeat(64);
-    let maximal = |normalized: bool| NativeImportPublication {
-        v: 1,
-        operation_id: reference.clone(),
-        action_ref: hash.clone(),
-        disposition: NativeImportPublicationDisposition::AlreadyCurrent,
-        publication: data::ImportPublicationDataV1 {
-            v: 1,
-            operation_id: reference.clone(),
-            claim_ref: reference.clone(),
-            publication_revision: reference.clone(),
-            native_receipt_ref: reference.clone(),
-            native_source_generation: hash.clone(),
-            access_generation: hash.clone(),
-            credential_version: hash.clone(),
-            source_revision: reference.clone(),
-            normalized_revision: reference.clone(),
-            catalog_revision: Some(if normalized {
-                reference.clone()
-            } else {
-                long.clone()
-            }),
-            runtime_revision: Some(if normalized {
-                reference.clone()
-            } else {
-                long.clone()
-            }),
-            auth_generation_revision: Some(if normalized {
-                reference.clone()
-            } else {
-                long.clone()
-            }),
-            paid_control_config_revision: Some(if normalized {
-                reference.clone()
-            } else {
-                long.clone()
-            }),
-            publication_request_digest: hash.clone(),
-            catalog_disposition: if normalized {
-                data::ImportCatalogDisposition::Normalized {
-                    client_version: "0".repeat(command::SNAPSHOT_MAX_BYTES - 6) + ".0.0",
-                    upstream_status: 299,
-                }
-            } else {
-                data::ImportCatalogDisposition::AuthenticatedLimited {
-                    upstream_status: 429,
-                }
-            },
-        },
-    };
-    [false, true]
-        .into_iter()
-        .map(|normalized| {
-            serde_json::to_vec(&maximal(normalized))
-                .expect("Finite fixed publication reply")
-                .len()
-        })
-        .max()
-        .expect("Two finite import reply branches")
+    // This is the closed serde field/tag shell, with empty string contents.
+    // Reference/hash fields are ASCII; each retained control unit needs six bytes.
+    let shell = concat!(
+        r#"{"v":1,"operation_id":"","action_ref":"","disposition":"already_current","#,
+        r#""publication":{"v":1,"operation_id":"","claim_ref":"","publication_revision":"","#,
+        r#""native_receipt_ref":"","native_source_generation":"","access_generation":"","#,
+        r#""credential_version":"","source_revision":"","normalized_revision":"","#,
+        r#""catalog_revision":"","runtime_revision":"","auth_generation_revision":"","#,
+        r#""paid_control_config_revision":"","publication_request_digest":"","catalog_disposition":"#,
+    ).len() + 2;
+    let common = shell + 7 * 256 + 5 * 64;
+    let authenticated =
+        common + 4 * 4096 * 6 + r#"{"kind":"authenticated_limited","upstream_status":429}"#.len();
+    let normalized = common + 4 * 256 + command::SNAPSHOT_MAX_BYTES - 2
+        + r#"{"kind":"normalized","client_version":"","upstream_status":299}"#.len();
+    authenticated.max(normalized)
 }
 /// Larger success responses qualify only through this exact new operation and
 /// complete request/reply binding. Errors retain the old publication cap.

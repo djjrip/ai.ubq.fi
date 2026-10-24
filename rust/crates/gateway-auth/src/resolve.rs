@@ -6,7 +6,10 @@ use crate::{
     types::{
         AuthConfig, AuthHost, AuthMethod, AuthPrincipal, AuthRequest, AuthResponse, unauthorized,
     },
-    upstream::*,
+    upstream::{
+        AuthUpstreamRequest, console_title_matches, deno_token_shape, github_rejected,
+        github_token_shape, kernel_public_keys_key, upstream_unavailable, verify_kernel,
+    },
 };
 use gateway_core::{error::GatewayError, state::AuthorityStore};
 use serde_json::{Value, json};

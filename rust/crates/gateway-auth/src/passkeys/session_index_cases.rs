@@ -9,37 +9,30 @@ mod support;
 use support::*;
 
 #[test]
-fn actual_session_creation_and_logout_publish_and_delete_one_atomic_pair() {
+fn actual_session_creation_and_logout_publish_and_delete_one_atomic_pair()
+-> Result<(), Box<dyn std::error::Error>> {
     run(async {
         let store = Store::default();
         let host = Host::default();
         let config = AuthConfig::default();
-        user(&store, true, "policy-1");
+        user(&store, true, "policy-1")?;
         let service = PasskeyService {
             store: &store,
             host: &host,
             config: &config,
         };
-        let first = service
-            .create_session("fixture-user".into(), None)
-            .await
-            .unwrap();
-        let second = service
-            .create_session("fixture-user".into(), None)
-            .await
-            .unwrap();
+        let first = service.create_session("fixture-user".into(), None).await?;
+        let second = service.create_session("fixture-user".into(), None).await?;
         let first_digest = session_index::digest(&first.token);
         let second_digest = session_index::digest(&second.token);
         assert_ne!(first_digest, second_digest);
         let index = session_index::read_current(&store, &first_digest, host.now_ms())
-            .await
-            .unwrap()
-            .unwrap();
+            .await?
+            .ok_or("missing expected session fixture")?;
         let source = store
             .read(&crate::passkeys::key("sessions", &first.token))
-            .await
-            .unwrap()
-            .unwrap();
+            .await?
+            .ok_or("missing expected session fixture")?;
         assert_eq!(index.fence.session_revision, source.revision);
         assert_eq!(index.fence.user_id, "fixture-user");
         let create = store.history.borrow()[0].clone();
@@ -48,43 +41,41 @@ fn actual_session_creation_and_logout_publish_and_delete_one_atomic_pair() {
         let auth = AuthService::new(&store, &host, &config);
         assert!(
             auth.authenticate_admin(&request(&first.token))
-                .await
-                .unwrap()
+                .await?
                 .is_admin
         );
-        let result = service.logout(&request(&first.token), None).await.unwrap();
+        let result = service.logout(&request(&first.token), None).await?;
         assert_eq!(result.status, 204);
         assert_eq!(
-            service
-                .logout(&request(&first.token), None)
-                .await
-                .unwrap()
-                .status,
+            service.logout(&request(&first.token), None).await?.status,
             204
         );
         assert!(
             store
                 .read(&crate::passkeys::key("sessions", &first.token))
-                .await
-                .unwrap()
+                .await?
                 .is_none()
         );
         assert!(
             session_index::read_current(&store, &first_digest, host.now_ms())
-                .await
-                .unwrap()
+                .await?
                 .is_none()
         );
         assert!(
             session_index::read_current(&store, &second_digest, host.now_ms())
-                .await
-                .unwrap()
+                .await?
                 .is_some()
         );
-        let delete = store.history.borrow().last().unwrap().clone();
+        let delete = store
+            .history
+            .borrow()
+            .last()
+            .ok_or("missing expected session fixture")?
+            .clone();
         assert_eq!(delete.checks.len(), 2);
         assert_eq!(delete.mutations.len(), 2);
-    });
+        Ok(())
+    })
 }
 
 #[test]
@@ -129,22 +120,20 @@ fn creation_conflicts_and_unknown_writes_never_detach_a_valid_index() {
 }
 
 #[test]
-fn logout_cannot_report_success_on_conflict_or_unknown_write() {
+fn logout_cannot_report_success_on_conflict_or_unknown_write()
+-> Result<(), Box<dyn std::error::Error>> {
     run(async {
         for fault in [0, 1, 2] {
             let store = Store::default();
             let host = Host::default();
             let config = AuthConfig::default();
-            user(&store, true, "policy");
+            user(&store, true, "policy")?;
             let service = PasskeyService {
                 store: &store,
                 host: &host,
                 config: &config,
             };
-            let value = service
-                .create_session("fixture-user".into(), None)
-                .await
-                .unwrap();
+            let value = service.create_session("fixture-user".into(), None).await?;
             match fault {
                 0 => store.conflict.set(true),
                 1 => store.unknown_before.set(true),
@@ -153,30 +142,30 @@ fn logout_cannot_report_success_on_conflict_or_unknown_write() {
             assert!(service.logout(&request(&value.token), None).await.is_err());
             let source = store
                 .read(&crate::passkeys::key("sessions", &value.token))
-                .await
-                .unwrap();
+                .await?;
             let index = session_index::read_current(
                 &store,
                 &session_index::digest(&value.token),
                 host.now_ms(),
             )
-            .await
-            .unwrap();
+            .await?;
             assert_eq!(source.is_some(), index.is_some());
             assert_eq!(source.is_none(), fault == 2);
         }
-    });
+        Ok(())
+    })
 }
 
 #[test]
-fn expiry_cleanup_deletes_both_and_source_ttl_bounds_the_metadata_lifetime() {
+fn expiry_cleanup_deletes_both_and_source_ttl_bounds_the_metadata_lifetime()
+-> Result<(), Box<dyn std::error::Error>> {
     run(async {
         let store = Store::default();
         let host = Host::default();
         let config = AuthConfig::default();
-        user(&store, true, "policy");
+        user(&store, true, "policy")?;
         let value = session("uos_ai_session_expired_fixture", host.now_ms() + 1);
-        install(&store, &value, "source-1", None, true);
+        install(&store, &value, "source-1", None, true)?;
         host.now.set(value.expires_at_ms);
         let service = PasskeyService {
             store: &store,
@@ -186,32 +175,30 @@ fn expiry_cleanup_deletes_both_and_source_ttl_bounds_the_metadata_lifetime() {
         assert!(
             service
                 .session(&request(&value.token), None)
-                .await
-                .unwrap()
+                .await?
                 .is_none()
         );
         assert!(
             store
                 .read(&crate::passkeys::key("sessions", &value.token))
-                .await
-                .unwrap()
+                .await?
                 .is_none()
         );
         assert!(
             store
-                .read(&session_index::index_key(&session_index::digest(&value.token)).unwrap())
-                .await
-                .unwrap()
+                .read(&session_index::index_key(&session_index::digest(
+                    &value.token
+                ))?)
+                .await?
                 .is_none()
         );
         let future = session("uos_ai_session_short_ttl_fixture", host.now_ms() + 100);
-        install(&store, &future, "source-2", Some(host.now_ms() + 10), true);
+        install(&store, &future, "source-2", Some(host.now_ms() + 10), true)?;
         host.now.set(host.now_ms() + 10);
         assert!(
             service
                 .session(&request(&future.token), None)
-                .await
-                .unwrap()
+                .await?
                 .is_none()
         );
         assert!(
@@ -220,42 +207,40 @@ fn expiry_cleanup_deletes_both_and_source_ttl_bounds_the_metadata_lifetime() {
                 &session_index::digest(&future.token),
                 host.now_ms()
             )
-            .await
-            .unwrap()
+            .await?
             .is_none()
         );
-    });
+        Ok(())
+    })
 }
 
 #[test]
-fn replacement_and_current_user_revision_fence_prepared_actions() {
+fn replacement_and_current_user_revision_fence_prepared_actions()
+-> Result<(), Box<dyn std::error::Error>> {
     run(async {
         let store = Store::default();
         let host = Host::default();
         let config = AuthConfig::default();
-        user(&store, true, "policy-1");
+        user(&store, true, "policy-1")?;
         let service = PasskeyService {
             store: &store,
             host: &host,
             config: &config,
         };
-        let value = service
-            .create_session("fixture-user".into(), None)
-            .await
-            .unwrap();
+        let value = service.create_session("fixture-user".into(), None).await?;
         let digest = session_index::digest(&value.token);
-        let index_key = session_index::index_key(&digest).unwrap();
+        let index_key = session_index::index_key(&digest)?;
         let old = session_index::read_current(&store, &digest, host.now_ms())
-            .await
-            .unwrap()
-            .unwrap();
+            .await?
+            .ok_or("missing expected session fixture")?;
         let user_key = crate::passkeys::key("users", "fixture-user");
-        user(&store, false, "policy-2");
+        user(&store, false, "policy-2")?;
         let auth = AuthService::new(&store, &host, &config);
         assert_eq!(
             auth.authenticate_admin(&request(&value.token))
                 .await
-                .unwrap_err()
+                .err()
+                .ok_or("expected administrator authorization refusal")?
                 .status,
             403
         );
@@ -272,10 +257,7 @@ fn replacement_and_current_user_revision_fence_prepared_actions() {
             ],
             mutations: vec![],
         };
-        assert_eq!(
-            store.commit(stale_user).await.unwrap(),
-            CommitOutcome::Conflict
-        );
+        assert_eq!(store.commit(stale_user).await?, CommitOutcome::Conflict);
         let source_key = crate::passkeys::key("sessions", &value.token);
         let replacement_revision = "replacement-session-revision";
         let replacement = AtomicTransition {
@@ -294,7 +276,7 @@ fn replacement_and_current_user_revision_fence_prepared_actions() {
                     key: source_key,
                     record: StoredRecord::json(
                         replacement_revision,
-                        serde_json::to_value(&value).unwrap(),
+                        serde_json::to_value(&value)?,
                         Some(value.expires_at_ms),
                     ),
                 },
@@ -304,15 +286,11 @@ fn replacement_and_current_user_revision_fence_prepared_actions() {
                         &value,
                         replacement_revision,
                         Some(value.expires_at_ms),
-                    )
-                    .unwrap(),
+                    )?,
                 },
             ],
         };
-        assert_eq!(
-            store.commit(replacement).await.unwrap(),
-            CommitOutcome::Committed
-        );
+        assert_eq!(store.commit(replacement).await?, CommitOutcome::Committed);
         assert_eq!(
             store
                 .commit(AtomicTransition {
@@ -322,18 +300,17 @@ fn replacement_and_current_user_revision_fence_prepared_actions() {
                     }],
                     mutations: vec![]
                 })
-                .await
-                .unwrap(),
+                .await?,
             CommitOutcome::Conflict
         );
         assert_ne!(
             session_index::read_current(&store, &digest, host.now_ms())
-                .await
-                .unwrap()
-                .unwrap()
+                .await?
+                .ok_or("missing expected session fixture")?
                 .fence
                 .session_revision,
             old.fence.session_revision
         );
-    });
+        Ok(())
+    })
 }

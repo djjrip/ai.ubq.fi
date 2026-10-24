@@ -9,6 +9,11 @@ pub struct Target {
     pub path: PathBuf,
 }
 
+pub struct Closure {
+    pub lines: usize,
+    pub sources: BTreeSet<PathBuf>,
+}
+
 fn explicit(directory: &Path, value: &toml::Value, kind: &str) -> Result<Vec<Target>, String> {
     let mut targets = Vec::new();
     if let Some(entries) = value.get(kind).and_then(toml::Value::as_array) {
@@ -203,13 +208,18 @@ fn closure(
     Ok(count)
 }
 
-pub fn lines(root: &Path, sources: &BTreeMap<PathBuf, Source>) -> Result<usize, String> {
+pub fn lines(root: &Path, sources: &BTreeMap<PathBuf, Source>) -> Result<Closure, String> {
     let root = normalized(root)?;
-    closure(
+    let mut visited = BTreeSet::new();
+    let lines = closure(
         &root,
         root.parent().ok_or("target source has no parent")?,
         sources,
+        &mut visited,
         &mut BTreeSet::new(),
-        &mut BTreeSet::new(),
-    )
+    )?;
+    Ok(Closure {
+        lines,
+        sources: visited,
+    })
 }

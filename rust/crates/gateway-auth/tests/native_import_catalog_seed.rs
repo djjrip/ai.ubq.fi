@@ -9,6 +9,7 @@ use gateway_auth::{
         catalog_seed::*,
     },
 };
+type TestResult = Result<(), Box<dyn std::error::Error>>;
 fn request() -> ImportCatalogSeedRequestData {
     let hash = "a".repeat(64);
     let reference = "r".repeat(256);
@@ -47,11 +48,11 @@ fn request() -> ImportCatalogSeedRequestData {
     }
 }
 #[test]
-fn exact_existing_frame_ceiling_and_one_over_are_optional_transport_not_raw_caps() {
+fn exact_existing_frame_ceiling_and_one_over_are_optional_transport_not_raw_caps() -> TestResult {
     let mut request = request();
-    let overhead = request.bytes().unwrap().len();
+    let overhead = request.bytes()?.len();
     request.source_body = "x".repeat(NATIVE_MAX_BODY_BYTES - overhead);
-    let bytes = request.bytes().unwrap();
+    let bytes = request.bytes()?;
     assert_eq!(bytes.len(), NATIVE_MAX_BODY_BYTES);
     assert!(ImportCatalogSeedRequestData::parse(&bytes).is_ok());
     assert!(
@@ -72,18 +73,22 @@ fn exact_existing_frame_ceiling_and_one_over_are_optional_transport_not_raw_caps
             "fixture-key",
             0,
             &base64url(&[7; 32]),
-            &serde_json::to_vec(&request).unwrap()
+            &serde_json::to_vec(&request)?
         )
         .is_err()
     );
+    Ok(())
 }
 #[test]
-fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed() {
+fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed() -> TestResult {
     let request = request();
-    let bytes = request.bytes().unwrap();
-    let mut value: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
-    value.as_object_mut().unwrap().remove("etag");
-    assert!(ImportCatalogSeedRequestData::parse(&serde_json::to_vec(&value).unwrap()).is_err());
+    let bytes = request.bytes()?;
+    let mut value: serde_json::Value = serde_json::from_slice(&bytes)?;
+    value
+        .as_object_mut()
+        .ok_or("missing fixture value")?
+        .remove("etag");
+    assert!(ImportCatalogSeedRequestData::parse(&serde_json::to_vec(&value)?).is_err());
     let mut padded = bytes.clone();
     padded.push(b' ');
     assert!(ImportCatalogSeedRequestData::parse(&padded).is_err());
@@ -95,7 +100,7 @@ fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed(
             "fixture-key",
             0,
             &base64url(&[7; 32]),
-            &serde_json::to_vec(&invalid).unwrap()
+            &serde_json::to_vec(&invalid)?
         )
         .is_err()
     );
@@ -110,7 +115,7 @@ fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed(
         .is_err()
     );
     for seeded in [false, true] {
-        let reply = ImportCatalogSeedReplyData::new(seeded).bytes().unwrap();
+        let reply = ImportCatalogSeedReplyData::new(seeded).bytes()?;
         assert!(
             authority_response_input("fixture-key", &base64url(&[7; 32]), &bytes, 200, &reply)
                 .is_ok()
@@ -136,6 +141,7 @@ fn exact_seed_marker_nullable_headers_canonical_and_original_limits_stay_closed(
             .is_err()
         );
     }
+    Ok(())
 }
 #[test]
 fn raw_json_and_headers_are_lossless_not_snapshot_reconstruction() {

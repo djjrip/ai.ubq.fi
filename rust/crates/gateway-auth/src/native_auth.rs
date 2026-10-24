@@ -2,7 +2,7 @@
 //! arbitrary fingerprint authority, provider credential or permissive fallback.
 use crate::{
     crypto::{base64url, decode_base64url, sha256_hex},
-    native::*,
+    native::{NATIVE_AUTH_WINDOW_MS, publication_response_input, signature_input},
 };
 use gateway_core::error::GatewayError;
 use hmac::{Hmac, Mac};

@@ -16,12 +16,79 @@ pub struct SourceContext {
     pub contexts: Vec<Context>,
 }
 
+#[derive(Serialize)]
+pub struct TargetInventory {
+    pub root: String,
+    pub lines: usize,
+    pub sources: Vec<String>,
+}
+
+#[derive(Default, Serialize)]
+pub struct Inventory {
+    pub sources: BTreeMap<String, usize>,
+    pub targets: BTreeMap<String, TargetInventory>,
+}
+
+impl Inventory {
+    fn record_target(
+        &mut self,
+        root: &Path,
+        key: String,
+        target: &targets::Target,
+        closure: targets::Closure,
+    ) -> Result<(), String> {
+        let mut sources = closure
+            .sources
+            .iter()
+            .map(|file| relative(root, file))
+            .collect::<Result<Vec<_>, _>>()?;
+        sources.sort();
+        self.targets.insert(
+            key,
+            TargetInventory {
+                root: relative(
+                    root,
+                    &target
+                        .path
+                        .canonicalize()
+                        .map_err(|error| error.to_string())?,
+                )?,
+                lines: closure.lines,
+                sources,
+            },
+        );
+        Ok(())
+    }
+}
+
 pub struct Scan {
     pub crates: BTreeMap<String, usize>,
     pub targets: BTreeMap<String, usize>,
     pub violations: BTreeMap<String, BTreeMap<String, usize>>,
     pub files: usize,
     pub contexts: BTreeMap<String, SourceContext>,
+    pub inventory: Inventory,
+}
+
+impl Scan {
+    fn record_targets(
+        &mut self,
+        root: &Path,
+        packages: Vec<(String, PathBuf, toml::Value)>,
+        sources: &BTreeMap<PathBuf, Source>,
+    ) -> Result<(), String> {
+        for (name, path, value) in packages {
+            for target in targets::discover(&path, &value)? {
+                let key = format!("{name}/{}/{}", target.kind, target.name);
+                let closure = targets::lines(&target.path, sources)?;
+                if self.targets.insert(key.clone(), closure.lines).is_some() {
+                    return Err(format!("duplicate Cargo target {key}"));
+                }
+                self.inventory.record_target(root, key, &target, closure)?;
+            }
+        }
+        Ok(())
+    }
 }
 
 pub fn relative(root: &Path, path: &Path) -> Result<String, String> {
@@ -127,6 +194,7 @@ pub fn scan(root: &Path) -> Result<Scan, String> {
             .collect(),
         files: 0,
         contexts: BTreeMap::new(),
+        inventory: Inventory::default(),
     };
     let mut sources = BTreeMap::new();
     for (name, path, _) in &packages {
@@ -138,6 +206,10 @@ pub fn scan(root: &Path) -> Result<Scan, String> {
                 .map_err(|error| format!("{}: {error}", file.display()))?;
             let source = analyze(&text).map_err(|error| format!("{}: {error}", file.display()))?;
             let lines = text.lines().count();
+            result
+                .inventory
+                .sources
+                .insert(relative(root, &file)?, lines);
             if file.starts_with(path.join("src")) {
                 production += lines;
             }
@@ -168,14 +240,6 @@ pub fn scan(root: &Path) -> Result<Scan, String> {
         }
         result.crates.insert(name.clone(), production);
     }
-    for (name, path, value) in packages {
-        for target in targets::discover(&path, &value)? {
-            let key = format!("{name}/{}/{}", target.kind, target.name);
-            let lines = targets::lines(&target.path, &sources)?;
-            if result.targets.insert(key.clone(), lines).is_some() {
-                return Err(format!("duplicate Cargo target {key}"));
-            }
-        }
-    }
+    result.record_targets(root, packages, &sources)?;
     Ok(result)
 }

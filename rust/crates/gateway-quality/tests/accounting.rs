@@ -64,6 +64,18 @@ fn production_and_each_test_target_have_separate_physical_closures() -> Result<(
     assert_eq!(result.crates["fixture"], 1001);
     assert_eq!(result.targets["fixture/test/first"], 1002);
     assert_eq!(result.targets["fixture/test/second"], 1001);
+    assert_eq!(
+        result.inventory.targets["fixture/test/first"].sources,
+        [
+            "rust/crates/fixture/tests/first.rs",
+            "rust/crates/fixture/tests/support/mod.rs"
+        ]
+    );
+    assert_eq!(
+        result.inventory.sources["rust/crates/fixture/src/lib.rs"],
+        1001
+    );
+    assert_eq!(result.inventory.targets["fixture/test/second"].lines, 1001);
     fixture.reconcile("--init")?;
     assert_eq!(baseline::read(&fixture.0)?.targets.len(), 2);
     fixture.reconcile("--check")?;
@@ -82,7 +94,16 @@ fn conditional_paths_and_inline_modules_charge_every_reachable_file_once() -> Re
         "// alternate\n// second\n",
     )?;
     fixture.write("rust/crates/fixture/tests/inline/child.rs", "// default\n")?;
-    assert_eq!(fixture.scan()?.targets["fixture/test/fixture"], 4);
+    let result = fixture.scan()?;
+    assert_eq!(result.targets["fixture/test/fixture"], 4);
+    assert_eq!(
+        result.inventory.targets["fixture/test/fixture"].sources,
+        [
+            "rust/crates/fixture/tests/fixture.rs",
+            "rust/crates/fixture/tests/inline/alternate.rs",
+            "rust/crates/fixture/tests/inline/child.rs"
+        ]
+    );
     Ok(())
 }
 
@@ -212,5 +233,69 @@ fn binary_scans_real_fixture_files_and_returns_failure_for_invalid_inactive_code
     )?;
     assert!(!run("--check")?.status.success());
     assert!(Path::new(env!("CARGO_BIN_EXE_gateway-quality")).is_file());
+    Ok(())
+}
+
+#[test]
+fn inventory_is_sorted_read_only_and_keeps_report_and_context_contracts() -> Result<(), String> {
+    let fixture = Fixture::new()?;
+    fixture.write("rust/crates/fixture/tests/z.rs", "// last\n")?;
+    fixture.write("rust/crates/fixture/tests/a.rs", "// first\n")?;
+    let context_directory = fixture.0.join("contexts");
+    let run = |mode| {
+        std::process::Command::new(env!("CARGO_BIN_EXE_gateway-quality"))
+            .args([mode, fixture.0.to_str().unwrap_or("")])
+            .env("CARGO_TARGET_DIR", &context_directory)
+            .output()
+            .map_err(|error| error.to_string())
+    };
+    let output = run("--inventory")?;
+    assert!(output.status.success());
+    assert!(!fixture.0.join(baseline::LOCATION).exists());
+    assert!(!context_directory.exists());
+    let expected = format!(
+        "{}\n",
+        serde_json::to_string_pretty(&fixture.scan()?.inventory)
+            .map_err(|error| error.to_string())?
+    );
+    assert_eq!(String::from_utf8_lossy(&output.stdout), expected);
+    let paths: Vec<_> = fixture.scan()?.inventory.sources.into_keys().collect();
+    assert_eq!(
+        paths,
+        [
+            "rust/crates/fixture/src/lib.rs",
+            "rust/crates/fixture/tests/a.rs",
+            "rust/crates/fixture/tests/z.rs"
+        ]
+    );
+    let report = run("--report")?;
+    assert!(report.status.success());
+    let report: serde_json::Value =
+        serde_json::from_slice(&report.stdout).map_err(|error| error.to_string())?;
+    assert!(report.get("inventory").is_none());
+    assert_eq!(report["crates"], serde_json::json!({}));
+    assert!(context_directory.join("quality-contexts.json").is_file());
+    assert!(!fixture.0.join(baseline::LOCATION).exists());
+    Ok(())
+}
+
+#[test]
+fn target_inventory_sorts_normalized_paths_with_same_stem_files_and_directories()
+-> Result<(), String> {
+    let fixture = Fixture::new()?;
+    fixture.write(
+        "rust/crates/fixture/tests/entry.rs",
+        "mod entry { mod child; }\n",
+    )?;
+    fixture.write("rust/crates/fixture/tests/entry/child.rs", "// child\n")?;
+    let result = fixture.scan()?;
+    assert_eq!(result.inventory.targets["fixture/test/entry"].lines, 2);
+    assert_eq!(
+        result.inventory.targets["fixture/test/entry"].sources,
+        [
+            "rust/crates/fixture/tests/entry.rs",
+            "rust/crates/fixture/tests/entry/child.rs"
+        ]
+    );
     Ok(())
 }

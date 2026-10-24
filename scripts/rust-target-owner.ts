@@ -6,17 +6,35 @@ type OwnerResult = Readonly<{ code: number; stdout: string; stderr: string }>;
 type OwnerRunner = (command: OwnerCommand, environment: Record<string, string>) => Promise<OwnerResult>;
 const MARKER = ".uos-worktree-owner.json";
 const CARGO_COMPILERS = new Set(["build", "check", "test", "clippy", "run", "bench", "rustc", "rustdoc"]);
+const CARGO_OPTION_VALUES = new Set(["--config", "--color", "--explain", "--manifest-path", "--target-dir", "-C", "-Z"]);
 const argumentsBeforeSeparator = (argv: readonly string[]): readonly string[] => {
   const separator = argv.indexOf("--");
   return separator < 0 ? argv.slice(1) : argv.slice(1, separator);
+};
+const cargoOperation = (args: readonly string[]): string | undefined => {
+  let skipValue = false;
+  for (const arg of args) {
+    if (skipValue) {
+      skipValue = false;
+      continue;
+    }
+    if (CARGO_OPTION_VALUES.has(arg)) skipValue = true;
+    else if (!arg.startsWith("-") && !arg.startsWith("+")) return arg;
+  }
+  return undefined;
 };
 
 export const isRustCompilerCommand = (argv: readonly string[]): boolean => {
   const tool = basename(argv[0] ?? "");
   const args = argumentsBeforeSeparator(argv);
   if (args.includes("--help") || args.includes("-h")) return false;
-  if (tool === "cargo")
-    return args.some((arg) => CARGO_COMPILERS.has(arg)) || (args.includes("install") && args.some((arg) => arg === "--path" || arg.startsWith("--path=")));
+  if (tool === "cargo") {
+    const operation = cargoOperation(args);
+    return (
+      (operation !== undefined && CARGO_COMPILERS.has(operation)) ||
+      (operation === "install" && args.some((arg) => arg === "--path" || arg.startsWith("--path=")))
+    );
+  }
   if (!["worker-build", "cargo-clippy", "rustc"].includes(tool)) return false;
   return !args.some((arg) => ["--version", "-V", "-vV"].includes(arg));
 };

@@ -147,6 +147,21 @@ test("distinct source processes racing for one target produce one owner", async 
   }
 });
 
+test("configuration values cannot turn read-only metadata into recursive compilation", async () => {
+  assert.equal(isRustCompilerCommand(["cargo", "metadata", "--config", "test"]), false);
+  assert.equal(isRustCompilerCommand(["cargo", "--config", "check", "metadata"]), false);
+  assert.equal(isRustCompilerCommand(["cargo", "--config", "metadata", "check"]), true);
+  const f = fixture();
+  try {
+    const cargo = fakeCargo(f.directory, f.source, f.target);
+    const result = await runCommand({ argv: [cargo.executable, "check", "--config", "test"], cwd: f.source }, { PATH: "/usr/bin:/bin" });
+    assert.equal(result.code, 0);
+    assert.equal(existsSync(cargo.sentinel), true);
+  } finally {
+    f.remove();
+  }
+});
+
 test("only compiler operations claim ownership; program arguments cannot select a manifest", async () => {
   for (const argv of [
     ["cargo", "fmt"],

@@ -69,17 +69,17 @@ impl WebAuthnCrypto for MaintainedCrypto {
     async fn verify_signature(&self, input: SignatureInput) -> Result<bool, GatewayError> {
         let signature = match (input.key.jwk["kty"].as_str(), input.key.jwk["crv"].as_str()) {
             (Some("EC"), Some("P-256")) => p256::ecdsa::Signature::from_slice(&input.signature)
-                .unwrap()
+                .map_err(|_| gateway_auth::types::invalid("Invalid ECDSA signature"))?
                 .to_der()
                 .as_bytes()
                 .to_vec(),
             (Some("EC"), Some("P-384")) => p384::ecdsa::Signature::from_slice(&input.signature)
-                .unwrap()
+                .map_err(|_| gateway_auth::types::invalid("Invalid ECDSA signature"))?
                 .to_der()
                 .as_bytes()
                 .to_vec(),
             (Some("EC"), Some("P-521")) => p521::ecdsa::Signature::from_slice(&input.signature)
-                .unwrap()
+                .map_err(|_| gateway_auth::types::invalid("Invalid ECDSA signature"))?
                 .to_der()
                 .as_bytes()
                 .to_vec(),

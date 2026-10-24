@@ -8,6 +8,7 @@ use gateway_auth::{
 };
 use gateway_core::source_json::SourceJson;
 use std::collections::BTreeSet;
+type TestResult = Result<(), Box<dyn std::error::Error>>;
 fn request(normalized: bool) -> ImportPublicationCommandData {
     let id = codex_credential_identity(
         "account",
@@ -97,34 +98,32 @@ fn identity() -> NativeTransportIdentity {
     .unwrap()
 }
 #[test]
-fn exact_limited_maximum_can_be_authenticated_but_one_more_byte_cannot() {
+fn exact_limited_maximum_can_be_authenticated_but_one_more_byte_cannot() -> TestResult {
     let request = request(false);
-    let body = request.bytes().unwrap();
+    let body = request.bytes()?;
     let reply = reply(&request, &body);
-    let bytes = serde_json::to_vec(&reply).unwrap();
+    let bytes = serde_json::to_vec(&reply)?;
     let cap = publication::import_publication_reply_max_bytes();
     assert_eq!(bytes.len(), cap);
     assert!(cap > 65_536);
     println!("derived-import-publication-reply-max-bytes={cap}");
     let nonce = base64url(&[7; 32]);
     let id = identity();
-    let mac = id
-        .sign_publication_response(&nonce, &body, 200, &bytes)
-        .unwrap();
-    id.verify_publication_response(&nonce, &body, 200, &bytes, &mac)
-        .unwrap();
+    let mac = id.sign_publication_response(&nonce, &body, 200, &bytes)?;
+    id.verify_publication_response(&nonce, &body, 200, &bytes, &mac)?;
     let mut over = bytes;
     over.push(b' ');
     assert!(
         id.sign_publication_response(&nonce, &body, 200, &over)
             .is_err()
     );
+    Ok(())
 }
 #[test]
-fn normalized_max_version_and_lone_utf16_command_retain_exact_shared_domain() {
+fn normalized_max_version_and_lone_utf16_command_retain_exact_shared_domain() -> TestResult {
     let request = request(true);
-    let body = request.bytes().unwrap();
-    let parsed = ImportPublicationCommandData::parse(&body).unwrap();
+    let body = request.bytes()?;
+    let parsed = ImportPublicationCommandData::parse(&body)?;
     let ImportCatalogData::Normalized {
         snapshot,
         client_version,
@@ -135,28 +134,27 @@ fn normalized_max_version_and_lone_utf16_command_retain_exact_shared_domain() {
     };
     assert!(snapshot.as_str().contains("\\ud800"));
     assert_eq!(
-        serde_json::to_vec(client_version).unwrap().len(),
+        serde_json::to_vec(client_version)?.len(),
         SNAPSHOT_MAX_BYTES
     );
     let reply = reply(&request, &body);
-    let bytes = serde_json::to_vec(&reply).unwrap();
+    let bytes = serde_json::to_vec(&reply)?;
     assert!(bytes.len() <= publication::import_publication_reply_max_bytes());
     let nonce = base64url(&[8; 32]);
-    identity()
-        .sign_publication_response(&nonce, &body, 200, &bytes)
-        .unwrap();
+    identity().sign_publication_response(&nonce, &body, 200, &bytes)?;
     let mut over = request.clone();
     if let ImportCatalogData::Normalized { client_version, .. } = &mut over.catalog {
         client_version.insert(0, '0');
     }
     assert!(over.bytes().is_err());
+    Ok(())
 }
 #[test]
-fn wrong_terminal_pair_request_digest_or_required_nullable_cannot_get_large_bound() {
+fn wrong_terminal_pair_request_digest_or_required_nullable_cannot_get_large_bound() -> TestResult {
     let nonce = base64url(&[5; 32]);
     let id = identity();
     let request = request(false);
-    let body = request.bytes().unwrap();
+    let body = request.bytes()?;
     let good = reply(&request, &body);
     for field in [
         "action_ref",
@@ -169,69 +167,58 @@ fn wrong_terminal_pair_request_digest_or_required_nullable_cannot_get_large_boun
         "normalized_revision",
         "publication_request_digest",
     ] {
-        let mut altered = serde_json::to_value(&good).unwrap();
+        let mut altered = serde_json::to_value(&good)?;
         if field == "action_ref" {
             altered[field] = serde_json::json!("f".repeat(64));
         } else {
             altered["publication"][field] = serde_json::json!("f".repeat(64));
         }
         assert!(
-            id.sign_publication_response(
-                &nonce,
-                &body,
-                200,
-                &serde_json::to_vec(&altered).unwrap()
-            )
-            .is_err(),
+            id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&altered)?)
+                .is_err(),
             "{field}"
         );
     }
-    let mut missing = serde_json::to_value(&good).unwrap();
+    let mut missing = serde_json::to_value(&good)?;
     missing["publication"]
         .as_object_mut()
-        .unwrap()
+        .ok_or("missing fixture value")?
         .remove("runtime_revision");
     assert!(
-        id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&missing).unwrap())
+        id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&missing)?)
             .is_err()
     );
-    let mut extra = serde_json::to_value(&good).unwrap();
+    let mut extra = serde_json::to_value(&good)?;
     extra["public_generation"] = serde_json::json!(true);
     assert!(
-        id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&extra).unwrap())
+        id.sign_publication_response(&nonce, &body, 200, &serde_json::to_vec(&extra)?)
             .is_err()
     );
     let mut wrong_body = body.clone();
     wrong_body.push(b' ');
     assert!(
-        id.sign_publication_response(
-            &nonce,
-            &wrong_body,
-            200,
-            &serde_json::to_vec(&good).unwrap()
-        )
-        .is_err()
+        id.sign_publication_response(&nonce, &wrong_body, 200, &serde_json::to_vec(&good)?)
+            .is_err()
     );
+    Ok(())
 }
 #[test]
-fn old_publication_and_every_error_reply_keep_exact_old_cap() {
+fn old_publication_and_every_error_reply_keep_exact_old_cap() -> TestResult {
     let nonce = base64url(&[4; 32]);
     let id = identity();
     let old = b"{}";
     let exact = vec![b'x'; 65_536];
     let over = vec![b'x'; 65_537];
     for status in [200, 400, 500] {
-        id.sign_publication_response(&nonce, old, status, &exact)
-            .unwrap();
+        id.sign_publication_response(&nonce, old, status, &exact)?;
         assert!(
             id.sign_publication_response(&nonce, old, status, &over)
                 .is_err()
         );
     }
-    let request = request(false).bytes().unwrap();
+    let request = request(false).bytes()?;
     for status in [400, 500] {
-        id.sign_publication_response(&nonce, &request, status, &exact)
-            .unwrap();
+        id.sign_publication_response(&nonce, &request, status, &exact)?;
         assert!(
             id.sign_publication_response(&nonce, &request, status, &over)
                 .is_err()
@@ -247,6 +234,7 @@ fn old_publication_and_every_error_reply_keep_exact_old_cap() {
         id.sign_publication_response(&nonce, unknown, 200, &over)
             .is_err()
     );
+    Ok(())
 }
 #[test]
 fn overlong_retained_revision_and_normalized_revision_mismatch_refuse() {
@@ -303,4 +291,53 @@ fn selected_auth_timestamp_is_required_finite_and_inside_existing_access_documen
     assert!(ImportPublicationCommandData::parse(&serde_json::to_vec(&value).unwrap()).is_err());
     value["document"]["updated_at_ms"] = serde_json::Value::Null;
     assert!(ImportPublicationCommandData::parse(&serde_json::to_vec(&value).unwrap()).is_err());
+}
+
+#[test]
+fn closed_reply_bound_matches_former_encoder_and_escaped_finite_dtos() -> Result<(), String> {
+    let cap = publication::import_publication_reply_max_bytes();
+    let mut maxima = [0; 2];
+    for (index, normalized) in [false, true].into_iter().enumerate() {
+        let command = request(normalized);
+        let body = command.bytes().map_err(|error| format!("{error:?}"))?;
+        let maximal = reply(&command, &body);
+        maxima[index] = serde_json::to_vec(&maximal)
+            .map_err(|error| error.to_string())?
+            .len();
+        for text in [
+            "\u{1}", "\u{0}", "\n", "\r", "\t", "\u{8}", "\u{c}", "\"", "\\", "/", "é", "😀",
+            "\u{2028}", "\u{2029}",
+        ] {
+            let mut value = maximal.clone();
+            if !normalized {
+                let retained = format!("x{}", text.repeat(4095 / text.len()));
+                value.publication.catalog_revision = Some(retained.clone());
+                value.publication.runtime_revision = Some(retained.clone());
+                value.publication.auth_generation_revision = Some(retained.clone());
+                value.publication.paid_control_config_revision = Some(retained);
+            }
+            for disposition in [
+                NativeImportPublicationDisposition::Applied,
+                NativeImportPublicationDisposition::AlreadyCurrent,
+            ] {
+                value.disposition = disposition;
+                let bytes = serde_json::to_vec(&value).map_err(|error| error.to_string())?;
+                assert!(bytes.len() <= cap, "{normalized} {text:?}");
+                NativeImportPublication::parse_for(&bytes, &body)
+                    .map_err(|error| format!("{error:?}"))?;
+            }
+        }
+        let mut nullable = maximal;
+        if !normalized {
+            nullable.publication.runtime_revision = None;
+            nullable.publication.auth_generation_revision = None;
+            nullable.publication.paid_control_config_revision = None;
+            let bytes = serde_json::to_vec(&nullable).map_err(|error| error.to_string())?;
+            assert!(bytes.len() <= cap);
+            NativeImportPublication::parse_for(&bytes, &body)
+                .map_err(|error| format!("{error:?}"))?;
+        }
+    }
+    assert_eq!(cap, maxima[0].max(maxima[1]));
+    Ok(())
 }

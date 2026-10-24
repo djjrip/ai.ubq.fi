@@ -390,7 +390,7 @@ fn max_state() -> ImportAuthorityStateData {
     }
 }
 fn max_terminal() -> ImportAuthorityTerminalData {
-    let long = Some("\u{1}".repeat(4096));
+    let long = "\u{1}".repeat(4096);
     let hash = "a".repeat(64);
     let reference = "r".repeat(256);
     ImportAuthorityTerminalData {
@@ -400,12 +400,12 @@ fn max_terminal() -> ImportAuthorityTerminalData {
         native_source_generation: hash.clone(),
         access_generation: hash.clone(),
         credential_version: hash,
-        source_revision: long.clone().expect("max text"),
-        normalized_revision: long.clone().expect("max text"),
-        catalog_revision: long.clone(),
-        runtime_revision: long.clone(),
-        auth_generation_revision: long.clone(),
-        paid_control_config_revision: long,
+        source_revision: long.clone(),
+        normalized_revision: long.clone(),
+        catalog_revision: Some(long.clone()),
+        runtime_revision: Some(long.clone()),
+        auth_generation_revision: Some(long.clone()),
+        paid_control_config_revision: Some(long),
     }
 }
 fn max_custody() -> ImportCustodyStartedWire {
@@ -459,17 +459,15 @@ pub fn import_authority_request_max_bytes() -> usize {
             publication_request_digest: "a".repeat(64),
         },
     ];
-    commands
-        .into_iter()
-        .map(|command| {
-            encoded(&ImportAuthorityRequestData {
-                operation: IMPORT_AUTHORITY_OPERATION.into(),
-                v: 1,
-                command,
-            })
+    let lengths = commands.map(|command| {
+        encoded(&ImportAuthorityRequestData {
+            operation: IMPORT_AUTHORITY_OPERATION.into(),
+            v: 1,
+            command,
         })
-        .max()
-        .expect("finite phases")
+    });
+    let [first, rest @ ..] = lengths;
+    rest.into_iter().fold(first, usize::max)
 }
 pub fn import_authority_reply_max_bytes() -> usize {
     let s = max_state();
@@ -508,11 +506,10 @@ pub fn import_authority_reply_max_bytes() -> usize {
             claim_ref: r,
         },
     ];
-    results
-        .into_iter()
-        .map(|result| encoded(&result::ImportAuthorityReplyData::new(result)))
-        .max()
-        .expect("finite phases")
+    let lengths = results.map(|result| encoded(&result::ImportAuthorityReplyData::new(result)));
+    let [first, rest @ ..] = lengths;
+    rest.into_iter()
+        .fold(first, usize::max)
         .max(original_terminal_reply_max_bytes())
 }
 fn original_terminal_reply_max_bytes() -> usize {

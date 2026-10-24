@@ -1,4 +1,5 @@
 use super::*;
+type TestResult = Result<(), Box<dyn std::error::Error>>;
 mod live_manual;
 mod native_import;
 mod renewal_v2;
@@ -15,7 +16,6 @@ use std::{
     },
     task::{Context, Poll, Waker},
 };
-
 fn run<F: Future>(future: F) -> F::Output {
     let mut context = Context::from_waker(Waker::noop());
     let mut future = std::pin::pin!(future);

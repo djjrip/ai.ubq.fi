@@ -8,6 +8,7 @@ use gateway_core::{error::GatewayError, state::*};
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,
+    error::Error,
     future::Future,
     task::{Context, Poll, Waker},
 };
@@ -38,11 +39,12 @@ impl Store {
         value: &T,
         revision: &str,
         expiry: Option<i64>,
-    ) {
+    ) -> Result<(), serde_json::Error> {
         self.rows.borrow_mut().insert(
             key.0,
-            StoredRecord::json(revision, serde_json::to_value(value).unwrap(), expiry),
+            StoredRecord::json(revision, serde_json::to_value(value)?, expiry),
         );
+        Ok(())
     }
 }
 impl AuthorityStore for Store {
@@ -159,7 +161,7 @@ pub fn request(token: &str) -> AuthRequest {
         ..Default::default()
     }
 }
-pub fn user(store: &Store, admin: bool, revision: &str) {
+pub fn user(store: &Store, admin: bool, revision: &str) -> Result<(), serde_json::Error> {
     store.put(
         key("users", "fixture-user"),
         &PasskeyUser {
@@ -172,7 +174,7 @@ pub fn user(store: &Store, admin: bool, revision: &str) {
         },
         revision,
         None,
-    );
+    )
 }
 pub fn session(token: &str, expiry: i64) -> PasskeySession {
     PasskeySession {
@@ -189,15 +191,14 @@ pub fn install(
     revision: &str,
     expiry: Option<i64>,
     indexed: bool,
-) {
-    store.put(key("sessions", &session.token), session, revision, expiry);
+) -> Result<(), Box<dyn Error>> {
+    store.put(key("sessions", &session.token), session, revision, expiry)?;
     if indexed {
-        let index = session_index::record_for_session(session, revision, expiry).unwrap();
+        let index = session_index::record_for_session(session, revision, expiry)?;
         store.rows.borrow_mut().insert(
-            session_index::index_key(&session_index::digest(&session.token))
-                .unwrap()
-                .0,
+            session_index::index_key(&session_index::digest(&session.token))?.0,
             index,
         );
     }
+    Ok(())
 }

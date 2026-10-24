@@ -1,4 +1,11 @@
-use crate::{CatalogRuntime, host::*, state};
+use crate::{
+    CatalogRuntime,
+    host::{
+        CatalogFetch, CatalogFetchResponse, CatalogHost, CatalogMaintenance, CatalogObservation,
+        CatalogProvider, CodexAccount, CredentialPublication, unavailable,
+    },
+    state,
+};
 use gateway_core::{
     error::GatewayError, model::ModelId, query::QueryStore, source_json::SourceJson,
     source_serialization as source,
@@ -13,7 +20,6 @@ use std::{
     future::{Future, poll_fn},
     task::Poll,
 };
-
 struct Lease<'a> {
     version: &'a str,
     owner: &'a str,
@@ -132,7 +138,6 @@ fn evidence(account: &str, parsed: &SourceJson) -> Vec<(String, Vec<ModelId>)> {
     }
     vec![(account.into(), slugs)]
 }
-
 async fn fetch_codex<H: CatalogHost>(
     host: &H,
     initial: &CredentialPublication,

@@ -1,4 +1,7 @@
-use crate::{host::*, providers};
+use crate::{
+    host::{CatalogHost, CatalogProvider, CredentialPublication, ProviderBinding, unavailable},
+    providers,
+};
 use gateway_core::{
     error::GatewayError,
     model::ModelId,
@@ -22,7 +25,6 @@ use gateway_schema::{
 };
 use serde_json::{Value, json};
 use std::collections::BTreeMap;
-
 #[derive(Clone, Debug)]
 pub struct CatalogState {
     pub input: CatalogInput,
@@ -280,7 +282,6 @@ pub(crate) async fn load_state<S: QueryStore>(
         refresh_due,
     })
 }
-
 /// Existing catalog rows only. Chunks are private until one atomic metadata publication
 /// checks the source generation, lease owner/revision/expiry and exact credential rows.
 pub(crate) async fn publish_fenced<S: AuthorityStore, H: CatalogHost>(
@@ -366,7 +367,6 @@ pub(crate) async fn publish_fenced<S: AuthorityStore, H: CatalogHost>(
     }
     Ok(true)
 }
-
 pub(crate) struct PublicationContext<'a> {
     pub version: &'a str,
     pub publication: &'a CredentialPublication,
@@ -447,7 +447,6 @@ pub(crate) async fn publish_account_models<S: AuthorityStore>(
     }
     Ok(())
 }
-
 pub(crate) async fn publish_snapshot<S: AuthorityStore>(
     store: &S,
     parsed: &SourceJson,
@@ -527,7 +526,6 @@ pub(crate) async fn publish_snapshot<S: AuthorityStore>(
 }
 /// Renew only request-owned leases; no independent periodic maintenance exists.
 pub(crate) const HEARTBEAT_MS: u32 = (REFRESH_LEASE_MS / 3) as u32;
-
 /// Provider observations are durable inputs, not the assembled final body.
 /// Keys include the auth generation and credential binding so rotation and
 /// key changes cannot reuse stale rows.
@@ -547,7 +545,6 @@ pub(crate) fn provider_observation_key(
         &identity,
     ])
 }
-
 pub(crate) async fn auth_generation<S: AuthorityStore>(
     store: &S,
 ) -> Result<Option<String>, GatewayError> {
@@ -556,7 +553,6 @@ pub(crate) async fn auth_generation<S: AuthorityStore>(
         .and_then(|record| record.value.as_str().map(str::to_owned))
         .filter(|value| !value.is_empty()))
 }
-
 #[derive(serde::Deserialize, serde::Serialize)]
 struct ProviderObservationWire {
     models: Vec<String>,
@@ -565,7 +561,6 @@ struct ProviderObservationWire {
     available: bool,
     stale: bool,
 }
-
 fn observation_wire(snapshot: &ProviderCatalog) -> Result<ProviderObservationWire, GatewayError> {
     Ok(ProviderObservationWire {
         models: snapshot
@@ -583,7 +578,6 @@ fn observation_wire(snapshot: &ProviderCatalog) -> Result<ProviderObservationWir
         stale: snapshot.stale,
     })
 }
-
 pub(crate) async fn load_provider_observation<S: AuthorityStore>(
     store: &S,
     generation: &str,
@@ -623,7 +617,6 @@ pub(crate) async fn load_provider_observation<S: AuthorityStore>(
         .is_some_and(|updated| now.saturating_sub(updated) >= 300_000);
     Ok(Some(snapshot))
 }
-
 pub(crate) async fn persist_provider_observation<S: AuthorityStore>(
     store: &S,
     generation: &str,

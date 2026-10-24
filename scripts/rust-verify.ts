@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { detectCiScope, isDocumentationPath, isRustGatePath, RUST_NATIVE_ONLY_PACKAGES } from "./test-scope.ts";
 import { testNetworkArgv } from "./test-network.ts";
 import { observeRustCommandResult as observeCommandResult, rustClippyCommand, rustQualityCommands } from "./rust-verify-quality.ts";
+import { guardRustTarget } from "./rust-target-owner.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const NATIVE_TARGET = "aarch64-unknown-linux-gnu";
@@ -244,6 +245,7 @@ export const rustVerificationEnvironment = (source: NodeJS.ProcessEnv = process.
   return environment;
 };
 export const runCommand: CommandRunner = async (command, environment) => {
+  await guardRustTarget(command, environment, runCommand);
   const argv = command.isolated ? testNetworkArgv(command.argv) : [...command.argv];
   const child = Bun.spawn(argv, { cwd: command.cwd, env: environment, stdin: "ignore", stdout: "pipe", stderr: "pipe", detached: true });
   const control = { expired: false };

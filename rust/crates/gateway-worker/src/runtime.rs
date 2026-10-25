@@ -222,7 +222,7 @@ fn original_auth_request(
         method: request.method().to_string(),
         url: auth_url.to_string(),
         headers: bounded_headers(
-            &request,
+            request,
             HeaderLimits {
                 total_bytes: 16_384,
                 value_bytes: 16_384,

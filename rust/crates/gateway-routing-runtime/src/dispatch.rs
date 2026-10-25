@@ -349,7 +349,7 @@ impl<
         }
         let mut decision = RefusalDecision::Return;
         let mut cursor = record.cursor;
-        if self.plan.synthetic {
+        if self.plan.synthetic && record.paid.is_none() {
             decision = match gateway_providers::policy::deepseek_decision(failure.failure, false) {
                 HopDecision::Advance => {
                     cursor += 1;

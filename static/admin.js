@@ -1534,8 +1534,6 @@ const claudeUsageReadLabel = (usage) => {
   return `OAuth usage API · ${usage.state || "unknown"}${status} · ${attempted}${usage.message ? ` — ${usage.message}` : ""}`;
 };
 
-const claudeUsageAutoRefreshAttempted = new Set();
-
 const claudeCapacityWindowForDisplay = (window) => {
   if (!window) return null;
   return {
@@ -1569,7 +1567,7 @@ const refreshClaudeUsage = async (source, button, options = {}) => {
         toast.success(payload?.refreshed === false ? "Claude usage is current" : "Claude usage refreshed", {
           description:
             payload?.refreshed === false
-              ? "The last usage attempt is less than a minute old."
+              ? "The last usage attempt is less than 30 seconds old."
               : `Observed ${formatCapacityTimestamp(payload?.observed_at_ms)}.`,
         });
       }
@@ -1628,14 +1626,6 @@ const renderClaudeCapacitySource = (source) => {
   refresh.addEventListener("click", () => void refreshClaudeUsage(source, refresh));
   header.append(title, badge, refresh);
   row.append(header);
-  if (
-    source.state === "stale" &&
-    typeof source.account_id === "string" &&
-    !claudeUsageAutoRefreshAttempted.has(source.account_id)
-  ) {
-    claudeUsageAutoRefreshAttempted.add(source.account_id);
-    globalThis.setTimeout(() => void refreshClaudeUsage(source, refresh, { automatic: true }), 0);
-  }
 
   const windows = document.createElement("div");
   windows.dataset.capacityWindows = "";

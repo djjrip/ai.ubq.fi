@@ -295,6 +295,8 @@ test("the restored Claude meter exposes an explicit refresh control", () => {
   assert.match(sourceText, /Usage read/);
   assert.match(sourceText, /user:profile scope missing/);
   assert.doesNotMatch(sourceText, /minimal streaming Claude request/);
+  assert.doesNotMatch(sourceText, /claudeUsageAutoRefreshAttempted/);
+  assert.match(sourceText, /refreshAnalyticsView\(\);\s*}, 30_000\)/);
 });
 
 test("shipped shared capacity list supports legacy singleton and distinct roster rows with stable disclosure state", () => {

@@ -1629,8 +1629,37 @@ const renderClaudeCapacitySource = (source) => {
 
   const windows = document.createElement("div");
   windows.dataset.capacityWindows = "";
-  renderCapacityWindow(windows, "5-hour window", claudeCapacityWindowForDisplay(source.windows?.five_hour));
-  renderCapacityWindow(windows, "Weekly window", claudeCapacityWindowForDisplay(source.windows?.seven_day));
+  if (source.usage_snapshot) {
+    const observed = document.createElement("p");
+    observed.textContent = `${source.usage_stale ? "Last known usage · stale" : "Direct usage"} · observed ${formatCapacityTimestamp(source.usage_snapshot.observed_at_ms)}`;
+    windows.appendChild(observed);
+    for (const meter of source.usage_snapshot.meters ?? []) {
+      const group = document.createElement("section");
+      group.dataset.usageGroup = meter.group;
+      group.dataset.usageSeverity = meter.severity ?? "";
+      group.dataset.usageActive = String(meter.is_active);
+      renderCapacityWindow(group, `${meter.label}${meter.is_active ? " · Headline" : ""}`, meter);
+      const detail = document.createElement("p");
+      detail.textContent = `${meter.used_percent === null ? "Usage not reported" : `${meter.used_percent}% used`} · ${meter.severity ?? "severity not reported"} · reset ${meter.resets_at ?? "not reported"}`;
+      group.appendChild(detail);
+      windows.appendChild(group);
+    }
+    if (!source.usage_snapshot.meters?.length) {
+      const empty = document.createElement("p");
+      empty.textContent = "No subscription meters reported.";
+      windows.appendChild(empty);
+    }
+    const payload = source.usage_snapshot.payload ?? {};
+    for (const key of ["extra_usage", "cinder_cove", "wattle_ember"]) {
+      if (payload[key] === undefined || payload[key] === null) continue;
+      const diagnostic = document.createElement("p");
+      diagnostic.textContent = `${key} (${key === "extra_usage" ? "amounts in minor currency units" : "separate credit evidence"}): ${JSON.stringify(payload[key])}`;
+      windows.appendChild(diagnostic);
+    }
+  } else {
+    renderCapacityWindow(windows, "5-hour window", claudeCapacityWindowForDisplay(source.windows?.five_hour));
+    renderCapacityWindow(windows, "Weekly window", claudeCapacityWindowForDisplay(source.windows?.seven_day));
+  }
   row.append(windows);
 
   appendCapacitySourceMeta(row, source, provider);
@@ -1715,6 +1744,22 @@ const CLAUDE_CAPACITY_CHART_SERIES = [
   { key: "claude-five-hour", label: "Claude 5-hour", window: "five_hour" },
   { key: "claude-seven-day", label: "Claude weekly", window: "seven_day" },
 ];
+const claudeCapacityChartSeries = (snapshot, accountId) => {
+  const series = new Map();
+  const add = (point) => {
+    if (point?.account_id !== accountId) return;
+    if (point.usage_snapshot) {
+      for (const meter of point.usage_snapshot.meters ?? [])
+        series.set(meter.id, { key: `claude-meter-${meter.id}`, label: meter.label, window: meter.id });
+    } else {
+      for (const entry of CLAUDE_CAPACITY_CHART_SERIES)
+        if (point.windows?.[entry.window]) series.set(entry.window, entry);
+    }
+  };
+  for (const point of snapshot?.claude_history?.points ?? []) add(point);
+  for (const row of snapshot?.claude_accounts ?? [snapshot?.claude]) add(row);
+  return Array.from(series.values());
+};
 let selectedClaudeHistoryAccountId = null;
 
 /** Raw observed points only: never reuse a live value at browser-now. */
@@ -1728,7 +1773,9 @@ const claudeCapacityChartPoints = (view, accountId, windowId, interval) => {
   const points = [];
   let previous = null;
   for (const sample of samples) {
-    const window = sample.windows?.[windowId];
+    const window = sample.usage_snapshot
+      ? sample.usage_snapshot.meters?.find((meter) => meter.id === windowId)
+      : sample.windows?.[windowId];
     const observedAt = window?.observed_at_ms;
     if (
       typeof observedAt !== "number" ||
@@ -1811,7 +1858,7 @@ const renderClaudeHistorySelector = (header, snapshot) => {
 };
 
 const renderClaudeHistoryPaths = (svg, snapshot, interval, plot) => {
-  for (const series of CLAUDE_CAPACITY_CHART_SERIES) {
+  for (const series of claudeCapacityChartSeries(snapshot, selectedClaudeHistoryAccountId)) {
     const points = claudeCapacityChartPoints(
       snapshot?.claude_history,
       selectedClaudeHistoryAccountId,
@@ -1823,6 +1870,7 @@ const renderClaudeHistoryPaths = (svg, snapshot, interval, plot) => {
       fill: "none",
       role: "img",
       "aria-label": `${series.label}, observed remaining capacity, gaps are unknown`,
+      stroke: "currentColor",
     });
     path.dataset.capacitySeries = series.key;
     svg.appendChild(path);
@@ -1832,9 +1880,10 @@ const renderClaudeHistoryPaths = (svg, snapshot, interval, plot) => {
         cy: plot.top + ((100 - point.remainingPercent) / 100) * plot.height,
         r: 2,
       });
+      circle.setAttribute("fill", "currentColor");
       circle.dataset.capacityClaudePoint = series.key;
       const title = capacityChartSvgElement("title");
-      title.textContent = `${series.label} · ${quotaPercentFormatter.format(point.remainingPercent)}% remaining · ${point.sample.account_id} · cohort ${point.sample.account_cohort_id} · headers observed ${formatCapacityTimestamp(point.observedAt)} · sampled ${formatCapacityTimestamp(point.sample.sampled_at_ms)} · ${point.sample.state} · reset ${formatCapacityTimestamp(point.window.reset_at_ms)}`;
+      title.textContent = `${series.label} · ${quotaPercentFormatter.format(point.remainingPercent)}% remaining · ${point.sample.account_id} · cohort ${point.sample.account_cohort_id} · ${point.sample.usage_snapshot ? "usage" : "headers"} observed ${formatCapacityTimestamp(point.observedAt)} · sampled ${formatCapacityTimestamp(point.sample.sampled_at_ms)} · ${point.sample.state} · reset ${formatCapacityTimestamp(point.window.reset_at_ms)}`;
       circle.appendChild(title);
       svg.appendChild(circle);
     }
@@ -1853,7 +1902,7 @@ const claudeHistorySummary = (snapshot, nowMs) => {
     .map((point) => point.source_observed_at_ms)
     .filter((time) => typeof time === "number" && Number.isFinite(time));
   const last = times.length ? Math.max(...times) : null;
-  return `Claude: ${points.length} retained observations · headers last observed ${formatCapacityTimestamp(last)}${last === null ? " · observation time unknown" : nowMs - last > view.stale_after_ms ? " · stale" : ""}${view.truncated ? " · INCOMPLETE: scan truncated" : ""} · downsampled to at most 6 events per 15-minute account/cohort bucket; latest 200 markers per window. Observed is gateway header receipt, not the provider clock. Gaps and reset/cohort changes are not interpolated.`;
+  return `Claude: ${points.length} retained observations · upstream last observed ${formatCapacityTimestamp(last)}${last === null ? " · observation time unknown" : nowMs - last > view.stale_after_ms ? " · stale" : ""}${view.truncated ? " · INCOMPLETE: scan truncated" : ""} · downsampled to at most 6 events per 15-minute account/cohort bucket; latest 200 markers per window. Observed is gateway usage/header receipt, not the provider clock. Gaps and reset/cohort changes are not interpolated.`;
 };
 
 const capacityChartFailureIsDowntime = (source) =>
@@ -2794,7 +2843,7 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
   for (const series of [
     { key: "cached-input", label: "Cached input share" },
     ...CAPACITY_CHART_SERIES,
-    ...CLAUDE_CAPACITY_CHART_SERIES,
+    ...claudeCapacityChartSeries(snapshot, selectedClaudeHistoryAccountId),
     { key: "rate-limit-reset", label: "Reset" },
     { key: "openai-downtime", label: "Downtime" },
     { key: "inference-error", label: "Errors (5xx)" },
@@ -2806,6 +2855,7 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
     const swatch = document.createElement("span");
     swatch.dataset.capacityLegendSwatch = "";
     swatch.setAttribute("aria-hidden", "true");
+    if (series.key.startsWith("claude-meter-")) swatch.style.backgroundColor = "currentColor";
     const label = document.createElement("span");
     label.textContent = series.label;
     item.append(swatch, label);

@@ -6,7 +6,7 @@ import { loadClaudeCodeAccountStore, resolveClaudeCodeAccount, type ClaudeCodeAc
 import type { ClaudeCodeEnvLookup } from "./claude-code.ts";
 import { loadClaudeCodeQuotaState, registerClaudeCodeObservationRecorder, type ClaudeCodeQuotaState } from "./claude-code-quota.ts";
 import { claudeCapacityUsedPercent, readClaudeCapacityHistory, recordClaudeCapacityObservation } from "./claude-capacity-history.ts";
-import { listClaudeCapacityRollups } from "./claude-capacity-rollups.ts";
+import { listClaudeCapacityRollups, listClaudeUsageRollups } from "./claude-capacity-rollups.ts";
 import { claudeCodeUsageIsFresh, refreshClaudeCodeUsage } from "./claude-code-usage-refresh.ts";
 import { getClaudeCodeProviderHealth } from "./health.ts";
 import { type CodexCapacityRoutingObservationInput, recordCodexCapacityRoutingObservations } from "../codex/account-routing.ts";
@@ -287,6 +287,7 @@ const claudeStandardLimits = (quota: ClaudeCodeQuotaState | null): ProviderCapac
 };
 
 const claudeLatestObservationMs = (quota: ClaudeCodeQuotaState | null): number | null => {
+  if (quota?.usage_snapshot) return quota.usage_snapshot.observed_at_ms;
   const candidates: number[] = [];
   const push = (value: number | null | undefined): void => {
     if (typeof value === "number" && Number.isFinite(value)) candidates.push(value);
@@ -342,9 +343,12 @@ const capacitySourceForClaudeAccount = async (
   // A healthy response without quota headers cannot refresh old quota evidence.
   const observedAtMs = claudeLatestObservationMs(quota);
   const failing = blocked || cooling || lastError !== null;
+  const usageStale =
+    quota?.usage_snapshot !== undefined &&
+    (quota.usage?.state !== "ok" || snapshotAtMs - quota.usage_snapshot.observed_at_ms >= PROVIDER_CAPACITY_READ_FRESH_MS);
   let state: ProviderCapacityClaudeSource["state"] = "available";
   if (!credential || failing) state = "unavailable";
-  else if (observedAtMs !== null && snapshotAtMs - observedAtMs > PROVIDER_CAPACITY_SOURCE_STALE_MS) state = "stale";
+  else if (usageStale || (observedAtMs !== null && snapshotAtMs - observedAtMs > PROVIDER_CAPACITY_SOURCE_STALE_MS)) state = "stale";
   let failureKind: ProviderCapacityFailureKind | null = null;
   if (!credential) failureKind = "not_configured";
   else if (failing) failureKind = "upstream_error";
@@ -369,6 +373,7 @@ const capacitySourceForClaudeAccount = async (
     },
     standard: claudeStandardLimits(quota),
     usage: quota?.usage ?? null,
+    ...(quota?.usage_snapshot ? { usage_snapshot: quota.usage_snapshot, usage_stale: usageStale } : {}),
     blocked_until_ms: blockedUntilMs,
     cooldown_until_ms: cooldownUntilMs,
     last_error: lastError
@@ -805,6 +810,7 @@ export const handleProviderCapacityRollups = async (
   const windowMs = windowDays * 24 * 60 * 60_000;
   const rollups = kv ? await listProviderCapacityRollups(kv, { sinceMs: Math.max(0, nowMs - windowMs), nowMs }).catch(() => null) : null;
   const claudeRollups = await listClaudeCapacityRollups(kv, Math.max(0, nowMs - windowMs), nowMs);
+  const claudeUsageRollups = await listClaudeUsageRollups(kv, Math.max(0, nowMs - windowMs), nowMs);
   return json(
     200,
     {
@@ -820,6 +826,7 @@ export const handleProviderCapacityRollups = async (
       claude_rollup_scan: claudeRollups.scan,
       claude_rollup_truncated: claudeRollups.truncated,
       claude_rollups: claudeRollups.points,
+      claude_usage_rollups: claudeUsageRollups,
     },
     { "Cache-Control": "no-store" }
   );

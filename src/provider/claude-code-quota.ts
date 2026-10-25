@@ -8,6 +8,7 @@ import type { Kv } from "#kv";
  * request-local cooldown so a transient 429 cannot invent a weekly block.
  */
 import { isRecord } from "../utils.ts";
+import { readClaudeCodeUsageSnapshot, type ClaudeCodeUsageSnapshot } from "./claude-code-usage-schema.ts";
 import type { ClaudeCodeUsageErrorKind } from "./claude-code-usage.ts";
 import {
   CLAUDE_CODE_ACCOUNTS_KEY,
@@ -64,6 +65,7 @@ export type ClaudeCodeQuotaError = Readonly<{
 }>;
 
 export type ClaudeCodeQuotaObservation = Readonly<{
+  usage_snapshot?: ClaudeCodeUsageSnapshot;
   windows: Readonly<Partial<Record<ClaudeCodeWindowId, ClaudeCodeQuotaWindow>>>;
   standard: Readonly<Partial<Record<ClaudeCodeStandardFamily, ClaudeCodeStandardWindow>>>;
   representative_claim: string | null;
@@ -94,6 +96,7 @@ export const claudeCodeQuotaKey = (binding?: ClaudeCodeAccountBinding) =>
   binding ? (["uos_ai", "claude_code_quota", "v1", binding.account_id, binding.account_cohort_id] as const) : CLAUDE_CODE_QUOTA_KV_KEY;
 
 export type ClaudeCodeQuotaState = Readonly<{
+  usage_snapshot?: ClaudeCodeUsageSnapshot;
   pool_proofs?: Readonly<Record<string, ClaudeCodePoolProof>>;
   windows: Readonly<Partial<Record<ClaudeCodeWindowId, ClaudeCodeQuotaWindow>>>;
   standard: Readonly<Partial<Record<ClaudeCodeStandardFamily, ClaudeCodeStandardWindow>>>;
@@ -202,7 +205,10 @@ const parseStandardWindow = (headers: Headers, family: ClaudeCodeStandardFamily,
 };
 
 const observationIsEmpty = (observation: ClaudeCodeQuotaObservation): boolean =>
-  !Object.keys(observation.windows).length && !Object.keys(observation.standard).length && observation.representative_claim === null;
+  !observation.usage_snapshot &&
+  !Object.keys(observation.windows).length &&
+  !Object.keys(observation.standard).length &&
+  observation.representative_claim === null;
 
 /**
  * Read the rate-limit headers from one upstream response. Returns null when
@@ -374,6 +380,7 @@ export const parseClaudeCodeQuotaState = (value: unknown): ClaudeCodeQuotaState 
   if (updatedAtMs === null || updatedAtMs <= 0) return null;
   return {
     ...(value.pool_proofs === undefined ? {} : { pool_proofs: parsePoolProofs(value.pool_proofs) }),
+    ...(readClaudeCodeUsageSnapshot(value.usage_snapshot) ? { usage_snapshot: readClaudeCodeUsageSnapshot(value.usage_snapshot) ?? undefined } : {}),
     windows: parseStoredWindows(value.windows),
     standard: parseStoredStandardWindows(value.standard),
     usage: parseClaudeCodeUsageState(value.usage),
@@ -432,7 +439,9 @@ export const mergeClaudeCodeQuotaState = (
       blockWindow = block.window;
     }
   }
+  const usageSnapshot = observation.usage_snapshot ? newerWindow(previous?.usage_snapshot, observation.usage_snapshot) : previous?.usage_snapshot;
   return {
+    ...(usageSnapshot ? { usage_snapshot: usageSnapshot } : {}),
     windows,
     standard,
     usage: previous?.usage ?? null,
@@ -510,7 +519,8 @@ const quotaStateForOutcome = (previous: ClaudeCodeQuotaState | null, input: Quot
   } else if (input.served) {
     withCooldown = { ...withCooldown, last_error: null };
   }
-  const withUsage = input.usage ? { ...withCooldown, usage: input.usage } : withCooldown;
+  const withUsage =
+    input.usage && (!previous?.usage || input.usage.attempted_at_ms >= previous.usage.attempted_at_ms) ? { ...withCooldown, usage: input.usage } : withCooldown;
   return input.binding ? { ...withUsage, pool_proofs: poolProofsForOutcome(previous, input, nowMs) } : withUsage;
 };
 

@@ -6,6 +6,7 @@
  * bounded failures, and conversion into the gateway's existing quota windows.
  */
 import { isRecord } from "../utils.ts";
+import { parseClaudeCodeUsageSnapshot } from "./claude-code-usage-schema.ts";
 import {
   CLAUDE_CODE_ANTHROPIC_VERSION,
   CLAUDE_CODE_BASE_URL,
@@ -42,37 +43,28 @@ export type ClaudeCodeUsageFailure = Readonly<{
 
 export type ClaudeCodeUsageResult = ClaudeCodeUsageSuccess | ClaudeCodeUsageFailure;
 
-const usageWindow = (value: unknown, observedAtMs: number) => {
-  if (!isRecord(value) || typeof value.utilization !== "number" || !Number.isFinite(value.utilization) || value.utilization < 0) return null;
-  const reset = value.resets_at;
-  if (reset !== null && reset !== undefined && typeof reset !== "string") return null;
-  const resetAtMs = typeof reset === "string" && reset.trim() ? Date.parse(reset) : null;
-  if (typeof reset === "string" && reset.trim() && (resetAtMs === null || !Number.isFinite(resetAtMs) || resetAtMs <= 0)) return null;
-  return {
-    status: null,
-    utilization: Math.min(1, value.utilization / 100),
-    reset_at_ms: resetAtMs,
-    observed_at_ms: observedAtMs,
-  };
-};
-
-/**
- * Parse the two subscription windows this gateway charts. `utilization` is an
- * upstream percentage (0-100); stored quota utilization remains the existing
- * fraction (0-1) contract shared with rate-limit headers.
- */
+/** Direct meters retain their own complete snapshot; canonical guards stay restricted to 5h/7d. */
 export const parseClaudeCodeUsagePayload = (payload: unknown, observedAtMs: number = Date.now()): ClaudeCodeQuotaObservation | null => {
-  if (!isRecord(payload) || !Number.isFinite(observedAtMs) || observedAtMs <= 0) return null;
-  const at = Math.trunc(observedAtMs);
-  const fiveHour = usageWindow(payload.five_hour, at);
-  const sevenDay = usageWindow(payload.seven_day, at);
-  if (!fiveHour || !sevenDay) return null;
-  return {
-    windows: { "5h": fiveHour, "7d": sevenDay },
-    standard: {},
-    representative_claim: null,
-    observed_at_ms: at,
-  };
+  const snapshot = parseClaudeCodeUsageSnapshot(payload, Math.trunc(observedAtMs));
+  if (!snapshot) return null;
+  const windows: Record<string, { status: null; utilization: number | null; reset_at_ms: number | null; observed_at_ms: number }> = {};
+  for (const [key, id] of [
+    ["five_hour", "5h"],
+    ["seven_day", "7d"],
+  ] as const) {
+    const window = snapshot.payload[key];
+    const meter = snapshot.meters.find((item) => item.kind === key);
+    if (window) {
+      const reset = window.resets_at === null ? NaN : Date.parse(window.resets_at);
+      windows[id] = {
+        status: null,
+        utilization: window.utilization === null ? null : Math.min(1, Math.max(0, window.utilization / 100)),
+        reset_at_ms: meter?.reset_at_ms ?? (Number.isSafeInteger(reset) && reset > 0 ? reset : null),
+        observed_at_ms: snapshot.observed_at_ms,
+      };
+    }
+  }
+  return { windows, standard: {}, representative_claim: null, observed_at_ms: snapshot.observed_at_ms, usage_snapshot: snapshot };
 };
 
 const boundedText = async (response: Response): Promise<string> => {
@@ -172,6 +164,6 @@ export const fetchClaudeCodeUsage = async (
     return failure("invalid_response", response.status, observedAtMs, "Claude usage returned an unreadable JSON payload.");
   }
   const observation = parseClaudeCodeUsagePayload(payload, observedAtMs);
-  if (!observation) return failure("invalid_response", response.status, observedAtMs, "Claude usage omitted a valid five-hour or weekly window.");
+  if (!observation) return failure("invalid_response", response.status, observedAtMs, "Claude usage returned an invalid or unrecognized meter payload.");
   return { ok: true, status: response.status, observed_at_ms: observedAtMs, observation };
 };

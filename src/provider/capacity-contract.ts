@@ -1,3 +1,4 @@
+import type { ClaudeCodeUsageSnapshot } from "./claude-code-usage-schema.ts";
 import type { Kv } from "#kv";
 /**
  * Shared provider-capacity storage keys. Keeping the key outside the sampler
@@ -117,6 +118,8 @@ export type ProviderCapacityClaudeError = Readonly<{
 }>;
 
 export type ProviderCapacityClaudeSource = Readonly<{
+  usage_snapshot?: ClaudeCodeUsageSnapshot;
+  usage_stale?: boolean;
   source: "claude_code";
   label: "Claude subscription";
   account_id?: string | null;
@@ -176,6 +179,7 @@ export type ProviderCapacityView = Readonly<
 
 /** Additive Claude evidence; never widen the persisted Codex/metered tuple. */
 export type ClaudeCapacityHistoryPoint = Readonly<{
+  usage_snapshot?: ClaudeCodeUsageSnapshot;
   v: 1;
   point_id: string;
   bucket_start_at_ms: number;

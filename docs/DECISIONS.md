@@ -22,6 +22,14 @@ Reason: the owner required a working independent usage source and rejected synth
 
 Reversal risk: removing the refresh action returns the meter to gateway-traffic-only updates. Polling the endpoint too frequently can trigger upstream rate limits, so only one stale-load attempt, one explicit operator read, and a 60-second freshness window are permitted. Reintroducing an inference request as the usage source would make quota observation consume the quota it is trying to measure.
 
+## Direct Claude usage preserves the complete meter snapshot - 2026-10-25
+
+Direct OAuth usage has a separately timestamped, account/cohort-bound successful snapshot. A successful partial reply replaces its complete prior shape; a failed read keeps the original last-success clock and exposes the failed attempt. Inference headers keep their existing canonical 5h/7d routing semantics and never renew the direct snapshot. A valid server `limits` array, including an empty array, defines the displayed meters in server order with the supplied kind, group, scope labels, severity and headline choice; missing or null `limits` uses independently present legacy subscription windows. Source values and nullable resets remain preserved, including percentages above 100; chart bounds are presentation only. Separate spend and credit fields are diagnostics, not quota capacity or management controls.
+
+Claude history retains the snapshot at the accepted-observation seam; direct meter rollups use a separate namespace and keep each meter/cohort/reset independent. Existing legacy records remain readable without backfill or a new shared capacity denominator. No named or dynamic scoped meter gains global routing authority. The Rust source adapter does not yet preserve these additive fields, so Rust adoption requires a separate source-contract preservation gate rather than claiming TypeScript/Rust round-trip parity.
+
+Reason: the native Claude Code 2.1.310 schema permits independent null/missing windows and server-selected scoped meters; requiring both canonical windows discarded valid replies and hid returned quota. Reversal risk: merging individual fields from older snapshots would present missing windows as current, and deriving global guards from scoped meters would block unrelated models.
+
 ## Admin console browser sign-in is Passport-only - 2026-10-25
 
 The admin console and chat present the Ubiquity-branded Passport sign-in button established in the Passport `sign-in-buttons` study: the Ubiquity mark plus the label "Sign in with Ubiquity". The admin page exposes only that browser sign-in; its former secondary "Sign in" gate, passkey controls, and admin-token controls are removed from the visible page. Hidden compatibility nodes preserve existing client code and local automation. Programmatic admin tokens and existing passkey relay routes remain available to command-line tooling and separately supported clients.

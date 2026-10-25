@@ -14,17 +14,17 @@ Reason: OpenRouter's default model list omits decision models, so the admin pick
 
 Reversal risk: returning to the default text-only discovery hides every decision model again. Advertising decision rows on Chat Completions or Responses, or accepting text rows on `/v1/decisions`, would produce guaranteed upstream failures and break the gateway's listed-equals-servable contract.
 
-## Admin Analytics omits the Claude subscription meter - 2026-10-25
+## Admin Analytics restores the Claude subscription meter with an explicit refresh - 2026-10-25
 
-The admin Analytics view no longer renders the Claude subscription capacity rows, Claude chart series, account selector, or history caption. The shared provider controls and Claude credential management remain in Providers. The retained API response still carries the internal Claude diagnostic fields for operator and compatibility use.
+The admin Analytics view restores the Claude subscription capacity rows and chart series. Each Claude account row exposes a **Refresh usage** action, and the first stale row rendered in a page session triggers the same refresh once automatically. The action calls `POST /admin/providers/claude-code/quota/refresh`, which selects the account's Haiku model (or first discovered model), sends a one-token streaming Messages request, captures the unified quota headers, cancels the response body, and records the accepted observation through the existing quota writer. A refresh within the previous 60 seconds returns the current evidence without another provider call. Claude traffic routed through the gateway continues to update the meter automatically through the existing header-observation path.
 
-Reason: the live observation record contained only a 2026-10-16 gateway observation while the admin page continued to show its percentage as capacity. The configured OAuth setup token cannot call Claude's OAuth usage endpoint because it lacks the `user:profile` scope, so only actual Claude traffic through the gateway can refresh the headers. A meter that remains stale for days is misleading; removing it is preferable to polling with synthetic inference or fabricating updates.
+Reason: the owner rejected removing the meter and required a working source. The stored OAuth setup token cannot call Anthropic's separate usage endpoint because it lacks the `user:profile` scope. The unified rate-limit headers on a minimal Messages request are the authoritative independent source, and a manual action avoids background synthetic traffic. The same endpoint remains available to gateway traffic, so ordinary Claude use refreshes the meter without pressing the button.
 
-Reversal risk: restoring the meter without a profile-scoped usage source returns the same frozen percentage display. A future live meter needs an explicitly supported quota source and honest observation-time labeling.
+Reversal risk: removing the refresh action returns the meter to waiting-only updates. Continuous polling would consume subscription requests indefinitely and is deliberately not used; only one stale-load attempt and explicit operator refresh are permitted. A future profile-scoped usage source may replace the minimal probe without changing the meter's observation contract.
 
 ## Admin console browser sign-in is Passport-only - 2026-10-25
 
-The admin console presents one browser sign-in action, Passport. The former secondary "Sign in" gate, passkey controls, and admin-token controls are removed from the visible page; hidden compatibility nodes preserve existing client code and local automation. Programmatic admin tokens and existing passkey relay routes remain available to command-line tooling and separately supported clients.
+The admin console and chat present the Ubiquity-branded Passport sign-in button established in the Passport `sign-in-buttons` study: the Ubiquity mark plus the label "Sign in with Ubiquity". The admin page exposes only that browser sign-in; its former secondary "Sign in" gate, passkey controls, and admin-token controls are removed from the visible page. Hidden compatibility nodes preserve existing client code and local automation. Programmatic admin tokens and existing passkey relay routes remain available to command-line tooling and separately supported clients.
 
 Reason: the owner reported two login choices and requested Passport as the only login service.
 

@@ -308,6 +308,7 @@ export const unavailableClaudeCapacitySource = (snapshotAtMs: number): ProviderC
   workspace_id: null,
   windows: { five_hour: null, seven_day: null },
   standard: [],
+  usage: null,
   blocked_until_ms: null,
   cooldown_until_ms: null,
   last_error: null,
@@ -366,6 +367,7 @@ const capacitySourceForClaudeAccount = async (
       seven_day: claudeCapacityWindow(quota?.windows["7d"]),
     },
     standard: claudeStandardLimits(quota),
+    usage: quota?.usage ?? null,
     blocked_until_ms: blockedUntilMs,
     cooldown_until_ms: cooldownUntilMs,
     last_error: lastError

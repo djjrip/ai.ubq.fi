@@ -104,6 +104,58 @@ test("a configured tier reports its credential, workspace, and observed subscrip
   });
 });
 
+test("direct usage state is visible in capacity without becoming an inference guard", async () => {
+  await withKv(async (kv) => {
+    const store = kv as unknown as Kv;
+    await storeClaudeCodeStoredCredential(store, { secret: "sk-ant-oat-usage-state-fixture" });
+    await recordClaudeCodeQuotaOutcome(store, {
+      observation: {
+        windows: {
+          "5h": { status: null, utilization: 0.42, reset_at_ms: NOW_MS + 3_600_000, observed_at_ms: NOW_MS },
+          "7d": { status: null, utilization: 0.12, reset_at_ms: NOW_MS + 86_400_000, observed_at_ms: NOW_MS },
+        },
+        standard: {},
+        representative_claim: null,
+        observed_at_ms: NOW_MS,
+      },
+      usage: {
+        source: "oauth_usage",
+        state: "ok",
+        status: 200,
+        message: null,
+        attempted_at_ms: NOW_MS,
+        observed_at_ms: NOW_MS,
+      },
+      nowMs: NOW_MS,
+    });
+    const observed = await claudeCapacitySource(store, NOW_MS + 1_000, nullEnv);
+    const usage = observed.usage;
+    assert(usage);
+    assert.equal(usage.state, "ok");
+    assert.equal(usage.source, "oauth_usage");
+    assert.equal(observed.windows.five_hour?.used_percent, 42);
+
+    await recordClaudeCodeQuotaOutcome(store, {
+      observation: null,
+      usage: {
+        source: "oauth_usage",
+        state: "scope_missing",
+        status: 403,
+        message: "OAuth token is missing the user:profile scope",
+        attempted_at_ms: NOW_MS + 2_000,
+        observed_at_ms: null,
+      },
+      nowMs: NOW_MS + 2_000,
+    });
+    const missingScope = await claudeCapacitySource(store, NOW_MS + 3_000, nullEnv);
+    assert.equal(missingScope.state, "available", "a usage-only scope failure does not disable inference");
+    assert.equal(missingScope.last_error, null);
+    assert.equal(missingScope.cooldown_until_ms, null);
+    assert.equal(missingScope.usage?.state, "scope_missing");
+    assert.equal(missingScope.windows.five_hour?.used_percent, 42, "the last accepted window is preserved");
+  });
+});
+
 test("a recorded configuration rejection keeps the tier unavailable with its exact reason", async () => {
   await withKv(async (kv) => {
     const store = kv as unknown as Kv;

@@ -1308,6 +1308,7 @@ const appendCapacitySourceMeta = (row, source, provider = null) => {
     appendProviderFact(facts, "Last event", health?.last_event ?? "Not observed");
     appendProviderFact(facts, "Blocked until", formatCapacityTimestamp(source.blocked_until_ms, "Not blocked"));
     appendProviderFact(facts, "Cooldown until", formatCapacityTimestamp(source.cooldown_until_ms, "No cooldown"));
+    appendProviderFact(facts, "Usage read", claudeUsageReadLabel(source.usage));
     appendProviderFact(
       facts,
       "Last upstream error",
@@ -1523,6 +1524,16 @@ const claudeCapacityCredentialLabel = (source) => {
   return "Not configured";
 };
 
+const claudeUsageReadLabel = (usage) => {
+  if (!usage || typeof usage !== "object") return "Not attempted · gateway headers only";
+  const attempted = formatDate(usage.attempted_at_ms);
+  if (usage.state === "ok") return `OAuth usage API · succeeded ${attempted}`;
+  if (usage.state === "scope_missing") return `OAuth usage API · user:profile scope missing · ${attempted}`;
+  if (usage.state === "unsupported_credential") return "OAuth usage API · unavailable for Console API keys";
+  const status = typeof usage.status === "number" ? ` · HTTP ${usage.status}` : "";
+  return `OAuth usage API · ${usage.state || "unknown"}${status} · ${attempted}${usage.message ? ` — ${usage.message}` : ""}`;
+};
+
 const claudeUsageAutoRefreshAttempted = new Set();
 
 const claudeCapacityWindowForDisplay = (window) => {
@@ -1533,7 +1544,7 @@ const claudeCapacityWindowForDisplay = (window) => {
   };
 };
 
-/** Explicitly refresh one account's headers with a minimal streaming probe, then reload the meter. */
+/** Read one account's usage directly from Anthropic's OAuth endpoint, then reload the meter. */
 const refreshClaudeUsage = async (source, button, options = {}) => {
   if (!adminAccessState.isAdmin || !hasAdminCredential() || typeof source.account_id !== "string") return;
   const target = apiUrl("/admin/providers/claude-code/quota/refresh");
@@ -1550,12 +1561,18 @@ const refreshClaudeUsage = async (source, button, options = {}) => {
     const payload = await response.json().catch(() => null);
     if (!response.ok) throw new Error(payload?.error?.message || "Claude usage refresh failed");
     if (options.automatic !== true) {
-      toast.success(payload?.refreshed === false ? "Claude usage is current" : "Claude usage refreshed", {
-        description:
-          payload?.refreshed === false
-            ? "The last observation is less than a minute old."
-            : `Observed ${formatCapacityTimestamp(payload?.observed_at_ms)}.`,
-      });
+      if (payload?.refreshed === false && payload?.reason !== "fresh") {
+        toast.info("Claude usage source unavailable", {
+          description: payload?.message || "The direct usage read did not return subscription windows.",
+        });
+      } else {
+        toast.success(payload?.refreshed === false ? "Claude usage is current" : "Claude usage refreshed", {
+          description:
+            payload?.refreshed === false
+              ? "The last usage attempt is less than a minute old."
+              : `Observed ${formatCapacityTimestamp(payload?.observed_at_ms)}.`,
+        });
+      }
     }
     await loadProviderCapacity();
     void loadClaudeSubscription();
@@ -1606,7 +1623,7 @@ const renderClaudeCapacitySource = (source) => {
   refresh.type = "button";
   refresh.dataset.capacityRefresh = "";
   refresh.textContent = "Refresh usage";
-  refresh.title = "Uses one minimal streaming Claude request to read the current quota headers.";
+  refresh.title = "Reads Anthropic's OAuth usage endpoint without sending an inference request.";
   refresh.disabled = !source.account_id;
   refresh.addEventListener("click", () => void refreshClaudeUsage(source, refresh));
   header.append(title, badge, refresh);

@@ -319,3 +319,41 @@ M32 unit-v2 was separately admitted at exact `0c75ffc2571ef59ff7d3d24c4b9d57d090
 The supported plan generator is rerun after exact M32 and the capacity member integrate; native 31 packages/24 test packages/52 commands and WASM 26 packages/five commands including the actual Worker build replace the stale native 30/WASM 25 composition. These are selection plans, not executed Rust gates. The full selected native/WASM CLI, strict comparator, affected tests and actual source-bound Worker/native artifacts remain required on a newly frozen clean canonical commit and tree. Native fixture prerequisites, the existing Darwin boundaries, manifest line-table profiles, shared compiler lock and source-owner cache guards remain unchanged. M64's separately owned synthetic native-example sequence retains its reserved compiler slot; this assembly queues no quality compiler.
 
 No baseline updater runs until a complete strict capture passes with zero unallowlisted changed contexts, and updates remain downward-only through supported tools. Preserve every original failure, static log, handback and source identity in ignored canonical custody. The clean source-candidate checkpoint after these edits is frozen only when the controller accepts its exact head/tree; it remains separate from the final post-baseline independent acceptance tree. Full remaining crate-size and staged lint debt cleanup continues beyond PR #1301; no component admission closes that goal.
+
+## 2026-10-25 complete diagnostic and downward-baseline checkpoint
+
+All six admitted V8 cleanup tips retain ancestry, including the atomic M33/M37 unit and the exact M32 fixture/dependency integration recorded above. Subsequent canonical corrections were scoped source work with normal hooks; every changed source invalidated its earlier receipt. The final diagnostic source is `1a000e6ace8cc4a870b6438b952d91f504b2d5c4`, tree `3de370238533ec533435075db5e4ca1e95c98f49`.
+
+| Source commit                              | Scoped correction                                                                                                                                        |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `4ca4cd2bd12b6de7f24e4fd03b4f68332d2e267a` | Use the existing ControlFlow Break variant for the lossless defaults response rail.                                                                      |
+| `0e899d723dde4afa061eb253061bb72fbffdf205` | Remove exactly two unused Migration imports and nine redundant reference layers.                                                                         |
+| `7671575d0f04337d6b25144b85cf0c37039849ee` | Preserve the explicit fixture missing-row error and the original administrative-observation boolean return.                                              |
+| `9cf420990c2f7bf5c7e5ab2503167d281eeae3e4` | Pass the already borrowed Worker request directly.                                                                                                       |
+| `a66a3936814140e1feae83b4d8f4ad9023b2c6c1` | Retain the Claude fixture Bootstrap and credential failure rail; relocate the exact shared test executor into the existing defining test-support module. |
+| `1a000e6ace8cc4a870b6438b952d91f504b2d5c4` | Preserve the expected kernel-quota GatewayError/status assertion through an explicit negative-fixture error rail.                                        |
+
+The first literal Claude fixture correction formatted to 1521 reachable lines and stopped before commit because its current ceiling was 1520. The separately approved real executor relocation retained its algorithm bytes, all call sites/case names/assertions/literal values, and the two original fixture corrections; the resulting contracts target is 1509 lines and the existing helper crate is 167 lines. No blank/comment/assertion offset, new dependency or production API was used. The kernel refusal fixture measures 1191 reachable lines against the independently measured V8 source ceiling 1209; its larger historical adoption allowance was not used to justify growth.
+
+Complete native 31-package and WASM 26-package Clippy captures both compiled and passed the unchanged strict staged comparator with zero new contexts. The fresh executed receipt is `591bceabb6cc0ae63ee09ee9914b02c17ad0b9b53f9be3f4389670cde15755a5/0ca008a8-ea40-4f5e-bdaa-aa4a5cdcc1ad`. Its native JSONL SHA-256 is `373d64d3d43bf431e0166fb2e781f974174c948a2e117c4f4aa9f04ff611bf2d`, WASM JSONL SHA-256 is `68b5fa9cc0d1639601194a2040169c2aa3eb5049eae4cdc429107c2d5d18affe`, and both saved source-context inventories have SHA-256 `a00996c7c20838617a44e9db1c413d133851b1eb477ece386ed5eb9a6ee069fa`. Actual compiler argv, terminal phase/exit, source/driver/environment bindings and complete raw outputs remain in canonical custody. These captures ran no behavior tests or Worker build.
+
+Only after both full strict stages passed, the controller approved the supported structural updater and the complete native/WASM staged updaters. All three commands exited 0; receipt `591bceabb6cc0ae63ee09ee9914b02c17ad0b9b53f9be3f4389670cde15755a5/880b0300-021b-4f05-8b3c-54b9547d24e8` retains their exact commands and outputs. Every count/key only fell or disappeared, adoption metadata remained decoded-equal, and all 807 independently bound Rust source/manifest inputs stayed byte-identical. No manual allowance, old fingerprint transfer, partial capture, source suppression or update initialization was used.
+
+| Baseline surface                                  | Before | After  |
+| ------------------------------------------------- | ------ | ------ |
+| Oversized production crates                       | 18     | 18     |
+| Recorded oversized production lines               | 164580 | 164064 |
+| Oversized separate targets                        | 14     | 13     |
+| Recorded oversized target lines                   | 23815  | 21272  |
+| Visible re-exports                                | 131    | 0      |
+| Path attributes                                   | 27     | 0      |
+| Source suppressions                               | 1      | 0      |
+| Include macros                                    | 0      | 0      |
+| Native staged keys, including context bookkeeping | 4940   | 4017   |
+| WASM staged keys, including context bookkeeping   | 991    | 616    |
+
+Remaining staged lint occurrences are native 153 excessive-nesting, 261 expect-used, 101 too-many-lines, 6840 unwrap-used and 82 wildcard-imports; WASM has 130, 196, 82, 31 and 77 respectively. Context occurrence bookkeeping is 2097 native and 380 WASM; it is not a separate defect count. The 18 oversized production crates, 13 oversized targets and this remaining staged debt keep the full Rust quality goal open. No paired compile-performance improvement is claimed from validation timings.
+
+Local review is unavailable, and no verified review findings were ingested. Hosted CI was not manually enabled, dispatched or rerun. The independent final selected CLI, affected tests, actual source-bound native/Worker artifacts and exact final commit/tree acceptance remain pending after this baseline/documentation commit. The successful pre-update captures and updater receipt are preparation evidence, not final acceptance or deployment authority.
+
+The custody ledger at canonical `.data/rust-quality-wave2-20261025/LATEST.json` binds the original baseline, all successful/failed captures, typed correction proofs, the no-growth contradiction and relocation, raw outputs, source contexts, tool/native-KV preparation and terminal records. The previously disclosed failed-bootstrap ancillary observer gap stays explicit; its original raw streams and exact restored journals remain separately verifiable. Separate M60/M61/M63/M64 functional work remains with its controller and does not enter this quality graph or acceptance implicitly.

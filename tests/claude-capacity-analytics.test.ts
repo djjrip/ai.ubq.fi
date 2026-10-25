@@ -658,8 +658,8 @@ test("capacity polling collects every Claude account before inference and return
       assert.doesNotMatch(url, /\/v1\/messages|\/v1\/responses|\/v1\/chat/);
       if (url !== "https://api.anthropic.com/api/oauth/usage") return Promise.resolve(Response.json({}, { status: 503 }));
       assert.equal(init?.method, "GET");
-      assert.equal(init?.body, undefined);
-      authorizations.add(new Headers(init?.headers).get("authorization"));
+      assert.equal(init.body, undefined);
+      authorizations.add(new Headers(init.headers).get("authorization"));
       calls++;
       at += 5;
       return Promise.resolve(Response.json(directUsagePayload(at, calls > 2 ? 61 : 42)));
@@ -698,14 +698,14 @@ test("manual and sampler usage refreshes share an account lease and preserve obs
     await storeClaudeCodeStoredCredential(store, { secret: "sk-ant-oat-concurrent-usage" });
     const account = await resolveClaudeCodeAccount(store, nullEnv);
     assert(account);
-    const fetched = Promise.withResolvers<void>();
+    const fetched = Promise.withResolvers<undefined>();
     const released = Promise.withResolvers<Response>();
     let calls = 0;
     const first = refreshClaudeCodeUsage(store, account, {
       now: () => NOW_MS,
       fetcher: () => {
         calls++;
-        fetched.resolve();
+        fetched.resolve(undefined);
         return released.promise;
       },
     });
@@ -721,9 +721,9 @@ test("manual and sampler usage refreshes share an account lease and preserve obs
     });
     const quota = await loadClaudeCodeQuotaState(store, account);
     assert.equal(quota?.usage?.state, "scope_missing");
-    assert.equal(quota?.windows["5h"]?.utilization, 0.42);
-    assert.equal(quota?.blocked_until_ms, null);
-    assert.equal(quota?.cooldown_until_ms, null);
+    assert.equal(quota.windows["5h"]?.utilization, 0.42);
+    assert.equal(quota.blocked_until_ms, null);
+    assert.equal(quota.cooldown_until_ms, null);
     assert.equal((await readClaudeCapacityHistory(store, NOW_MS + CLAUDE_CODE_USAGE_FRESH_MS)).points.length, 1);
   });
 });

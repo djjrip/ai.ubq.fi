@@ -23,7 +23,7 @@ import {
   discoverClaudeCodeModels,
   type ClaudeCodeModelsSnapshot,
 } from "../provider/claude-code-models.ts";
-import { clearClaudeCodeQuotaGuards, loadClaudeCodeQuotaState } from "../provider/claude-code-quota.ts";
+import { clearClaudeCodeQuotaGuards } from "../provider/claude-code-quota.ts";
 import { refreshClaudeCodeUsage } from "../provider/claude-code-usage-refresh.ts";
 import { getPassiveProviderHealthSnapshot } from "../health.ts";
 import {

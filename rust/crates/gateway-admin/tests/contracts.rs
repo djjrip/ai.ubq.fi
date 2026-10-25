@@ -3,7 +3,7 @@ use gateway_admin::{
     keys::*,
     operations::{AdminHost, AdminInput, PaidKeyFields, missing_capability},
     routes::{AdminOperation, match_route},
-    service::{self, AdminService},
+    service::AdminService,
 };
 use gateway_admin_test_support::source_store::Store;
 use gateway_auth::{

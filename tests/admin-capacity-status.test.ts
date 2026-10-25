@@ -74,6 +74,49 @@ const presenters = context as typeof context & {
   renderMeta: (row: TestElement, source: unknown, provider: unknown) => void;
 };
 
+test("admin console exposes Passport as its only browser sign-in", () => {
+  const html = readFileSync(new URL("../static/admin.html", import.meta.url), "utf8");
+  const gateStart = html.indexOf('id="admin-auth-gate"');
+  const gate = html.slice(gateStart, html.indexOf('id="admin-loading-grid"', gateStart));
+  assert.equal((gate.match(/<button\b/g) ?? []).length, 1, "the sign-in gate has one button");
+  assert.match(gate, /id="admin-passport-login"/);
+  assert.doesNotMatch(gate, /admin-auth-gate-open|passkey|admin token/i);
+  const compatStart = html.indexOf('id="admin-auth-compat"');
+  const compat = html.slice(compatStart, html.indexOf("</div>", compatStart));
+  assert.ok(compatStart > 0);
+  assert.match(compat, /^id="admin-auth-compat" hidden aria-hidden="true"/, "non-Passport control nodes remain hidden plumbing only");
+  assert.doesNotMatch(html, /<details data-passkey-advanced|<details data-token-fallback/);
+});
+
+test("opening the account panel never exposes a second Passport button", () => {
+  const authGate = new TestElement();
+  const loadingGrid = new TestElement();
+  const loadingTitle = { textContent: "" };
+  const body = { dataset: { authWidget: "collapsed" } };
+  const fixture = {
+    authGate,
+    loadingGrid,
+    loadingTitle,
+    document: { body },
+    adminAccessState: { checked: true, isAdmin: false },
+    hasAdminCredential: () => false,
+  };
+  runInNewContext(
+    sourceText.slice(sourceText.indexOf("const syncLoadingGate ="), sourceText.indexOf("const resetLoadingPrefetchStatuses =")) +
+      "\nglobalThis.sync = syncLoadingGate;",
+    fixture
+  );
+  const sync = (fixture as typeof fixture & { sync: () => void }).sync;
+  sync();
+  assert.equal(authGate.hidden, false, "the gate owns the single signed-out Passport action");
+  body.dataset.authWidget = "expanded";
+  sync();
+  assert.equal(authGate.hidden, true, "opening the account panel removes the duplicate gate action");
+  body.dataset.authWidget = "collapsed";
+  sync();
+  assert.equal(authGate.hidden, false);
+});
+
 test("Claude credential actions stay within the existing provider entry and survive roster renders", () => {
   const html = readFileSync(new URL("../static/admin.html", import.meta.url), "utf8");
   assert.doesNotMatch(html, /card-claude-subscription/);
@@ -229,7 +272,7 @@ test("shared Claude analytics diagnostics retain credential, workspace and routi
     [
       sourceText.slice(sourceText.indexOf("const providerBadgeState"), sourceText.indexOf("const formatCapacityPercent")),
       sourceText.slice(sourceText.indexOf("const capacityProviderStatus"), sourceText.indexOf("let codexResetSettings")),
-      sourceText.slice(sourceText.indexOf("const claudeCapacityCredentialLabel"), sourceText.indexOf("const claudeCapacityWindowForDisplay")),
+      sourceText.slice(sourceText.indexOf("const claudeCapacityCredentialLabel"), sourceText.indexOf("const renderProviderCapacityList")),
       sourceText.slice(sourceText.indexOf("const claudeCredentialSourceLabel"), sourceText.indexOf("const renderClaudeSubscriptionControls")),
       "globalThis.render = appendCapacitySourceMeta;",
     ].join("\n"),
@@ -257,77 +300,6 @@ test("shared Claude analytics diagnostics retain credential, workspace and routi
   assert.equal(facts["Principal allowlist"], "Configured");
   assert.equal(facts.Inference, "healthy");
   assert.equal(facts["Last event"], "success");
-});
-
-test("shipped Claude rows never reuse another account or replacement cohort's masked diagnostics", () => {
-  class Row extends TestElement {
-    setAttribute() {}
-  }
-  const providerA = { account_id: "local-a", account_cohort_id: "cohort-a", label: "A", credential: { hint: "masked-a" } };
-  const providerB = { account_id: "local-b", account_cohort_id: "cohort-b", label: "B", credential: { hint: "masked-b" } };
-  const rendered: unknown[] = [];
-  const fixture = {
-    document: { createElement: () => new Row() },
-    latestClaudeSubscription: { accounts: [providerA, providerB], enabled: true, principal_allowlist_configured: true },
-    latestProviderHealth: null,
-    setBadge: () => {},
-    capacityBadgeState: () => "unknown",
-    capacityStateLabel: () => "Unknown",
-    renderCapacityWindow: () => {},
-    appendCapacitySourceMeta: (_row: unknown, _source: unknown, provider: unknown) => rendered.push(provider),
-  };
-  runInNewContext(
-    sourceText.slice(sourceText.indexOf("const claudeCapacityWindowForDisplay ="), sourceText.indexOf("const renderProviderCapacityList =")) +
-      "\nglobalThis.render = renderClaudeCapacitySource;",
-    fixture
-  );
-  const render = (fixture as typeof fixture & { render: (source: unknown) => void }).render;
-  render({ source: "claude_code", account_id: "local-b", account_cohort_id: "cohort-b", windows: {} });
-  assert.equal((rendered[0] as { credential: { hint: string } }).credential.hint, "masked-b");
-  render({ source: "claude_code", account_id: "local-b", account_cohort_id: "old-cohort-b", windows: {} });
-  assert.equal(rendered[1], null, "a poll racing credential replacement displays unknown metadata, never the replacement's provenance");
-});
-
-test("shipped shared capacity list supports legacy singleton and distinct roster rows with stable disclosure state", () => {
-  class CapacityRow extends TestElement {
-    details = new TestElement();
-    querySelector() {
-      return this.details;
-    }
-  }
-  const list = new TestElement();
-  const fixture = {
-    providerCapacityList: list,
-    providerForCodexSlot: () => null,
-    renderCodexCapacitySource: () => new CapacityRow(),
-    renderClaudeCapacitySource: (entry: { account_id?: string }) => {
-      const row = new CapacityRow();
-      row.dataset.accountId = entry.account_id ?? "legacy";
-      return row;
-    },
-  };
-  runInNewContext(
-    sourceText.slice(sourceText.indexOf("const claudeCapacitySourcesForDisplay ="), sourceText.indexOf("const unavailableCodexCapacitySource =")) +
-      "\nglobalThis.render = renderProviderCapacityList;",
-    fixture
-  );
-  const render = (fixture as typeof fixture & { render: (sources: unknown[], active: unknown, accounts?: unknown[]) => void }).render;
-  const sources = [
-    { source: "codex", slot: 1, account_cohort_id: "codex-a" },
-    { source: "codex", slot: 2, account_cohort_id: "codex-b" },
-  ];
-  const a = { source: "claude_code", account_id: "local-a" };
-  const b = { source: "claude_code", account_id: "local-b" };
-  render(sources, a);
-  assert.equal(list.children.length, 3, "an old server's singleton still renders once");
-  render(sources, a, [a, b]);
-  assert.equal(list.children.length, 4, "the active projection is not appended again beside the roster");
-  (list.children[2] as CapacityRow).details.open = true;
-  render(sources, b, [b, a]);
-  assert.equal((list.children[2] as CapacityRow).details.open, false, "reordering cannot move another account's disclosure state");
-  assert.equal((list.children[3] as CapacityRow).details.open, true);
-  render(sources, a, []);
-  assert.equal(list.children.length, 2, "an explicit empty roster does not resurrect a stale active projection");
 });
 
 test("shipped routing warnings describe only disabled capacity and paid fallback, not a false Claude paid-first route", () => {
@@ -465,7 +437,7 @@ test("the provider picker preserves missing subscriptions until the Codex tier i
   assert.equal(fixture.providersSummary.textContent, "All 3 providers checked: no filter is saved, so every provider is active.");
 });
 
-test("shipped capacity summary counts exactly displayed Claude roster or legacy rows without changing Codex chart inputs", () => {
+test("shipped capacity summary ignores Claude diagnostics and keeps the Codex chart inputs", () => {
   const badges: string[] = [];
   const chartSources: { source: string }[][] = [];
   const fixture = {
@@ -479,8 +451,7 @@ test("shipped capacity summary counts exactly displayed Claude roster or legacy 
     formatCapacityTimestamp: () => "observed",
   };
   runInNewContext(
-    sourceText.slice(sourceText.indexOf("const claudeCapacitySourcesForDisplay ="), sourceText.indexOf("const renderProviderCapacityList =")) +
-      sourceText.slice(sourceText.indexOf("const unavailableCodexCapacitySource ="), sourceText.indexOf("const CAPACITY_CHART_SVG_NS =")) +
+    sourceText.slice(sourceText.indexOf("const unavailableCodexCapacitySource ="), sourceText.indexOf("const CAPACITY_CHART_SVG_NS =")) +
       sourceText.slice(sourceText.indexOf("const renderProviderCapacity ="), sourceText.indexOf("const loadProviderCapacity =")) +
       "\nglobalThis.render = renderProviderCapacity;",
     fixture
@@ -488,24 +459,27 @@ test("shipped capacity summary counts exactly displayed Claude roster or legacy 
   const render = (fixture as typeof fixture & { render: (snapshot: unknown) => void }).render;
   const codex = (state: string) => [1, 2].map((slot) => ({ source: "codex", slot, state }));
   const account = (id: string, state: string) => ({ source: "claude_code", account_id: id, state });
-  const a = account("a", "available");
-  const b = account("b", "stale");
-  const snapshot = { sources: codex("unavailable"), claude: a, claude_accounts: [a, b], prompt_cache: { status: "ready" } };
+  const snapshot = {
+    sources: codex("unavailable"),
+    claude: account("a", "available"),
+    claude_accounts: [account("a", "available")],
+    prompt_cache: { status: "ready" },
+  };
   const before = structuredClone(snapshot);
   render(snapshot);
-  assert.equal(badges.at(-1), "Partial quota · 2 unavailable", "live Claude capacity cannot be summarized as wholly unavailable");
+  assert.equal(badges.at(-1), "Quota unavailable", "the removed Claude meter cannot make the Codex summary look partially available");
   assert.deepEqual(snapshot, before, "summary presentation cannot fabricate a quota or mutate the snapshot");
-  render({ ...snapshot, sources: codex("available"), claude: account("old-active", "unavailable"), claude_accounts: [b] });
-  assert.equal(badges.at(-1), "Quota stale · 1 source", "do not append the active compatibility projection beside an explicit roster");
-  render({ ...snapshot, sources: codex("available"), claude: account("removed", "unavailable"), claude_accounts: [] });
-  assert.equal(badges.at(-1), "Up to date", "a present empty roster does not resurrect removed current evidence");
-  render({ sources: codex("unavailable"), claude: a, prompt_cache: { status: "ready" } });
-  assert.equal(badges.at(-1), "Partial quota · 2 unavailable", "old singleton servers retain truthful summary presentation");
-  render({ sources: codex("unavailable"), claude_accounts: [account("a", "unavailable")] });
+  render({ sources: codex("available"), claude: account("a", "stale"), prompt_cache: { status: "ready" } });
+  assert.equal(badges.at(-1), "Up to date");
+  render({ sources: codex("unavailable"), prompt_cache: { status: "ready" } });
   assert.equal(badges.at(-1), "Quota unavailable");
-  render({});
-  assert.equal(badges.at(-1), "Quota unavailable", "missing evidence is not made available");
   assert(chartSources.every((sources) => sources.length === 2 && sources.every((entry) => entry.source === "codex")));
+  assert.doesNotMatch(
+    sourceText.slice(sourceText.indexOf("const renderProviderCapacityList ="), sourceText.indexOf("const unavailableCodexCapacitySource =")),
+    /claude/i,
+    "the capacity list renders only Codex rows"
+  );
+  assert.doesNotMatch(sourceText, /CLAUDE_CAPACITY_CHART_SERIES|renderClaudeHistory|claude-five-hour|claude-seven-day/);
 });
 
 test("current accepted quota access is reachable while its failed refresh attempt stays visible", () => {
@@ -727,74 +701,6 @@ test("shipped retention renderer refuses incomplete, errored, unavailable or cor
       "Capture storage usage unavailable · Gateway text logs 2 GiB · Text logs reached 1 GiB; rotation is separate."
     );
   }
-});
-
-const claudeChartContext = {
-  CAPACITY_CHART_BUCKET_MS: 900_000,
-  clampCapacityChartPercent: (value: number) => Math.max(0, Math.min(100, value)),
-  formatCapacityTimestamp: (value: unknown) => {
-    if (typeof value === "number" || typeof value === "string") return String(value);
-    return "Not reported";
-  },
-};
-runInNewContext(
-  sourceText.slice(sourceText.indexOf("const CLAUDE_CAPACITY_CHART_SERIES ="), sourceText.indexOf("const capacityChartFailureIsDowntime =")) +
-    "\nglobalThis.points = claudeCapacityChartPoints; globalThis.summary = claudeHistorySummary;",
-  claudeChartContext
-);
-const claudeChart = claudeChartContext as typeof claudeChartContext & {
-  points: (view: unknown, account: string, window: string, interval: unknown) => ({ remainingPercent: number } | null)[];
-  summary: (snapshot: unknown, now: number) => string;
-};
-const historyStart = 1_800_000_000_000;
-const historyInterval = { startAtMs: historyStart, resetAtMs: historyStart + 3_600_000, durationMs: 3_600_000 };
-const historySample = (offset: number, patch: Record<string, unknown> = {}) => ({
-  account_id: "local-a",
-  account_cohort_id: "cohort-a",
-  credential_kind: "oauth",
-  workspace_id: null,
-  state: "available",
-  sampled_at_ms: historyStart + offset,
-  source_observed_at_ms: historyStart + offset,
-  bucket_start_at_ms: Math.floor((historyStart + offset) / 900_000) * 900_000,
-  windows: { five_hour: { used_percent: 7, reset_at_ms: historyStart + 18_000_000, observed_at_ms: historyStart + offset } },
-  ...patch,
-});
-
-test("shipped Claude chart uses actual window timestamps and never anchors a current value", () => {
-  const view = { stale_after_ms: 1_800_000, points: [historySample(0), historySample(1_000)] };
-  const points = claudeChart.points(view, "local-a", "five_hour", historyInterval);
-  assert.equal(points.filter(Boolean).length, 2);
-  assert.equal(points.filter((point) => point === null).length, 1);
-  assert.equal(points.at(-1)?.remainingPercent, 93);
-  assert.deepEqual(Array.from(claudeChart.points(view, "local-a", "seven_day", historyInterval).filter(Boolean)), []);
-  const noTime = historySample(2_000, { windows: { five_hour: { used_percent: 0, reset_at_ms: null, observed_at_ms: null } } });
-  assert.equal(claudeChart.points({ points: [noTime] }, "local-a", "five_hour", historyInterval).filter(Boolean).length, 0);
-});
-
-test("shipped Claude chart breaks cohort, reset, unavailable and missing-bucket runs without inventing downtime", () => {
-  const cases = [
-    historySample(1_000, { account_cohort_id: "replacement" }),
-    historySample(1_000, { credential_kind: "api_key" }),
-    historySample(1_000, { workspace_id: "other-workspace" }),
-    historySample(1_000, { state: "unavailable" }),
-    historySample(1_000, { windows: { five_hour: { used_percent: 0, reset_at_ms: historyStart + 36_000_000, observed_at_ms: historyStart + 1_000 } } }),
-    historySample(2_700_000),
-  ];
-  for (const sample of cases) {
-    const points = claudeChart.points({ points: [historySample(0), sample] }, "local-a", "five_hour", historyInterval);
-    assert.equal(points.filter((point) => point === null).length, 2);
-    assert.equal(points.filter(Boolean).length, 2, "a measured zero stays an observed point, not a fabricated missing value");
-  }
-  assert.match(claudeChart.summary({ claude_history: { scan: "unavailable", points: [] } }, historyStart), /unavailable/);
-  assert.match(claudeChart.summary({ claude_history: { scan: "ok", truncated: true, points: [] } }, historyStart), /truncated/);
-  const aggregate = /const CAPACITY_CHART_SERIES = ([^;]+);/.exec(sourceText)?.[1] ?? "";
-  assert.doesNotMatch(aggregate, /claude/, "Claude never changes Codex aggregate membership");
-  assert.doesNotMatch(
-    sourceText.slice(sourceText.indexOf("const renderClaudeHistorySelector ="), sourceText.indexOf("const renderClaudeHistoryPaths =")),
-    /fetch\(|mutateClaude|activate/,
-    "history selection is view-only"
-  );
 });
 
 test("shipped shared account controls preserve scoped drafts and send only explicit account/access actions", async () => {

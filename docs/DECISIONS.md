@@ -14,6 +14,22 @@ Reason: OpenRouter's default model list omits decision models, so the admin pick
 
 Reversal risk: returning to the default text-only discovery hides every decision model again. Advertising decision rows on Chat Completions or Responses, or accepting text rows on `/v1/decisions`, would produce guaranteed upstream failures and break the gateway's listed-equals-servable contract.
 
+## Admin Analytics omits the Claude subscription meter - 2026-10-25
+
+The admin Analytics view no longer renders the Claude subscription capacity rows, Claude chart series, account selector, or history caption. The shared provider controls and Claude credential management remain in Providers. The retained API response still carries the internal Claude diagnostic fields for operator and compatibility use.
+
+Reason: the live observation record contained only a 2026-10-16 gateway observation while the admin page continued to show its percentage as capacity. The configured OAuth setup token cannot call Claude's OAuth usage endpoint because it lacks the `user:profile` scope, so only actual Claude traffic through the gateway can refresh the headers. A meter that remains stale for days is misleading; removing it is preferable to polling with synthetic inference or fabricating updates.
+
+Reversal risk: restoring the meter without a profile-scoped usage source returns the same frozen percentage display. A future live meter needs an explicitly supported quota source and honest observation-time labeling.
+
+## Admin console browser sign-in is Passport-only - 2026-10-25
+
+The admin console presents one browser sign-in action, Passport. The former secondary "Sign in" gate, passkey controls, and admin-token controls are removed from the visible page; hidden compatibility nodes preserve existing client code and local automation. Programmatic admin tokens and existing passkey relay routes remain available to command-line tooling and separately supported clients.
+
+Reason: the owner reported two login choices and requested Passport as the only login service.
+
+Reversal risk: re-exposing passkey or token fields restores the second visible login path. Removing the server-side token and passkey authorities would break automation and approved relay clients, so that broader change requires a separate decision.
+
 ## Bun serves the Passport browser sign-in advertised by its admin page - 2026-10-23
 
 The production Bun gateway implements the existing Passport `ai` registration at `/auth/login`, `/auth/callback`, and `/auth/logout`, matching the fixed issuer, audience, origin, callback, RS256/JWKS verification, host-only secure cookies, and cookie-only admin authority used by the Rust implementation. An administrator claim is required for admin access; agent tokens never become admin sessions, and foreign-origin cookie mutations are rejected. The admin button requests `/admin` as its return destination; that fixed choice is bound into the random login state, while ordinary chat login returns to `/chat`.

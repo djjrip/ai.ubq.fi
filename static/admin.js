@@ -166,7 +166,6 @@ const loadingTitle = mustGet("admin-loading-title");
 const loadingSummary = mustGet("admin-loading-summary");
 const loadingGrid = mustGet("admin-loading-grid");
 const authGate = mustGet("admin-auth-gate");
-const authGateOpen = mustGet("admin-auth-gate-open");
 const loadingAuthStatus = mustGet("loading-auth-status");
 const loadingKeysStatus = mustGet("loading-keys-status");
 const loadingUsersStatus = mustGet("loading-users-status");
@@ -477,7 +476,8 @@ const updateLoadingAuthStatus = () => {
 
 const syncLoadingGate = () => {
   const preparing = adminAccessState.isAdmin || (!adminAccessState.checked && hasAdminCredential());
-  authGate.hidden = preparing;
+  const authWidgetExpanded = document.body.dataset.authWidget === "expanded";
+  authGate.hidden = preparing || authWidgetExpanded;
   loadingGrid.hidden = !preparing;
   loadingTitle.textContent = preparing ? "Preparing admin console" : "Sign in to manage the gateway";
 };
@@ -501,6 +501,7 @@ const setAuthWidgetOpen = (open, options = {}) => {
   authWidgetToggle.setAttribute("aria-label", expanded ? "Collapse authentication" : "Open authentication");
   authWidgetToggle.dataset.tooltip = expanded ? "Collapse authentication" : "Open authentication";
   authWidgetToggleLabel.textContent = expanded ? "Close" : "Session";
+  syncLoadingGate();
   if (expanded && options.focus) {
     globalThis.requestAnimationFrame(() => authWidgetPanel.focus({ preventScroll: true }));
   }
@@ -1421,11 +1422,7 @@ const renderCodexCapacitySource = (source, provider = null) => {
       codexResetSaving.delete(setting.account_id_hash);
       codexResetSettingsRevision++;
       if (latestProviderCapacityChartState?.sources) {
-        renderProviderCapacityList(
-          latestProviderCapacityChartState.sources,
-          latestProviderCapacityChartState.claude,
-          latestProviderCapacityChartState.claudeAccounts
-        );
+        renderProviderCapacityList(latestProviderCapacityChartState.sources);
       }
       input.disabled = false;
       if (target === apiUrl("/admin/providers") && token === getAdminToken()) void loadProviders();
@@ -1487,11 +1484,7 @@ const renderCodexCapacitySource = (source, provider = null) => {
       codexOverageSaving.delete(overageSetting.account_id_hash);
       codexOverageSettingsRevision++;
       if (latestProviderCapacityChartState?.sources) {
-        renderProviderCapacityList(
-          latestProviderCapacityChartState.sources,
-          latestProviderCapacityChartState.claude,
-          latestProviderCapacityChartState.claudeAccounts
-        );
+        renderProviderCapacityList(latestProviderCapacityChartState.sources);
       }
       overageInput.disabled = false;
       if (target === apiUrl("/admin/providers") && token === getAdminToken()) void loadProviders();
@@ -1522,68 +1515,7 @@ const claudeCapacityCredentialLabel = (source) => {
   return "Not configured";
 };
 
-const claudeCapacityWindowForDisplay = (window) => {
-  if (!window) return null;
-  return {
-    used_percent: window.used_percent,
-    reset_at_ms: window.reset_at_ms,
-  };
-};
-
-/**
- * The Claude subscription row mirrors the Codex rows: a live/stale/unavailable
- * badge, the observed subscription windows as remaining capacity, and the
- * diagnostics the tier itself recorded (credential direction, workspace,
- * guards, last upstream outcome, and Console API-key limits when present).
- */
-const renderClaudeCapacitySource = (source) => {
-  const row = document.createElement("div");
-  row.dataset.capacitySource = "claude_code";
-  row.dataset.state = source.state;
-  if (typeof source.account_id === "string") row.dataset.capacityAccountId = source.account_id;
-  row.setAttribute("role", "listitem");
-
-  const account = (latestClaudeSubscription?.accounts ?? []).find(
-    (entry) => entry.account_id === source.account_id && entry.account_cohort_id === source.account_cohort_id
-  );
-  const provider = account
-    ? {
-        ...account,
-        enabled: latestClaudeSubscription.enabled,
-        principal_allowlist_configured: latestClaudeSubscription.principal_allowlist_configured,
-      }
-    : source.account_id
-      ? null
-      : (latestClaudeSubscription ?? latestProviderHealth?.claude_code);
-
-  const header = document.createElement("header");
-  const title = document.createElement("h3");
-  title.textContent =
-    typeof source.label === "string" && source.label.trim() ? source.label.trim() : "Claude subscription";
-  if (source.account_id)
-    title.textContent += ` · ${account?.label || source.account_id.slice(0, 8)}${account?.active ? " · Active" : ""}`;
-  const badge = document.createElement("span");
-  badge.dataset.badge = "";
-  setBadge(badge, capacityBadgeState(source.state), capacityStateLabel(source.state));
-  header.append(title, badge);
-  row.append(header);
-
-  const windows = document.createElement("div");
-  windows.dataset.capacityWindows = "";
-  renderCapacityWindow(windows, "5-hour window", claudeCapacityWindowForDisplay(source.windows?.five_hour));
-  renderCapacityWindow(windows, "Weekly window", claudeCapacityWindowForDisplay(source.windows?.seven_day));
-  row.append(windows);
-
-  appendCapacitySourceMeta(row, source, provider);
-  return row;
-};
-
-const claudeCapacitySourcesForDisplay = (claude, claudeAccounts) =>
-  (Array.isArray(claudeAccounts) ? claudeAccounts : [claude]).filter(
-    (source) => source && typeof source === "object" && source.source === "claude_code"
-  );
-
-const renderProviderCapacityList = (sources, claude = null, claudeAccounts = null) => {
+const renderProviderCapacityList = (sources) => {
   const expanded = new Map(
     Array.from(providerCapacityList.children, (row) => [
       row.dataset.capacityKey,
@@ -1594,13 +1526,6 @@ const renderProviderCapacityList = (sources, claude = null, claudeAccounts = nul
   for (const source of sources) {
     const row = renderCodexCapacitySource(source, providerForCodexSlot(source.slot));
     row.dataset.capacityKey = `codex:${source.slot}:${source.account_cohort_id ?? "unknown"}`;
-    providerCapacityList.appendChild(row);
-  }
-  // New servers supply every configured account. Old servers retain the single
-  // active row fallback; never append that projection a second time.
-  for (const source of claudeCapacitySourcesForDisplay(claude, claudeAccounts)) {
-    const row = renderClaudeCapacitySource(source);
-    row.dataset.capacityKey = `claude_code:${source.account_id ?? "legacy"}`;
     providerCapacityList.appendChild(row);
   }
   for (const row of providerCapacityList.children) {
@@ -1652,151 +1577,6 @@ const CAPACITY_CHART_DATE_TIME_FORMATTER = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 const CAPACITY_CHART_SERIES = [{ key: "available-capacity", label: "Codex capacity", source: "aggregate" }];
-const CLAUDE_CAPACITY_CHART_SERIES = [
-  { key: "claude-five-hour", label: "Claude 5-hour", window: "five_hour" },
-  { key: "claude-seven-day", label: "Claude weekly", window: "seven_day" },
-];
-let selectedClaudeHistoryAccountId = null;
-
-/** Raw observed points only: never reuse a live value at browser-now. */
-const claudeCapacityChartPoints = (view, accountId, windowId, interval) => {
-  const samples = (Array.isArray(view?.points) ? view.points : [])
-    .filter((point) => point?.account_id === accountId)
-    .sort(
-      (left, right) =>
-        (left.source_observed_at_ms ?? left.sampled_at_ms) - (right.source_observed_at_ms ?? right.sampled_at_ms)
-    );
-  const points = [];
-  let previous = null;
-  for (const sample of samples) {
-    const window = sample.windows?.[windowId];
-    const observedAt = window?.observed_at_ms;
-    if (
-      typeof observedAt !== "number" ||
-      !Number.isFinite(observedAt) ||
-      typeof window?.used_percent !== "number" ||
-      !Number.isFinite(window.used_percent) ||
-      observedAt < interval.startAtMs ||
-      observedAt > interval.resetAtMs
-    ) {
-      points.push(null);
-      previous = null;
-      continue;
-    }
-    const boundary =
-      !previous ||
-      sample.account_cohort_id !== previous.sample.account_cohort_id ||
-      sample.credential_kind !== previous.sample.credential_kind ||
-      sample.workspace_id !== previous.sample.workspace_id ||
-      window.reset_at_ms === null ||
-      window.reset_at_ms !== previous.window.reset_at_ms ||
-      observedAt <= previous.observedAt ||
-      observedAt - previous.observedAt > (view.stale_after_ms ?? 30 * 60_000) ||
-      sample.bucket_start_at_ms - previous.sample.bucket_start_at_ms > CAPACITY_CHART_BUCKET_MS ||
-      sample.state === "unavailable" ||
-      previous.sample.state === "unavailable";
-    if (boundary) points.push(null);
-    points.push({
-      elapsedPercent: clampCapacityChartPercent(((observedAt - interval.startAtMs) / interval.durationMs) * 100),
-      remainingPercent: clampCapacityChartPercent(100 - window.used_percent),
-      sample,
-      window,
-      observedAt,
-    });
-    previous = { sample, window, observedAt };
-  }
-  return points;
-};
-
-const renderClaudeHistorySelector = (header, snapshot) => {
-  const view = snapshot?.claude_history;
-  const accounts = new Map(
-    (latestClaudeSubscription?.accounts ?? []).map((account) => [
-      account.account_id,
-      account.label || account.account_id,
-    ])
-  );
-  for (const point of Array.isArray(view?.points) ? view.points : [])
-    if (typeof point?.account_id === "string" && !accounts.has(point.account_id))
-      accounts.set(point.account_id, `Retained account ${point.account_id}`);
-  if (selectedClaudeHistoryAccountId === null || (selectedClaudeHistoryAccountId === "" && accounts.size))
-    selectedClaudeHistoryAccountId = latestClaudeSubscription?.active_account_id ?? accounts.keys().next().value ?? "";
-  if (selectedClaudeHistoryAccountId && !accounts.has(selectedClaudeHistoryAccountId))
-    accounts.set(selectedClaudeHistoryAccountId, `Retained account ${selectedClaudeHistoryAccountId}`);
-  const label = document.createElement("label");
-  label.dataset.capacityClaudeFilter = "";
-  const text = document.createElement("span");
-  text.textContent = "Claude history account";
-  const select = document.createElement("select");
-  select.setAttribute("aria-label", "Claude history account (view only)");
-  if (!accounts.size) {
-    const empty = document.createElement("option");
-    empty.value = "";
-    empty.textContent = "Waiting for account observations";
-    select.appendChild(empty);
-  }
-  for (const [id, name] of accounts) {
-    const option = document.createElement("option");
-    option.value = id;
-    option.textContent = name;
-    select.appendChild(option);
-  }
-  select.value = selectedClaudeHistoryAccountId;
-  select.addEventListener("change", () => {
-    selectedClaudeHistoryAccountId = select.value;
-    const state = latestProviderCapacityChartState;
-    if (state) renderProviderCapacityChart(state.snapshot, state.sources, state.fiveXxBuckets);
-  });
-  label.append(text, select);
-  header.appendChild(label);
-};
-
-const renderClaudeHistoryPaths = (svg, snapshot, interval, plot) => {
-  for (const series of CLAUDE_CAPACITY_CHART_SERIES) {
-    const points = claudeCapacityChartPoints(
-      snapshot?.claude_history,
-      selectedClaudeHistoryAccountId,
-      series.window,
-      interval
-    );
-    const path = capacityChartSvgElement("path", {
-      d: capacityChartPath(points, plot, { anchorStart: false, anchorEnd: false }),
-      fill: "none",
-      role: "img",
-      "aria-label": `${series.label}, observed remaining capacity, gaps are unknown`,
-    });
-    path.dataset.capacitySeries = series.key;
-    svg.appendChild(path);
-    for (const point of points.filter(Boolean).slice(-200)) {
-      const circle = capacityChartSvgElement("circle", {
-        cx: plot.left + (point.elapsedPercent / 100) * plot.width,
-        cy: plot.top + ((100 - point.remainingPercent) / 100) * plot.height,
-        r: 2,
-      });
-      circle.dataset.capacityClaudePoint = series.key;
-      const title = capacityChartSvgElement("title");
-      title.textContent = `${series.label} · ${quotaPercentFormatter.format(point.remainingPercent)}% remaining · ${point.sample.account_id} · cohort ${point.sample.account_cohort_id} · headers observed ${formatCapacityTimestamp(point.observedAt)} · sampled ${formatCapacityTimestamp(point.sample.sampled_at_ms)} · ${point.sample.state} · reset ${formatCapacityTimestamp(point.window.reset_at_ms)}`;
-      circle.appendChild(title);
-      svg.appendChild(circle);
-    }
-  }
-};
-
-const claudeHistorySummary = (snapshot, nowMs) => {
-  const view = snapshot?.claude_history;
-  if (!view || view.scan !== "ok") return "Claude history unavailable; no capacity inferred.";
-  const points = (Array.isArray(view.points) ? view.points : []).filter(
-    (point) => point.account_id === selectedClaudeHistoryAccountId
-  );
-  if (!points.length)
-    return `Claude history: waiting for actual upstream quota observations; no backfill.${view.truncated ? " INCOMPLETE: scan truncated." : ""}`;
-  const times = points
-    .map((point) => point.source_observed_at_ms)
-    .filter((time) => typeof time === "number" && Number.isFinite(time));
-  const last = times.length ? Math.max(...times) : null;
-  return `Claude: ${points.length} retained observations · headers last observed ${formatCapacityTimestamp(last)}${last === null ? " · observation time unknown" : nowMs - last > view.stale_after_ms ? " · stale" : ""}${view.truncated ? " · INCOMPLETE: scan truncated" : ""} · downsampled to at most 6 events per 15-minute account/cohort bucket; latest 200 markers per window. Observed is gateway header receipt, not the provider clock. Gaps and reset/cohort changes are not interpolated.`;
-};
-
 const capacityChartFailureIsDowntime = (source) =>
   source?.source === "codex" &&
   source?.state === "unavailable" &&
@@ -2726,7 +2506,6 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
   range.dataset.capacityChartRange = "";
   range.textContent = "7 days";
   chartHeader.append(title, range);
-  renderClaudeHistorySelector(chartHeader, snapshot);
   figure.appendChild(chartHeader);
 
   const legend = document.createElement("div");
@@ -2735,7 +2514,6 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
   for (const series of [
     { key: "cached-input", label: "Cached input share" },
     ...CAPACITY_CHART_SERIES,
-    ...CLAUDE_CAPACITY_CHART_SERIES,
     { key: "rate-limit-reset", label: "Reset" },
     { key: "openai-downtime", label: "Downtime" },
     { key: "inference-error", label: "Errors (5xx)" },
@@ -2761,7 +2539,7 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
     preserveAspectRatio: "xMinYMin meet",
     role: "img",
     "aria-label":
-      "Observed Codex and Claude provider capacity and cached input percentage over seven days; missing Claude observations and identity/reset gaps are not interpolated",
+      "Observed Codex provider capacity and cached input percentage over seven days; missing observations and identity or reset gaps are not interpolated",
     focusable: "false",
   });
   svg.dataset.capacityChartSvg = "";
@@ -3113,7 +2891,6 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
   chartScroll.tabIndex = 0;
   chartScroll.setAttribute("role", "region");
   chartScroll.setAttribute("aria-label", "Scrollable seven-day provider analytics history");
-  renderClaudeHistoryPaths(svg, snapshot, chartWindow, plot);
   chartScroll.appendChild(svg);
 
   const chartScrollControls = document.createElement("div");
@@ -3295,10 +3072,6 @@ const renderProviderCapacityChart = (snapshot, sources, fiveXxBuckets = []) => {
       }${resetSuffix}${rateLimitResetSuffix}${downtimeSuffix}${fiveXxSuffix}${cacheSuffix}${staleSuffix}`
     : `No retained capacity samples yet · trailing seven-day window${resetSuffix}${rateLimitResetSuffix}${downtimeSuffix}${fiveXxSuffix}${cacheSuffix}${staleSuffix}`;
   details.appendChild(caption);
-  const claudeCaption = document.createElement("p");
-  claudeCaption.dataset.capacityClaudeHistory = "";
-  claudeCaption.textContent = claudeHistorySummary(snapshot, nowMs);
-  details.appendChild(claudeCaption);
   figure.appendChild(details);
   providerCapacityChart.replaceChildren(figure);
   restoreCapacityChartScroll(chartScroll, chartWindow, plot);
@@ -3361,17 +3134,14 @@ const renderProviderCapacity = (snapshot, fiveXxBuckets = []) => {
     rawSources.find((source) => source?.source === "codex" && source.slot === slot) ??
     unavailableCodexCapacitySource(slot);
   const sources = [sourceForSlot(1), sourceForSlot(2)];
-  const claude = snapshot?.claude && typeof snapshot.claude === "object" ? snapshot.claude : null;
-  const claudeAccounts = Array.isArray(snapshot?.claude_accounts) ? snapshot.claude_accounts : null;
-  latestProviderCapacityChartState = { snapshot, sources, claude, claudeAccounts, fiveXxBuckets };
+  latestProviderCapacityChartState = { snapshot, sources, fiveXxBuckets };
   renderProviderCapacityChart(snapshot, sources, fiveXxBuckets);
-  renderProviderCapacityList(sources, claude, claudeAccounts);
+  renderProviderCapacityList(sources);
 
-  const displayedSources = [...sources, ...claudeCapacitySourcesForDisplay(claude, claudeAccounts)];
-  const unavailableCount = displayedSources.filter((source) => source.state === "unavailable").length;
-  const staleCount = displayedSources.filter((source) => source.state === "stale").length;
+  const unavailableCount = sources.filter((source) => source.state === "unavailable").length;
+  const staleCount = sources.filter((source) => source.state === "stale").length;
   const cacheAnalyticsUnavailable = snapshot?.prompt_cache?.status !== "ready";
-  if (unavailableCount === displayedSources.length) {
+  if (sources.length > 0 && unavailableCount === sources.length) {
     setBadge(providerCapacityBadge, "unknown", "Quota unavailable");
   } else if (unavailableCount > 0) {
     setBadge(providerCapacityBadge, "unknown", `Partial quota · ${unavailableCount} unavailable`);
@@ -3741,21 +3511,13 @@ const loadProviders = async () => {
     if (!response.ok || !payload) {
       if (providersLoadedAt) {
         if (latestProviderCapacityChartState?.sources) {
-          renderProviderCapacityList(
-            latestProviderCapacityChartState.sources,
-            latestProviderCapacityChartState.claude,
-            latestProviderCapacityChartState.claudeAccounts
-          );
+          renderProviderCapacityList(latestProviderCapacityChartState.sources);
         }
         return;
       }
       latestProviderHealth = null;
       if (latestProviderCapacityChartState?.sources) {
-        renderProviderCapacityList(
-          latestProviderCapacityChartState.sources,
-          latestProviderCapacityChartState.claude,
-          latestProviderCapacityChartState.claudeAccounts
-        );
+        renderProviderCapacityList(latestProviderCapacityChartState.sources);
       }
       return;
     }
@@ -3790,32 +3552,20 @@ const loadProviders = async () => {
     codexProviderSettingsLoadedAt = Date.now();
     latestProviderHealth = payload;
     if (latestProviderCapacityChartState?.sources) {
-      renderProviderCapacityList(
-        latestProviderCapacityChartState.sources,
-        latestProviderCapacityChartState.claude,
-        latestProviderCapacityChartState.claudeAccounts
-      );
+      renderProviderCapacityList(latestProviderCapacityChartState.sources);
     }
     providersLoadedAt = Date.now();
   } catch {
     if (loadId !== providersLoadId) return;
     if (providersLoadedAt) {
       if (latestProviderCapacityChartState?.sources) {
-        renderProviderCapacityList(
-          latestProviderCapacityChartState.sources,
-          latestProviderCapacityChartState.claude,
-          latestProviderCapacityChartState.claudeAccounts
-        );
+        renderProviderCapacityList(latestProviderCapacityChartState.sources);
       }
       return;
     }
     latestProviderHealth = null;
     if (latestProviderCapacityChartState?.sources) {
-      renderProviderCapacityList(
-        latestProviderCapacityChartState.sources,
-        latestProviderCapacityChartState.claude,
-        latestProviderCapacityChartState.claudeAccounts
-      );
+      renderProviderCapacityList(latestProviderCapacityChartState.sources);
     }
   } finally {
     if (loadId === providersLoadId) providersLoading = false;
@@ -4128,11 +3878,11 @@ const refreshAccessOverview = async () => {
   updateAccessPubkeysSummary();
 };
 
-const getKernelListMissingTokenMessage = () => "Paste an admin token to load GitHub access analytics and rate limits.";
+const getKernelListMissingTokenMessage = () => "Sign in with Passport to load GitHub access analytics and rate limits.";
 
 const getKernelListTargetChangedMessage = () => "Target changed. Loading GitHub access analytics and rate limits...";
 
-const getKernelQueueMissingTokenMessage = () => "Paste an admin token to load the rate limit queue.";
+const getKernelQueueMissingTokenMessage = () => "Sign in with Passport to load the rate limit queue.";
 
 const getKernelQueueTargetChangedMessage = () => "Target changed. Loading the rate limit queue...";
 
@@ -5684,7 +5434,7 @@ const refreshKernelPubKeys = async () => {
   const token = getAdminToken();
   if (!token && !hasAdminCredential()) {
     setKernelPubKeysBadge("bad", "Missing token");
-    setKernelPubKeysMessage("Paste an admin token to load kernel attestation keys.");
+    setKernelPubKeysMessage("Sign in with Passport to load kernel attestation keys.");
     updateAccessPubkeysSummary();
     return;
   }
@@ -5734,7 +5484,7 @@ const ensureKernelPubKeysLoaded = async () => {
   const token = getAdminToken();
   if (!token && !hasAdminCredential()) {
     setKernelPubKeysBadge("bad", "Missing token");
-    setKernelPubKeysMessage("Paste an admin token to load kernel attestation keys.");
+    setKernelPubKeysMessage("Sign in with Passport to load kernel attestation keys.");
     updateAccessPubkeysSummary();
     return;
   }
@@ -7610,7 +7360,7 @@ const refreshPasskeyUsers = async () => {
   const token = getAdminToken();
   if (!token && !hasAdminCredential()) {
     setPasskeyUsersBadge("bad", "Missing token");
-    setPasskeyUsersMessage("Paste a fallback admin token to manage passkey users.");
+    setPasskeyUsersMessage("Sign in with Passport to manage passkey users.");
     return;
   }
 
@@ -7632,7 +7382,7 @@ const refreshPasskeyUsers = async () => {
       setPasskeyUsersBadge("bad", data?.error?.message ?? "Error");
       setPasskeyUsersMessage(
         res.status === 403
-          ? "Admin token required. Paste a Deno/admin token in the fallback token field."
+          ? "Administrator access required. Sign in with Passport again."
           : "Failed to load passkey users."
       );
       return;
@@ -8276,7 +8026,7 @@ const switchKeysView = (view) => {
   if (allKeys.length) {
     renderKeys(allKeys, view);
   } else {
-    setKeyListMessage("Paste an admin token to load API keys.");
+    setKeyListMessage("Sign in with Passport to load API keys.");
     setKeysBadge("unknown", "Not loaded");
   }
 };
@@ -8492,7 +8242,7 @@ const refreshKeys = async () => {
   const token = getAdminToken();
   if (!token && !hasAdminCredential()) {
     setKeysBadge("bad", "Missing token");
-    setKeyListMessage("Paste an admin token to load API keys.");
+    setKeyListMessage("Sign in with Passport to load API keys.");
     updateAccessApiKeysSummary();
     return;
   }
@@ -8546,7 +8296,7 @@ const ensureKeysLoaded = async () => {
   const token = getAdminToken();
   if (!token && !hasAdminCredential()) {
     setKeysBadge("bad", "Missing token");
-    setKeyListMessage("Paste an admin token to load API keys.");
+    setKeyListMessage("Sign in with Passport to load API keys.");
     return;
   }
   if (keysLoadedAt && Date.now() - keysLoadedAt < 10_000) {
@@ -10134,7 +9884,6 @@ const invalidateProviderSelection = (message) => {
   providerSelectionSaveError = "";
   latestClaudeSubscription = null;
   selectedClaudeAccountId = null;
-  selectedClaudeHistoryAccountId = null;
   claudeAccountDrafts.clear();
   claudeAccessDirty = false;
   claudeAccessInput.value = "";
@@ -10871,11 +10620,7 @@ const hydrateAdminSnapshots = async () => {
     providerCapacityUpdated.textContent = `Cached ${formatDate(capacitySnapshot.savedAt)} · refreshing`;
     setBadge(providerCapacityBadge, "unknown", "Cached · refreshing");
   } else if (latestProviderCapacityChartState?.sources) {
-    renderProviderCapacityList(
-      latestProviderCapacityChartState.sources,
-      latestProviderCapacityChartState.claude,
-      latestProviderCapacityChartState.claudeAccounts
-    );
+    renderProviderCapacityList(latestProviderCapacityChartState.sources);
   }
 
   const errors = cachedList(errorsSnapshot);
@@ -10914,11 +10659,11 @@ setKernelNewBadge("unknown", "Idle");
 setKernelQueueBadge("unknown", "Not loaded");
 setKernelPubKeysBadge("unknown", "Not loaded");
 setKernelPubKeyCreateBadge("unknown", "Idle");
-setKeyListMessage("Paste an admin token to load API keys.");
-setPasskeyUsersMessage("Paste a fallback admin token to manage passkey users.");
+setKeyListMessage("Sign in with Passport to load API keys.");
+setPasskeyUsersMessage("Sign in with Passport to manage passkey users.");
 setKernelListMessage(getKernelListMissingTokenMessage());
 setKernelQueueMessage(getKernelQueueMissingTokenMessage());
-setKernelPubKeysMessage("Paste an admin token to load kernel attestation keys.");
+setKernelPubKeysMessage("Sign in with Passport to load kernel attestation keys.");
 kernelFilterInput.value = "";
 kernelShowSelect.value = "all";
 switchKeysView("active");
@@ -10953,10 +10698,6 @@ bindForegroundRefresh(() => {
 
 authWidgetToggle.addEventListener("click", () => {
   setAuthWidgetOpen(authWidgetPanel.hidden, { focus: authWidgetPanel.hidden });
-});
-
-authGateOpen.addEventListener("click", () => {
-  setAuthWidgetOpen(true, { focus: true });
 });
 
 authWidgetClose.addEventListener("click", () => {
@@ -11001,15 +10742,15 @@ tokenInput.addEventListener("input", () => {
     setAdminAccessState({ checked: true, isAdmin: false, isSuperAdmin: false });
     setSignedInState(false);
     setKeysBadge("unknown", "Not loaded");
-    setKeyListMessage("Paste an admin token to load API keys.");
+    setKeyListMessage("Sign in with Passport to load API keys.");
     setPasskeyUsersBadge("unknown", "Not loaded");
-    setPasskeyUsersMessage("Paste a fallback admin token to manage passkey users.");
+    setPasskeyUsersMessage("Sign in with Passport to manage passkey users.");
     setKernelListBadge("unknown", "Not loaded");
     setKernelListMessage(getKernelListMissingTokenMessage());
     setKernelQueueBadge("unknown", "Not loaded");
     setKernelQueueMessage(getKernelQueueMissingTokenMessage());
     setKernelPubKeysBadge("unknown", "Not loaded");
-    setKernelPubKeysMessage("Paste an admin token to load kernel attestation keys.");
+    setKernelPubKeysMessage("Sign in with Passport to load kernel attestation keys.");
     allKeys = [];
     scheduleKeyExpiryRefresh();
     passkeyUsers = [];

@@ -766,48 +766,6 @@ body[data-page="admin"] [data-capacity-series="available-capacity"] {
   stroke-width: 2;
 }
 
-body[data-page="admin"] [data-capacity-series="claude-five-hour"] {
-  stroke: var(--success);
-  stroke-width: 2;
-}
-
-body[data-page="admin"] [data-capacity-series="claude-seven-day"] {
-  stroke: var(--muted);
-  stroke-dasharray: 5 3;
-  stroke-width: 2;
-}
-
-body[data-page="admin"] [data-capacity-claude-point="claude-five-hour"] {
-  fill: var(--success);
-}
-
-body[data-page="admin"] [data-capacity-claude-point="claude-seven-day"] {
-  fill: var(--muted);
-}
-
-body[data-page="admin"] [data-capacity-legend-item="claude-five-hour"] [data-capacity-legend-swatch] {
-  border-top-color: var(--success);
-}
-
-body[data-page="admin"] [data-capacity-legend-item="claude-seven-day"] [data-capacity-legend-swatch] {
-  border-top-color: var(--muted);
-  border-top-style: dashed;
-}
-
-body[data-page="admin"] [data-capacity-claude-filter] {
-  display: grid;
-  gap: 4px;
-  min-width: 0;
-  max-width: 100%;
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-body[data-page="admin"] [data-capacity-claude-filter] select {
-  min-width: 0;
-  max-width: 100%;
-}
-
 body[data-page="admin"] [data-capacity-cache-bucket] {
   cursor: help;
 }

@@ -2418,3 +2418,11 @@ Reason: the 1000-line crate cap improves reviewability but does not prove compil
 Reversal risk: enabling broad lint groups or lowering a lint from deny to warn under `-D warnings` stages nothing; using `--cap-lints` or `continue-on-error` hides real failures. Changing `[profile.release]` before measuring the full Worker build can regress artifact size or runtime without a build-time benefit.
 
 Provenance: one owner-authorized GPT Pro submission, job `66ca9a42-20cf-4ff8-acd2-e01653d97ea3`, 2026-10-23.
+
+## Rust verification binds cache ownership and manifest profiles - 2026-10-24
+
+First-party Cargo artifacts belong to their resolved workspace source root. The verifier claims an empty target atomically and rejects a foreign, malformed, symlinked or unowned nonempty target before compiler execution. Actual manifest and target-directory overrides participate in that resolution; subcrate manifests in one workspace share the owner, and immutable source archives require no Git directory. Same-root edits may reuse their cache. This follows fresh evidence that shared first-party targets can replay warning spans from another worktree even when Cargo metadata names the current source. Previous shared-target diagnostic captures remain historical diagnosis, not acceptance.
+
+The verifier removes its Darwin `debug = 0` environment overrides and excludes ambient dev/test debug overrides. Committed `rust/Cargo.toml` dev/test profiles remain `line-tables-only`, as required by the 2026-10-23 decision; production release settings are unchanged. Earlier debug-disabled component captures retain development and behavior evidence, while final combined acceptance requires the exact corrected driver/source and inspection of actual compiler flags.
+
+Fresh [structural adoption reproduction](research/rust-quality-adoption-2026-10-24.md) retains the immutable base source inventory, target closures and all fourteen adopted target counts with [machine-readable provenance](research/rust-quality-adoption-2026-10-24/provenance.json). These artifacts prove fresh structural reproduction; they do not recover the original raw Clippy captures or authorize allowance growth. Historical diagnostic identities stay unchanged, and missing historical Clippy proof remains explicit.

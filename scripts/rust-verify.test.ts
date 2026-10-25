@@ -146,7 +146,7 @@ test("native command and test targets follow the actual supported host while WAS
     assert.throws(() => planRustVerification(root, paths, "native", false, host), /supported Darwin or Linux ARM64/);
 });
 
-test("Mac tools bind to the prepared toolchain and cannot fall back to ambient binaries or escaped links", () => {
+test("Mac tools bind prepared binaries, preserve manifest profiles and reject ambient fallbacks", () => {
   const task = mkdtempSync(join(temporary, "prepared-"));
   const bin = join(task, "rustup/toolchains/1.98.1-aarch64-apple-darwin/bin");
   const tools = join(task, "tools/bin");
@@ -162,12 +162,16 @@ test("Mac tools bind to the prepared toolchain and cannot fall back to ambient b
       CARGO_HOME: join(task, "cargo"),
       CARGO_TARGET_DIR: join(task, "target"),
       XDG_CACHE_HOME: join(task, "cache"),
+      CARGO_PROFILE_DEV_DEBUG: "0",
+      CARGO_PROFILE_TEST_DEBUG: "2",
     },
     darwin
   );
   assert.equal(environment.RUSTC, join(bin, "rustc"));
   assert.equal(environment.RUSTDOC, join(bin, "rustdoc"));
   assert.equal(environment.RUSTUP_TOOLCHAIN, "1.98.1-aarch64-apple-darwin");
+  assert.equal(environment.CARGO_PROFILE_DEV_DEBUG, undefined);
+  assert.equal(environment.CARGO_PROFILE_TEST_DEBUG, undefined);
   assert.ok(!environment.PATH.split(":").includes(ambient));
   assert.equal(rustToolPath("cargo", environment, darwin), join(bin, "cargo"));
   assert.equal(rustToolPath("worker-build", environment, darwin), join(tools, "worker-build"));

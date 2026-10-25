@@ -237,8 +237,6 @@ export const rustVerificationEnvironment = (source: NodeJS.ProcessEnv = process.
     environment.PATH = [...new Set([macRustBin(environment), ...paths, "/usr/bin", "/bin", "/usr/sbin", "/sbin"])].join(delimiter);
     environment.RUSTUP_TOOLCHAIN = `${RUST_VERSION}-aarch64-apple-darwin`;
     environment.CARGO_INCREMENTAL = "0";
-    environment.CARGO_PROFILE_DEV_DEBUG = "0";
-    environment.CARGO_PROFILE_TEST_DEBUG = "0";
     environment.RUSTC = rustToolPath("rustc", environment, host);
     environment.RUSTDOC = rustToolPath("rustdoc", environment, host);
   }

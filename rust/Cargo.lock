@@ -1099,6 +1099,7 @@ dependencies = [
  "gateway-auth",
  "gateway-authority",
  "gateway-core",
+ "gateway-native-supervisor-read",
  "gateway-publication",
  "gateway-publication-policy",
  "gateway-publication-transport",
@@ -1118,6 +1119,16 @@ dependencies = [
  "ureq",
  "url",
  "webpki-roots",
+]
+
+[[package]]
+name = "gateway-native-supervisor-read"
+version = "0.1.0"
+dependencies = [
+ "gateway-core",
+ "rusqlite",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

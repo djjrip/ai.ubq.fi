@@ -2,7 +2,7 @@ use gateway_admin::operations::{AdminHost, AdminInput};
 type TestResult = Result<(), Box<dyn std::error::Error>>;
 use gateway_admin::routes::AdminOperation;
 use gateway_admin_runtime::{AdminRuntime, RuntimeConfig, capabilities::*};
-use gateway_admin_test_support::runtime_host::Host;
+use gateway_admin_test_support::runtime_host::{Host, run};
 use gateway_auth::{
     native::NativeReadRequest,
     types::{
@@ -21,8 +21,6 @@ use serde_json::{Value, json};
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,
-    future::Future,
-    task::{Context as TaskContext, Poll, Waker},
 };
 
 mod manual_reset;
@@ -37,16 +35,6 @@ impl WireBody for AuthResponseBody {
     }
 }
 
-fn run<F: Future>(future: F) -> F::Output {
-    let mut cx = TaskContext::from_waker(Waker::noop());
-    let mut future = std::pin::pin!(future);
-    loop {
-        if let Poll::Ready(value) = future.as_mut().poll(&mut cx) {
-            return value;
-        }
-        std::thread::yield_now();
-    }
-}
 #[derive(Default)]
 struct Store {
     rows: RefCell<BTreeMap<String, StoredRecord>>,
@@ -623,8 +611,8 @@ fn errors_limit_does_not_truncate_five_xx_buckets() {
 #[test]
 fn claude_roster_rotation_preserves_identity_and_fences_prior_generations() -> TestResult {
     use gateway_admin_runtime::claude::{
-        AccountUpdate, current_binding, parse_credential, source_secret::ClaudeSourceSecret,
-        update_account,
+        AccountUpdate, Bootstrap, current_binding, parse_credential,
+        source_secret::ClaudeSourceSecret, update_account,
     };
     let store = Store::default();
     let host = Host::default();
@@ -632,7 +620,8 @@ fn claude_roster_rotation_preserves_identity_and_fences_prior_generations() -> T
     let credential = parse_credential(
         &json!({"secret":"sk-ant-api-test-secret","kind":"api_key","updated_at_ms":900000}),
         "kv",
-    )?;
+    )
+    .ok_or("fixture credential missing")?;
     let first = run(update_account(
         &store,
         &host,

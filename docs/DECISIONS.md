@@ -6,6 +6,14 @@ higher authority.
 
 Provider routing decisions are maintained separately in `docs/provider-decision-journal.md`.
 
+## Decision models use their own first-class wire - 2026-10-25
+
+OpenRouter's decision models are discovered with `output_modalities=text,decisions` and served through `POST /v1/decisions`, which mirrors the upstream Decisions API's `state`, typed `questions` (`noul`, `choice`, `score`, `box`), optional provider routing, trace, session, and user fields, and returns the typed `answers` envelope unchanged. Text models remain limited to Chat Completions and Responses; decision models remain limited to `/v1/decisions`. `/v1/systemone` stays as the bounded Jev compatibility route. Every listing surface attributes decision rows to `/v1/decisions`, while the Codex-native versioned catalog excludes them because Codex cannot select a non-text decision response.
+
+Reason: OpenRouter's default model list omits decision models, so the admin picker and public catalog silently missed newly listed rows such as `baseten/elephant-1:free`; merely widening discovery without a matching request wire would have advertised models that no gateway route could serve.
+
+Reversal risk: returning to the default text-only discovery hides every decision model again. Advertising decision rows on Chat Completions or Responses, or accepting text rows on `/v1/decisions`, would produce guaranteed upstream failures and break the gateway's listed-equals-servable contract.
+
 ## Bun serves the Passport browser sign-in advertised by its admin page - 2026-10-23
 
 The production Bun gateway implements the existing Passport `ai` registration at `/auth/login`, `/auth/callback`, and `/auth/logout`, matching the fixed issuer, audience, origin, callback, RS256/JWKS verification, host-only secure cookies, and cookie-only admin authority used by the Rust implementation. An administrator claim is required for admin access; agent tokens never become admin sessions, and foreign-origin cookie mutations are rejected. The admin button requests `/admin` as its return destination; that fixed choice is bound into the random login state, while ordinary chat login returns to `/chat`.

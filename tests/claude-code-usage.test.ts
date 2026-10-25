@@ -79,8 +79,8 @@ test("a setup token without the profile scope is an explicit non-fatal usage res
 test("malformed Claude usage payloads fail closed as invalid responses", async () => {
   const payloads: readonly (readonly [string, () => Response])[] = [
     ["invalid JSON", () => new Response("not-json", { status: 200, headers: { "content-type": "application/json" } })],
-    ["missing weekly window", () => Response.json({ five_hour: { utilization: 10, resets_at: null } })],
-    ["invalid reset", () => Response.json({ five_hour: { utilization: 10, resets_at: "later" }, seven_day: { utilization: 2, resets_at: null } })],
+    ["unrecognized shape", () => Response.json({ unknown_window: { utilization: 10, resets_at: null } })],
+    ["invalid reset type", () => Response.json({ five_hour: { utilization: 10, resets_at: 123 }, seven_day: { utilization: 2, resets_at: null } })],
     ["missing utilization", () => Response.json({ five_hour: { resets_at: null }, seven_day: { utilization: 2, resets_at: null } })],
   ];
 

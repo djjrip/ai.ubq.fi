@@ -653,12 +653,13 @@ fn source_utf16_runtime_capture_and_signed_receiver_keep_the_actual_codec()
             &SourceJson::parse(r#"{"model":"\ud800","reasoning":"none"}"#)?,
             None,
         )?;
-        let mut rows = store
-            .0
-            .lock()
-            .map_err(|_| std::io::Error::other("fixture memory lock poisoned"))?;
-        rows.insert(runtime_config_key().0.clone(), runtime.clone());
-        drop(rows);
+        {
+            let mut rows = store
+                .0
+                .lock()
+                .map_err(|_| std::io::Error::other("fixture memory lock poisoned"))?;
+            rows.insert(runtime_config_key().0.clone(), runtime.clone());
+        }
         let configured = inputs("fixture-paid-key");
         let prepared =
             PreparedConfigurationPublication::capture(&store, &identity, &configured, "g1", now())

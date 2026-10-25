@@ -940,7 +940,8 @@ fn source_kernel_defaults_feed_actual_admission_and_new_org_rows_invert()
             "responses",
             2300
         ))
-        .unwrap_err()
+        .err()
+        .ok_or("Expected kernel quota refusal")?
         .status,
         429
     );

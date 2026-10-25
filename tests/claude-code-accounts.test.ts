@@ -642,7 +642,7 @@ test("account discovery reads only the state needed for pristine, configured and
       { command: "get", keys: [CLAUDE_CODE_ACCOUNTS_KEY] },
       { command: "get", keys: [CLAUDE_CODE_AUTH_KV_KEY] },
       { command: "get", keys: [CLAUDE_CODE_WORKSPACE_KV_KEY] },
-      { command: "atomic.commit", keys: [CLAUDE_CODE_ACCOUNTS_KEY, CLAUDE_CODE_AUTH_KV_KEY, CLAUDE_CODE_WORKSPACE_KV_KEY, CLAUDE_CODE_ACCOUNTS_KEY] },
+      { command: "atomic.commit", keys: [CLAUDE_CODE_ACCOUNTS_KEY, CLAUDE_CODE_ACCOUNTS_KEY] },
     ]
   );
   counting.clearMeasurements();

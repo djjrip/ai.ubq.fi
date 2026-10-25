@@ -1,6 +1,6 @@
 # Rust quality cleanup contract
 
-Version: 7, manifest build profiles restored 2026-10-24; earlier version sections below retain their historical provenance. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
+Version: 8, genuine staged-context remediation authorized 2026-10-25; earlier version sections below retain their historical provenance. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
 
 ## Outcome and invariants
 
@@ -133,3 +133,157 @@ M27 additionally owns the unused `self` removal in `rust/crates/gateway-admin/te
 The separate functional H4 parity unit starts at exact `d4cb17ef10f605bc7d087d83a9580eb34a60af39` and reserves `rust/crates/gateway-worker/src/inference.rs`, one conventional supporting module and its narrow `tools/cloudflare/runtime-matrix` scenario and registration. Its source, failing fake-provider proof and separate functional PR remain with the functional owner. Quality integration does not absorb those writes; coordinate any future merge against the frozen quality candidate.
 
 Recovered task tools are rooted at `/tmp/rust-quality-final-20261025/prepared`; source `/tmp/rust-quality-final-20261025/compiler-env.sh` and use `/usr/bin/python3 /tmp/rust-quality-final-20261025/compiler-lock.py` for compiler sequences. Preserve compiler lock inode `478177048`, unique source-owned targets and all native/Worker artifacts and receipts. Final native import targets and `TMPDIR` stay within `prepared`, matching the restored committed offline profile. The installed Cargo registry is shared without a broad copy; separate tool installation may stage only exact lock-bound artifacts. No debug override, install at runtime or automatic online retry is authorized.
+
+## Version 8 genuine staged-context remediation
+
+Objective: remediate the unallowlisted contexts confirmed on clean canonical source `08431133cc0758c4c215f7ecf7ac4569ca36101a`, tree `e2c01e6d52b349212c94dee2ccc8fea4553ce8d1`, through genuine source cleanup in the exact disjoint modules below. Preserve the complete provider, credential, accounting, native, serialization and effect-order behavior matrix already recorded by this contract and repository policy. This version changes source assignments and admission sequencing; it does not authorize a runtime, provider, credential, service, workflow or deployment change.
+
+The complete native capture compiled all 30 selected packages successfully, then strict comparison rejected 219 previously absent keys over 98 contexts/76 files. The 121 lint keys represent 496 diagnostic occurrences; the 98 context bookkeeping keys represent 101 occurrences and are not another 98 defects. Existing allowed keys did not increase. Independent read-only audit binds all 775 context source files, 235 freshly rebuilt first-party artifacts, matching compiler identity, actual line-table flags and unchanged comparator extraction/counting. No capture fidelity mismatch was found. The source and baseline remained unchanged; WASM and both updaters were never executed.
+
+Failure receipt: `591bceabb6cc0ae63ee09ee9914b02c17ad0b9b53f9be3f4389670cde15755a5/e0e7a375-dc9f-46cc-8b48-ff5933090c7d`. Independent audit SHA-256: `b65ef88e302f8c9ff6d61ff8f99c83c2c4a0aa073df0f6228d00d41cc64994f7`. The full native diagnostics, contexts, rejection/function maps and terminal status are retained under canonical `.data/rust-quality-wave2-20261025/baseline-20261025T0110Z/`, manifest SHA-256 `40e652a11fc732cacf59e4fe7edaf5bea058ec7e0eabbc28a6681010535b55c5`. The planned assignment manifest has SHA-256 `f1eb6dc39f562f9196397b290a5c233945919e246e6ec42138425d6ef1645973`; its frozen copy is retained in custody rather than relying on a temporary-only path. These are failed-comparison and audit records, not final source acceptance.
+
+All six workers start from the exact documentation-only V8 commit containing this checkpoint, a descendant of `08431133cc0758c4c215f7ecf7ac4569ca36101a`. The integration writer returns its full head and tree, and the controller fills that exact SHA into the assignment manifest before creating any lane. The identities below are already derived from the stable goal-plan path; retain them without recomputation. No lane existed when this version was authorized. The controller owns creation, assignments, later admission and remote delivery. The integration worker remains the sole canonical writer.
+
+| Module                         | Owner               | aid10        | Owned paths | Rejected contexts |
+| ------------------------------ | ------------------- | ------------ | ----------- | ----------------- |
+| m31-migration-production-lints | provider_finish     | `95bfa8b4ec` | 17          | 19                |
+| m32-migration-fixture-lints    | baseline_reproduce  | `db2a4cd044` | 15          | 22                |
+| m33-worker-context-lints       | small_split_prepare | `f0f2528431` | 15          | 15                |
+| m34-native-live-lints          | wasm_prepare        | `66929eb304` | 6           | 8                 |
+| m35-admin-catalog-lints        | admin_finish        | `759effc196` | 7           | 15                |
+| m36-runtime-projection-lints   | new_worker          | `5ae64da255` | 15          | 17                |
+
+The 75 module paths are disjoint. The remaining file, `rust/crates/gateway-worker/src/inference.rs`, stays with functional M60 controller `01a15eae-8e8f-7c83-ab73-ce9958f6c7f3`; its `run` and `dispatch_attempts` contexts require coordinated functional ownership, and that response remains pending. M33 has no write authority over this reserved file. Separate M60/M61 functional work and the allocated M63 red-sequence compiler gap remain outside these repair modules.
+
+### m31-migration-production-lints
+
+Owner: `provider_finish`. Exact worktree: `/Users/nv/repos/ubiquity/ai.ubq.fi/.codex-worktrees/handoff-2026-10-23-rust-quality-wave2-m31-migration-production-lints-a95bfa8b4ec`. Exact branch: `codex/handoff-2026-10-23-rust-quality-wave2-m31-migration-production-lints-a95bfa8b4ec`. The module depends on the frozen V8 source base only; other module paths, shared manifests, lockfiles, baselines, verifier/parser code and unrelated source are prohibited unless the controller separately transfers an exact surface.
+
+Owned paths:
+
+- `rust/crates/gateway-migration/src/core_state.rs`
+- `rust/crates/gateway-migration/src/engine.rs`
+- `rust/crates/gateway-migration/src/indexes.rs`
+- `rust/crates/gateway-migration/src/indexes/disk.rs`
+- `rust/crates/gateway-migration/src/initial_owner.rs`
+- `rust/crates/gateway-migration/src/inverse.rs`
+- `rust/crates/gateway-migration/src/native_capture.rs`
+- `rust/crates/gateway-migration/src/native_custody.rs`
+- `rust/crates/gateway-migration/src/native_inverse.rs`
+- `rust/crates/gateway-migration/src/native_latest.rs`
+- `rust/crates/gateway-migration/src/native_stage.rs`
+- `rust/crates/gateway-migration/src/paid_controls.rs`
+- `rust/crates/gateway-migration/src/profile_bindings.rs`
+- `rust/crates/gateway-migration/src/profile_coupling.rs`
+- `rust/crates/gateway-migration/src/profile_runtime.rs`
+- `rust/crates/gateway-migration/src/projection.rs`
+- `rust/crates/gateway-migration/src/staged.rs`
+
+### m32-migration-fixture-lints
+
+Owner: `baseline_reproduce`. Exact worktree: `/Users/nv/repos/ubiquity/ai.ubq.fi/.codex-worktrees/handoff-2026-10-23-rust-quality-wave2-m32-migration-fixture-lints-adb2a4cd044`. Exact branch: `codex/handoff-2026-10-23-rust-quality-wave2-m32-migration-fixture-lints-adb2a4cd044`. The module depends on the frozen V8 source base only; other module paths, shared manifests, lockfiles, baselines, verifier/parser code and unrelated source are prohibited unless the controller separately transfers an exact surface.
+
+Owned paths:
+
+- `rust/crates/gateway-migration/examples/native-stage-apply.rs`
+- `rust/crates/gateway-migration/examples/native-stage-frames.rs`
+- `rust/crates/gateway-migration/tests/core_state.rs`
+- `rust/crates/gateway-migration/tests/import_custody.rs`
+- `rust/crates/gateway-migration/tests/native_capture.rs`
+- `rust/crates/gateway-migration/tests/native_custody.rs`
+- `rust/crates/gateway-migration/tests/runtime.rs`
+- `rust/crates/gateway-migration/tests/source_paid_state.rs`
+- `rust/crates/gateway-migration/tests/staged.rs`
+- `rust/crates/gateway-migration/tests/support/native-offline-fixture.rs`
+- `rust/crates/gateway-migration/tests/support/worker-custody-fixture.rs`
+- `rust/crates/gateway-migration/tests/support/worker_custody_fixture/host.rs`
+- `rust/crates/gateway-migration/tests/support/worker_custody_fixture/port.rs`
+- `rust/crates/gateway-migration/tests/support/worker_custody_fixture/producers.rs`
+- `rust/crates/gateway-migration/tests/support/worker_custody_fixture/staged.rs`
+
+### m33-worker-context-lints
+
+Owner: `small_split_prepare`. Exact worktree: `/Users/nv/repos/ubiquity/ai.ubq.fi/.codex-worktrees/handoff-2026-10-23-rust-quality-wave2-m33-worker-context-lints-af0f2528431`. Exact branch: `codex/handoff-2026-10-23-rust-quality-wave2-m33-worker-context-lints-af0f2528431`. The module depends on the frozen V8 source base only; other module paths, shared manifests, lockfiles, baselines, verifier/parser code and unrelated source are prohibited unless the controller separately transfers an exact surface.
+
+Owned paths:
+
+- `rust/crates/gateway-worker/src/admin_support_host.rs`
+- `rust/crates/gateway-worker/src/catalog_host.rs`
+- `rust/crates/gateway-worker/src/claude_host/admin.rs`
+- `rust/crates/gateway-worker/src/claude_host/platform.rs`
+- `rust/crates/gateway-worker/src/compaction_host/protocol/tests.rs`
+- `rust/crates/gateway-worker/src/extras.rs`
+- `rust/crates/gateway-worker/src/image_host.rs`
+- `rust/crates/gateway-worker/src/inference_capture.rs`
+- `rust/crates/gateway-worker/src/live_host/platform.rs`
+- `rust/crates/gateway-worker/src/native_authority.rs`
+- `rust/crates/gateway-worker/src/native_host.rs`
+- `rust/crates/gateway-worker/src/native_transport.rs`
+- `rust/crates/gateway-worker/src/observability_host/inventory.rs`
+- `rust/crates/gateway-worker/src/routing_host/paid_catalog_tests.rs`
+- `rust/crates/gateway-worker/src/runtime.rs`
+
+### m34-native-live-lints
+
+Owner: `wasm_prepare`. Exact worktree: `/Users/nv/repos/ubiquity/ai.ubq.fi/.codex-worktrees/handoff-2026-10-23-rust-quality-wave2-m34-native-live-lints-a66929eb304`. Exact branch: `codex/handoff-2026-10-23-rust-quality-wave2-m34-native-live-lints-a66929eb304`. The module depends on the frozen V8 source base only; other module paths, shared manifests, lockfiles, baselines, verifier/parser code and unrelated source are prohibited unless the controller separately transfers an exact surface.
+
+Owned paths:
+
+- `rust/crates/gateway-native/src/bin/uos-native.rs`
+- `rust/crates/gateway-native/src/existing_account_import/import_publication/tests.rs`
+- `rust/crates/gateway-native/tests/contracts.rs`
+- `rust/crates/gateway-native/tests/supervisor_data.rs`
+- `rust/crates/gateway-native/tests/unix_transport.rs`
+- `rust/crates/gateway-live-runtime/src/runtime.rs`
+
+### m35-admin-catalog-lints
+
+Owner: `admin_finish`. Exact worktree: `/Users/nv/repos/ubiquity/ai.ubq.fi/.codex-worktrees/handoff-2026-10-23-rust-quality-wave2-m35-admin-catalog-lints-a759effc196`. Exact branch: `codex/handoff-2026-10-23-rust-quality-wave2-m35-admin-catalog-lints-a759effc196`. The module depends on the frozen V8 source base only; other module paths, shared manifests, lockfiles, baselines, verifier/parser code and unrelated source are prohibited unless the controller separately transfers an exact surface.
+
+Owned paths:
+
+- `rust/crates/gateway-admin-runtime/src/defaults.rs`
+- `rust/crates/gateway-admin-runtime/src/lib.rs`
+- `rust/crates/gateway-admin-runtime/tests/contracts.rs`
+- `rust/crates/gateway-admin-runtime/tests/manual_reset/mod.rs`
+- `rust/crates/gateway-catalog-runtime/src/versioned.rs`
+- `rust/crates/gateway-catalog-runtime/tests/control.rs`
+- `rust/crates/gateway-catalog-runtime/tests/runtime.rs`
+
+### m36-runtime-projection-lints
+
+Owner: `new_worker`. Exact worktree: `/Users/nv/repos/ubiquity/ai.ubq.fi/.codex-worktrees/handoff-2026-10-23-rust-quality-wave2-m36-runtime-projection-lints-a5ae64da255`. Exact branch: `codex/handoff-2026-10-23-rust-quality-wave2-m36-runtime-projection-lints-a5ae64da255`. The module depends on the frozen V8 source base only; other module paths, shared manifests, lockfiles, baselines, verifier/parser code and unrelated source are prohibited unless the controller separately transfers an exact surface.
+
+Owned paths:
+
+- `rust/crates/gateway-claude-runtime/src/pool.rs`
+- `rust/crates/gateway-claude-runtime/src/workspace.rs`
+- `rust/crates/gateway-claude-runtime/tests/oracle/mod.rs`
+- `rust/crates/gateway-claude-runtime/tests/runtime.rs`
+- `rust/crates/gateway-compaction/src/engine.rs`
+- `rust/crates/gateway-compaction/src/response.rs`
+- `rust/crates/gateway-compaction/src/state.rs`
+- `rust/crates/gateway-compaction/src/transcript.rs`
+- `rust/crates/gateway-core/src/source_usage/tests.rs`
+- `rust/crates/gateway-extras-runtime/src/images.rs`
+- `rust/crates/gateway-observability/src/capacity.rs`
+- `rust/crates/gateway-observability/src/capacity_math.rs`
+- `rust/crates/gateway-observability/src/providers.rs`
+- `rust/crates/gateway-observability/tests/claude_source_history.rs`
+- `rust/crates/gateway-observability/tests/projection_source.rs`
+
+### Source-candidate admission and final enforcement
+
+Repair the actual nesting, long-function, wildcard and fallibility findings in the assigned contexts. Do not raise or transfer allowances, revive old hashes to evade findings, suppress lints, change the comparator, hide source with cfg, remove tests or rename cases. Preserve every source-bound opaque capability, constructor and ownership proof, quota/accounting lifetime, transport receipt, serialization byte contract and effect order. Keep original failure and audit bytes intact. New source files, helper crates, manifest/dependency edges or caller edits outside an owned list require a separate exact scope transfer before writing.
+
+Keep physical production/test-target debt from growing and preserve the 1000-line crate/target rules, conventional module graph and defining-module imports. Existing oversized crates remain mandatory debt. Private test proof must remain private: no production visibility widening, fake capability, replacement fixture, compatibility facade, re-export, path attribute, include macro, allow/expect suppression or source-context waiver is authorized. Genuine new or substantially rewritten crates comply immediately.
+
+Isolated writers return committed source candidates with exact base/head/tree, changed paths and source hashes; pinned syntax/rustfmt receipts; physical no-growth and unchanged-case inventories; diff checks; normal commit-hook exit/full log; and settled jobs. Formatting remains limited to two changed-file passes per edit round. Preserve every existing test name, assertion, golden input and production proof boundary. Normal commits and hooks remain enabled, with matching immutable prepared dependencies; this version adds no hook bypass.
+
+Source-candidate admission records inspected scope, syntax, formatting, no-growth and case-preservation evidence. It makes no compiled, behavior or final-readiness claim. Do not run per-lane cold compiler, parser/comparator, behavior or gate rounds while the functional gap owns the compiler schedule. No writer pushes, merges, dispatches CI or takes another module's files. The controller may admit exact clean candidates into canonical with separate no-fast-forward merges, preserving every tip and all evidence.
+
+After all repair writers and the reserved functional contexts settle, freeze one clean canonical source and run the unchanged selected native/WASM full CLI, strict complete-stage comparator and affected tests on that source. Use the existing shared compiler lock inode `478177048`, at most two jobs and canonical-owned private targets; retain existing canonical caches across same-root edits, and never copy or use a foreign first-party cache. Matching Darwin fixture boundaries, real native prerequisites and actual Worker artifact checks remain mandatory. The independent verifier owns final gates; admission cannot waive a failed result.
+
+Every remediated changed context must produce zero new/unallowlisted findings before the final baseline update. Only the supported downward-only structural and complete-stage Clippy updaters may then tighten recorded debt, preserving historical adoption identities and all prior evidence. A subset, partial stream, stale context or owned-only pass cannot update a complete stage. Journal terminal phase/status, exit and artifact reference before a future helper hands back, so a completed failure cannot look like a live compiler phase.
+
+The latest parser report on `08431133cc0758c4c215f7ecf7ac4569ca36101a` measured 18 oversized production crates, 13 oversized test targets and zero include/path/pubUse/suppression constructs, with no structural growth; that report alone is not a passed strict check. Full crate-size and remaining lint debt cleanup remains the goal after PR #1301. The preserved successor proposals are read-only planning evidence until separately assigned; this V8 repair contract does not authorize their implementation. Production release profiles, credentials, live data, provider spend, services, remote push/PR mutation and workflow enable/dispatch/rerun remain outside worker authority.

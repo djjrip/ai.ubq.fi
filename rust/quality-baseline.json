@@ -14,7 +14,6 @@
     "gateway-native": 22934,
     "gateway-observability": 12243,
     "gateway-providers": 9773,
-    "gateway-publication": 2279,
     "gateway-routing-runtime": 7967,
     "gateway-schema": 7639,
     "gateway-worker": 20516
@@ -31,7 +30,6 @@
     "gateway-migration/example/worker-custody-fixture": 1922,
     "gateway-migration/test/copied_store_inverse": 1075,
     "gateway-migration/test/runtime": 1191,
-    "gateway-publication/test/control_publication": 1237,
     "gateway-routing-runtime/test/source_contracts": 1462
   },
   "violations": {

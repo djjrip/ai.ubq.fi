@@ -13,7 +13,6 @@ use gateway_core::{
     source_serialization as source,
     value::PortableValue,
 };
-use serde::Deserialize;
 use serde_json::Value;
 
 fn required(value: &SourceJson, field: &str) -> Result<SourceJson, GatewayError> {

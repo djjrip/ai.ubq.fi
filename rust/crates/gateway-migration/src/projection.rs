@@ -127,20 +127,19 @@ pub(crate) fn forward(row: &mut Row) -> Result<(), GatewayError> {
 fn project_api(row: &mut Row, v: &Value) -> Result<bool, GatewayError> {
     let p = &row.parts;
     if starts(p, &["ubq_ai", "api_keys", "id"]) {
-        let record: gateway_admin::keys::ApiKeyRecord = decode(&v)?;
+        let record: gateway_admin::keys::ApiKeyRecord = decode(v)?;
         if p.len() != 4
             || p[3] != record.policy.id
             || record.policy.usage_quota_version != 3
-            || !gateway_admin_data::migration::audit::keys::valid_key_policy(&v, true)
+            || !gateway_admin_data::migration::audit::keys::valid_key_policy(v, true)
         {
             return Err(invalid(
                 "API key ID policy is malformed or requires legacy migration",
             ));
         }
     } else if starts(p, &["ubq_ai", "api_keys", "hash"]) {
-        let _: gateway_auth::api_keys::ApiKeyHashRecord = decode(&v)?;
-        if p.len() != 4 || !gateway_admin_data::migration::audit::keys::valid_key_policy(&v, false)
-        {
+        let _: gateway_auth::api_keys::ApiKeyHashRecord = decode(v)?;
+        if p.len() != 4 || !gateway_admin_data::migration::audit::keys::valid_key_policy(v, false) {
             return Err(invalid("API key hash policy is malformed"));
         }
     } else if starts(p, &["uos_ai", "api_key_usage", "v3", "window"]) {
@@ -190,7 +189,7 @@ fn project_kernel(row: &mut Row, v: &Value) -> Result<bool, GatewayError> {
             let (scope, owner, repo) = gateway_admin_data::migration::kernel::identity(p, "window")
                 .ok_or_else(|| invalid("Kernel source window identity is malformed"))?;
             if gateway_admin_data::migration::kernel::normalize_window(
-                &v,
+                v,
                 &scope,
                 &owner,
                 repo.as_deref(),
@@ -228,7 +227,7 @@ fn project_kernel(row: &mut Row, v: &Value) -> Result<bool, GatewayError> {
             row.record.value = projected;
             row.mapping.transform = Transform::KernelRequest;
         } else if kind.ends_with("_policy") {
-            let _: KernelPolicy = decode(&v)?;
+            let _: KernelPolicy = decode(v)?;
         }
     } else {
         return Ok(false);
@@ -255,7 +254,7 @@ fn project_paid(row: &mut Row, v: &Value) -> Result<bool, GatewayError> {
         row.record.value = projected;
         row.mapping.transform = Transform::PaidGate;
     } else if starts(p, &["uos_ai", "paid_fallback", "v3", "window"]) {
-        let window: PaidWindow = decode(&v)?;
+        let window: PaidWindow = decode(v)?;
         if p.len() != 6
             || p[4] != window.key_id.0
             || p[5].as_f64() != Some(window.window_reset_at_ms as f64)

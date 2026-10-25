@@ -4,8 +4,7 @@ use gateway_core::error::GatewayError;
 use gateway_core::{
     query::{QueryEntry, QueryRequest, QuerySelector, QueryStore},
     state::{
-        AtomicTransition, AuthorityStore, CommitOutcome, RecordKey, RecordMutation, RevisionCheck,
-        StoredRecord,
+        AtomicTransition, CommitOutcome, RecordKey, RecordMutation, RevisionCheck, StoredRecord,
     },
 };
 use serde_json::Value;

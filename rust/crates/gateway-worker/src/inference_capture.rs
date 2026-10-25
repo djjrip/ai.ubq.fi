@@ -290,7 +290,7 @@ impl Capture {
         provider: &str,
         stream: bool,
         observed_terminal: Option<String>,
-    ) -> Result<(), GatewayError> {
+    ) -> Result<bool, GatewayError> {
         let at = now_ms()?;
         let terminal = observation
             .semantic_terminal

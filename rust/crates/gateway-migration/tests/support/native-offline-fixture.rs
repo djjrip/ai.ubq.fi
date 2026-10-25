@@ -61,7 +61,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ))?;
     drop(authority);
     let key = key(serde_json::json!(["default", "native-graph", 0]));
-    let original = run(store.read(&key))??;
+    let original = run(store.read(&key))?.ok_or("Expected retained fixture row")?;
     let mut graph = original.source_graph_value()?;
     for node in &mut graph.nodes {
         if let GraphNode::ArrayBuffer { bytes } = node {

@@ -38,6 +38,10 @@ class AdminKv {
         writes.push(() => this.values.set(keyOf(key), value));
         return operation;
       },
+      delete: (key: KvKey) => {
+        writes.push(() => this.values.delete(keyOf(key)));
+        return operation;
+      },
       commit: () => {
         for (const write of writes) {
           write();

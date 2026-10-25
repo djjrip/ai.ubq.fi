@@ -23,13 +23,8 @@ import {
   discoverClaudeCodeModels,
   type ClaudeCodeModelsSnapshot,
 } from "../provider/claude-code-models.ts";
-import {
-  clearClaudeCodeQuotaGuards,
-  loadClaudeCodeQuotaState,
-  recordClaudeCodeQuotaOutcome,
-  type ClaudeCodeUsageState,
-} from "../provider/claude-code-quota.ts";
-import { fetchClaudeCodeUsage } from "../provider/claude-code-usage.ts";
+import { clearClaudeCodeQuotaGuards, loadClaudeCodeQuotaState } from "../provider/claude-code-quota.ts";
+import { refreshClaudeCodeUsage } from "../provider/claude-code-usage-refresh.ts";
 import { getPassiveProviderHealthSnapshot } from "../health.ts";
 import {
   resolveClaudeCodeAccount,
@@ -206,19 +201,8 @@ export const handleAdminClaudeCodeAuthSet = async (req: Request, options: Readon
   });
 };
 
-const CLAUDE_USAGE_OBSERVATION_FRESH_MS = 60_000;
-
 type ClaudeUsageRefreshOptions = Readonly<{ env?: ClaudeCodeEnvLookup; fetcher?: ClaudeCodeFetch; now?: () => number }>;
 type ClaudeUsageRefreshTarget = Readonly<{ kind: "response"; response: Response }> | Readonly<{ kind: "refresh"; account: ClaudeCodeAccountBinding }>;
-
-const latestQuotaActivityMs = (state: Awaited<ReturnType<typeof loadClaudeCodeQuotaState>>): number | null => {
-  const times = [
-    ...Object.values(state?.windows ?? {}).map((window) => window.observed_at_ms),
-    ...Object.values(state?.standard ?? {}).map((window) => window.observed_at_ms),
-    ...(state?.usage ? [state.usage.attempted_at_ms] : []),
-  ].filter((value): value is number => typeof value === "number" && Number.isFinite(value));
-  return times.length ? Math.max(...times) : null;
-};
 
 const resolveClaudeUsageRefreshTarget = async (req: Request, kv: Kv, options: ClaudeUsageRefreshOptions): Promise<ClaudeUsageRefreshTarget> => {
   const body = await readJsonBody(req);
@@ -230,45 +214,28 @@ const resolveClaudeUsageRefreshTarget = async (req: Request, kv: Kv, options: Cl
   if (!account) return { kind: "response", response: openaiError(404, "Claude account was not found", "not_found") };
   if (body.account_cohort_id !== undefined && body.account_cohort_id !== account.account_cohort_id)
     return { kind: "response", response: openaiError(409, "Claude account generation changed", "claude_code_account_changed") };
-  const now = options.now?.() ?? Date.now();
-  const current = await loadClaudeCodeQuotaState(kv, account);
-  const observedAtMs = latestQuotaActivityMs(current);
-  if (observedAtMs !== null && now - observedAtMs < CLAUDE_USAGE_OBSERVATION_FRESH_MS) {
-    return {
-      kind: "response",
-      response: json(200, {
-        data: await claudeSubscriptionBlock(),
-        refreshed: false,
-        reason: "fresh",
-        observed_at_ms: observedAtMs,
-        usage: current?.usage ?? null,
-      }),
-    };
-  }
   return { kind: "refresh", account };
 };
 
-const usageStateForResult = (result: Awaited<ReturnType<typeof fetchClaudeCodeUsage>>): ClaudeCodeUsageState => ({
-  source: "oauth_usage",
-  state: result.ok ? "ok" : result.kind,
-  status: result.status,
-  message: result.ok ? null : result.message,
-  attempted_at_ms: result.observed_at_ms,
-  observed_at_ms: result.ok ? result.observed_at_ms : null,
-});
-
 const runClaudeUsageRefresh = async (kv: Kv, account: ClaudeCodeAccountBinding, options: ClaudeUsageRefreshOptions): Promise<Response> => {
-  const result = await fetchClaudeCodeUsage(account.credential, { fetcher: options.fetcher, now: options.now });
-  const usage = usageStateForResult(result);
-  const recorded = await recordClaudeCodeQuotaOutcome(kv, {
-    binding: account,
-    observation: result.ok ? result.observation : null,
-    response_status: result.status,
-    response_observed_at_ms: result.observed_at_ms,
-    usage,
-    nowMs: result.observed_at_ms,
-  });
-  if (!recorded) return openaiError(409, "Claude account changed during usage refresh", "claude_code_account_changed");
+  const refreshed = await refreshClaudeCodeUsage(kv, account, options);
+  if (refreshed.kind === "changed") return openaiError(409, "Claude account changed during usage refresh", "claude_code_account_changed");
+  if (refreshed.kind === "busy")
+    return json(200, {
+      data: await claudeSubscriptionBlock(),
+      refreshed: false,
+      reason: "refresh_in_progress",
+      message: "A usage refresh is already in progress.",
+    });
+  if (refreshed.kind === "fresh")
+    return json(200, {
+      data: await claudeSubscriptionBlock(),
+      refreshed: false,
+      reason: "fresh",
+      observed_at_ms: refreshed.usage.attempted_at_ms,
+      usage: refreshed.usage,
+    });
+  const { result, usage } = refreshed;
   const data = await claudeSubscriptionBlock();
   if (result.ok) {
     return json(200, {

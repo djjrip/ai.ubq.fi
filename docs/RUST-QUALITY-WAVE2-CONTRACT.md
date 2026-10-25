@@ -1,6 +1,6 @@
 # Rust quality cleanup contract
 
-Version: 8, genuine staged-context remediation authorized 2026-10-25; earlier version sections below retain their historical provenance. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
+Version: 9, source-candidate assembly and atomic Worker scope recorded 2026-10-25; earlier version sections below retain their historical provenance. Controller: active goal thread `01a16a00-7860-7440-8727-61bb36ebeefa`. Resume source: `/Users/nv/repos/ubiquity/ai.ubq.fi/docs/HANDOFF-2026-10-23-rust-quality-wave2.md`.
 
 ## Outcome and invariants
 
@@ -287,3 +287,35 @@ After all repair writers and the reserved functional contexts settle, freeze one
 Every remediated changed context must produce zero new/unallowlisted findings before the final baseline update. Only the supported downward-only structural and complete-stage Clippy updaters may then tighten recorded debt, preserving historical adoption identities and all prior evidence. A subset, partial stream, stale context or owned-only pass cannot update a complete stage. Journal terminal phase/status, exit and artifact reference before a future helper hands back, so a completed failure cannot look like a live compiler phase.
 
 The latest parser report on `08431133cc0758c4c215f7ecf7ac4569ca36101a` measured 18 oversized production crates, 13 oversized test targets and zero include/path/pubUse/suppression constructs, with no structural growth; that report alone is not a passed strict check. Full crate-size and remaining lint debt cleanup remains the goal after PR #1301. The preserved successor proposals are read-only planning evidence until separately assigned; this V8 repair contract does not authorize their implementation. Production release profiles, credentials, live data, provider spend, services, remote push/PR mutation and workflow enable/dispatch/rerun remain outside worker authority.
+
+## Version 9 source-candidate assembly and scoped transfers
+
+This checkpoint records source-candidate admission from the exact V8 base `50675dcd1af199e49de01a57151b92502ea5def5`, tree `a2aca253b5833f3b034ad17b3dd0c92669fa07f8`. The controller independently inspected each admitted clean tip, scope, ancestry, diff and terminal static handback. Source-candidate admission is not Rust compilation, strict comparator, runtime, actual Worker or final acceptance. No per-lane cold gate was substituted for the required frozen canonical gates, and no baseline or source-context finding was waived.
+
+| Module | Exact source tip                           | Tree                                       | Disposition                                                  |
+| ------ | ------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------ |
+| M31    | `bca241dd04eceed3d9e519a2618b4e3d4a818928` | `c12e996b7b44dd5d73c7fcd3edaeb3a87023d60a` | Migration production source candidate                        |
+| M34    | `5577bea7d8f94f38ddfd08b3450cec5b30497e33` | `f15146640970a3e679f2bf805dcb749b41ceb6ed` | Native and Live source candidate                             |
+| M36    | `666126c405e1f64e90b742cac5e87c4890323a5a` | `e6c8eb168dfa8d31edf3ee45fc35dcd593be1aa0` | Runtime projection source candidate                          |
+| M35    | `5012d0c367a564b30e2645956cd1ae835c51a5f2` | `22e18eac7db5e36a818c1e923685f2bc7d5da388` | Admin and Catalog unit-v2 source candidate                   |
+| M33    | `f0cec8d8392a2cd38f07bb932a9e4c21e3e85a3b` | `d480becfc9ca1036a7c0046e9d15601a2ec0a374` | Worker unit-v2 source candidate; atomic M37 integration only |
+
+M31, M34, M36 and M35 were integrated with separate no-fast-forward merges. M36's actual owner is the external controller's existing `quality_fixtures` worker, as bound by the assigned manifest SHA-256 `f0c475dbf9c8ea8815a876fdc5c275446df435c05c201b8305344723f15b9d20`; the earlier planned `new_worker` slot remains historical. All original lane identities and admitted ancestry are preserved.
+
+M35 unit-v2 permits the seven existing seed-caller tests in its already owned file to use the approved private seed conversion. The controller inspected that exact scope and terminal handback; this transfer adds no production visibility, replacement capability, assertion deletion or unrelated caller authority.
+
+### Atomic M33 and M37 Worker unit
+
+M33 unit-v2 owns the exact capacity-recovery extraction and corresponding workspace, Worker dependency and frozen root lockfile edges. The existing Worker capacity implementation and unchanged tests move into the conventional `gateway-capacity-recovery` crate; the new crate measures 637 owned production lines and remains below 1000. M33's terminal candidate changes 23 paths from the 25 granted paths, including the conventional moves. No package version upgrade, lockfile regeneration or unrelated dependency change is authorized.
+
+The controller accepted M37 only as an uncommitted pure quality fragment from the same V8 source: `inference.rs` and its conventional private child `inference/stream.rs`. Its immutable patch SHA-256 is `20a6fe8522a273bce81eb2f2a5f48cba150f54920bb271062c69218a24d22f65`; terminal handback SHA-256 is `5fd4983494f54a981ccb3a4b2a702de206b18fffc9a05f972a04bc0bf6cff1a9`. The frozen fragment preserves exact original tests and private `RequestResources`, original literal values, clone counts and source-only effect-order checks. It contains no H4 behavior or fixture ancestry. The dirty M37 lane remains preserved without an accepted standalone tip.
+
+M37 alone would grow Worker by 143 lines and is never committed or admitted alone. Canonical first merged exact M33 with `--no-ff --no-commit`, retained its `MERGE_HEAD`, then applied only those two exact M37 patch paths. The combined Worker was independently remeasured at 20516 lines, below the V8 ceiling 20784 by 268; the new capacity crate remained 637. Baseline bytes remained unchanged. One normal direct commit with its ordinary hooks produced ancestry-preserving merge `641152c5b013a573f5ca7ed4b6db7d1a42475f2e`; its parents retain the previous source candidate and exact M33 tip. This atomic non-growing tree is the acceptance unit, with M37 patch/source hashes bound in custody. It is still uncompiled source evidence.
+
+### Pending M32 and final verification
+
+M32 remains pending at this checkpoint. Its separately approved unit-v2 may move scalar `Receipt` and case definitions into existing `gateway-migration-test-support/src/fixture.rs` and add only `serde.workspace = true` to that helper's `Cargo.toml`. The integration writer owns the matching root `Cargo.lock` dependency-list addition of the existing pinned `serde` package only after exact M32 acceptance. The worker does not edit the root lockfile; no integration edge is added before its candidate is ready. No lockfile regeneration, version change or unrelated dependency edge is allowed.
+
+The complete package inventories and changed-surface plans must be regenerated after M32 and the new capacity member are integrated; the earlier native 30/WASM 25 inventory is stale for this composition. The full selected native/WASM CLI, strict comparator, affected tests and actual source-bound Worker/native artifacts remain required on a newly frozen clean canonical commit and tree. Native fixture prerequisites, the existing Darwin boundaries, manifest line-table profiles, shared compiler lock and source-owner cache guards remain unchanged. M64's separately owned synthetic native-example sequence retains its reserved compiler slot; this assembly queues no quality compiler.
+
+No baseline updater runs until a complete strict capture passes with zero unallowlisted changed contexts, and updates remain downward-only through supported tools. Preserve every original failure, static log, handback and source identity in ignored canonical custody. The next intermediate checkpoint is not the final freeze while M32 or a source issue remains unresolved. Full remaining crate-size and staged lint debt cleanup continues beyond PR #1301; no component admission closes that goal.

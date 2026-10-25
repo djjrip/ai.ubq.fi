@@ -1,10 +1,9 @@
 //! Anchored Darwin metadata observation. No parent chdir or caller command/path protocol.
-#[cfg(target_os = "macos")]
-use super::exclusive_owner::Facts;
 use super::exclusive_owner::{PinnedExecutable, fail};
-use super::owner_runtime::verified_tool;
+#[cfg(target_os = "macos")]
+use super::{exclusive_owner::Facts, owner_runtime::verified_tool};
 use gateway_core::error::GatewayError;
-use std::{fs::File, path::Path, time::Instant};
+use std::{fs::File, time::Instant};
 #[cfg(target_os = "macos")]
 use std::{
     io::Read,
@@ -12,6 +11,7 @@ use std::{
         fd::AsFd,
         unix::{net::UnixStream, process::CommandExt},
     },
+    path::Path,
     process::{Child, Command, Stdio},
     time::Duration,
 };

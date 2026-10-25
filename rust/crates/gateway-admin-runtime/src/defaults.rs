@@ -326,7 +326,7 @@ fn defaults_runtime(
                 if SourceJson::from_serializable(&error.diagnostic().envelope)? == *error.body() {
                     return Err(error.diagnostic().clone());
                 }
-                return Ok(DefaultRuntime::Response(AuthResponse::source_json(
+                return Ok(DefaultRuntime::Break(AuthResponse::source_json(
                     error.status,
                     error.body().clone(),
                 )));

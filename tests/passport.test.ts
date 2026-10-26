@@ -23,6 +23,7 @@ const originalFetch = globalThis.fetch;
 let exchangedToken = "";
 let exchanges: Record<string, unknown>[] = [];
 let jwksStatus = 200;
+let exchangeStatus = 200;
 
 const sign = async (overrides: Record<string, unknown> = {}, headerOverrides: Record<string, unknown> = {}): Promise<string> => {
   const now = Math.floor(Date.now() / 1000);
@@ -58,6 +59,7 @@ beforeEach(() => {
   resetPassportCacheForTest();
   exchanges = [];
   jwksStatus = 200;
+  exchangeStatus = 200;
   globalThis.fetch = createFetchMock(async (input, init) => {
     const url = urlOf(input);
     if (url === `${ISSUER}/api/auth/jwks`)
@@ -66,6 +68,9 @@ beforeEach(() => {
       assert.equal(init?.method, "POST");
       assert.equal(init.redirect, "error");
       exchanges.push(JSON.parse(await new Response(init.body).text()) as Record<string, unknown>);
+      if (exchangeStatus !== 200) {
+        return Response.json({ error: "exchange_error" }, { status: exchangeStatus });
+      }
       return Response.json({ accessToken: exchangedToken });
     }
     throw new Error(`Unexpected fetch: ${url}`);
@@ -207,4 +212,22 @@ test("Passport unavailable keys fail closed, proxy origin stays fixed and logout
   assert.deepEqual(logout.headers.getSetCookie(), [`${SESSION_COOKIE}=; Max-Age=0; Path=/; HttpOnly; Secure; SameSite=Lax`]);
   setKvForTest(kvStub);
   assert.equal((await handler(request("/admin/api-keys"))).status, 401);
+});
+
+test("Passport exchange 4xx returns 401 and clears state cookie, while 5xx returns 502", async () => {
+  for (const status of [400, 401, 403, 422]) {
+    exchangeStatus = status;
+    const { state, stateCookie } = await begin();
+    const response = await handler(request(`/auth/callback?state=${state}&code=expired-code`, "", { headers: { Cookie: stateCookie } }));
+    assert.equal(response.status, 401);
+    assert(response.headers.getSetCookie().some((cookie) => cookie.startsWith(`${STATE_COOKIE}=; Max-Age=0;`)));
+  }
+
+  for (const status of [500, 502, 503]) {
+    exchangeStatus = status;
+    const { state, stateCookie } = await begin();
+    const response = await handler(request(`/auth/callback?state=${state}&code=upstream-down`, "", { headers: { Cookie: stateCookie } }));
+    assert.equal(response.status, 502);
+    assert(response.headers.getSetCookie().some((cookie) => cookie.startsWith(`${STATE_COOKIE}=; Max-Age=0;`)));
+  }
 });
